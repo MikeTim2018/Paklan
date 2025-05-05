@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "833776742151",
+    "project_id": "paklan-45c3c",
+    "storage_bucket": "paklan-45c3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833776742151:android:a8111e3ad4c991442d9fa2",
+        "android_client_info": {
+          "package_name": "com.example.login_test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqBItNocNsmgnfV-HmdvOEQADRXoMZ_1Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833776742151:android:c91e58fe4c6eb22c2d9fa2",
+        "android_client_info": {
+          "package_name": "com.example.packlan_alpha"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqBItNocNsmgnfV-HmdvOEQADRXoMZ_1Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
