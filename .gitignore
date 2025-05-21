@@ -1,2 +1,5 @@
 /firebase.json
 /android/app/google-services.json
+.dart_tool/
+.vscode/
+build/

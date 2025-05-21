@@ -7,4 +7,7 @@ class AppImages{
   static const findPerson = '${basePath}people-search-icon-13$format';
   static const person = '${basePath}clipart960742$format';
   static const dealSuccess = '${basePath}order_placed$format';
+  static const userLogo = '${basePath}user-circle-svgrepo-com$format';
+  static const userLogoBlack = '${basePath}user-circle-svgrepo-com-black$format';
+
 }

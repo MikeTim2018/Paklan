@@ -13,4 +13,5 @@ class AppVectors{
   static const info = '${basePath}info-circle-svgrepo-com$format';
   static const notFound = '${basePath}not_found$format';
   static const rightArrow = '${basePath}right-arrow-svgrepo-com-2$format';
+  static const user = '${basePath}user-circle-svgrepo-com$format';
 }
