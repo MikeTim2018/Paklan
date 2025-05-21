@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:packlan_alpha/core/configs/theme/app_colors.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
 
 class BasicAppbar extends StatelessWidget implements PreferredSizeWidget {
   final Widget ? title;

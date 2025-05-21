@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state.dart';
+import 'package:paklan/common/bloc/button/button_state.dart';
 
 import '../../../core/usecase/usecase.dart';
 

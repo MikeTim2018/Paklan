@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:packlan_alpha/data/auth/models/user_creation_req.dart';
-import 'package:packlan_alpha/data/auth/models/user_signin.dart';
-import 'package:packlan_alpha/data/auth/source/auth_firebase_service.dart';
-import 'package:packlan_alpha/domain/auth/repository/auth.dart';
-import 'package:packlan_alpha/service_locator.dart';
+import 'package:paklan/data/auth/models/user.dart';
+import 'package:paklan/data/auth/models/user_creation_req.dart';
+import 'package:paklan/data/auth/models/user_signin.dart';
+import 'package:paklan/data/auth/source/auth_firebase_service.dart';
+import 'package:paklan/domain/auth/repository/auth.dart';
+import 'package:paklan/service_locator.dart';
+
 
 class AuthRepositoryImpl extends AuthRepository{
   @override
@@ -39,7 +41,9 @@ class AuthRepositoryImpl extends AuthRepository{
         return Left(error);
       }
       , (data){
-
-      })
+        return Right(
+          UserModel.fromMap(data).toEntity()
+          );
+      });
   }
 }

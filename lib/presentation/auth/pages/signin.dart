@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/common/widgets/appbar/app_bar.dart';
-import 'package:packlan_alpha/common/widgets/button/basic_app_button.dart';
-import 'package:packlan_alpha/data/auth/models/user_signin.dart';
-import 'package:packlan_alpha/presentation/auth/pages/enter_password.dart';
-import 'package:packlan_alpha/presentation/auth/pages/signup.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/common/widgets/appbar/app_bar.dart';
+import 'package:paklan/common/widgets/button/basic_app_button.dart';
+import 'package:paklan/data/auth/models/user_signin.dart';
+import 'package:paklan/presentation/auth/pages/enter_password.dart';
+import 'package:paklan/presentation/auth/pages/signup.dart';
 
 class SigninPage extends StatelessWidget {
   SigninPage({super.key});

@@ -1,33 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:packlan_alpha/common/widgets/appbar/app_bar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:paklan/common/bloc/bottom_nav_bar/navigation_bloc.dart';
+import 'package:paklan/common/bloc/bottom_nav_bar/navigation_state.dart';
+import 'package:paklan/common/widgets/bottom_nav_bar/bottom_navigation.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
+import 'package:paklan/presentation/transactions/pages/transaction_success_wo_confirmation.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
+
+  final List<Widget> pages = [
+    TransactionHome(),
+    TransactionSuccessWoConfirmation(),
+    SigninPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: BasicAppbar(
-        title: _welcome(context),
-        height: 110,
-        hideBack: true,
-      ),
-      body: Column(children: [
-        Text("")
-      ],)
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => NavigationBloc()),
+                  ],
+      child:  Scaffold(
+          bottomNavigationBar: BlocBuilder<NavigationBloc, NavigationState>(
+            builder: (context, state){
+              int currentIndex = 0;
+              if (state is NavigationChanged){
+                currentIndex = state.index;
+              }
+              return BottomNavBar( 
+              currentIndex: currentIndex);
+            },
+          ),
+          body: BlocBuilder<NavigationBloc, NavigationState>(
+            builder: (context, state){
+              if(state is NavigationChanged){
+                return pages[state.index];
+              }
+              return pages[0];
+            },
+            ),
+        )
     );
-  }
+    }
 }
-
-Widget _welcome(BuildContext context){
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        '¡Hola!',
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold
-        ),
-      ),
-    );
-  }

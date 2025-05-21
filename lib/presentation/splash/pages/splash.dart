@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/core/configs/assets/app_images.dart';
-import 'package:packlan_alpha/core/configs/theme/app_colors.dart';
-import 'package:packlan_alpha/presentation/auth/pages/signin.dart';
-import 'package:packlan_alpha/presentation/home/pages/home.dart';
-import 'package:packlan_alpha/presentation/splash/bloc/splash_cubit.dart';
-import 'package:packlan_alpha/presentation/splash/bloc/splash_state.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/core/configs/assets/app_images.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/home/pages/home.dart';
+import 'package:paklan/presentation/splash/bloc/splash_cubit.dart';
+import 'package:paklan/presentation/splash/bloc/splash_state.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -28,7 +28,7 @@ class SplashPage extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(height: 190,),
-              Text("Paklan",style: TextStyle(
+              Text("paklan",style: TextStyle(
                 fontSize: 35
               ),),
               Padding(

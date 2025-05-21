@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:packlan_alpha/core/configs/assets/app_vectors.dart';
+import 'package:paklan/core/configs/assets/app_vectors.dart';
 
 class SearchField extends StatelessWidget {
   const SearchField({super.key});

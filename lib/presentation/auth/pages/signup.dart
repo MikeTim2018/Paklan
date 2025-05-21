@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/common/widgets/appbar/app_bar.dart';
-import 'package:packlan_alpha/common/widgets/button/basic_app_button.dart';
-import 'package:packlan_alpha/data/auth/models/user_creation_req.dart';
-import 'package:packlan_alpha/presentation/auth/pages/gender_and_age_selection.dart';
-import 'package:packlan_alpha/presentation/auth/pages/signin.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/common/widgets/appbar/app_bar.dart';
+import 'package:paklan/common/widgets/button/basic_app_button.dart';
+import 'package:paklan/data/auth/models/user_creation_req.dart';
+import 'package:paklan/presentation/auth/pages/gender_and_age_selection.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});

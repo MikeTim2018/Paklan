@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state_cubit.dart';
-import 'package:packlan_alpha/core/configs/theme/app_colors.dart';
+import 'package:paklan/common/bloc/button/button_state.dart';
+import 'package:paklan/common/bloc/button/button_state_cubit.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
 
 
 class BasicReactiveButton extends StatelessWidget {

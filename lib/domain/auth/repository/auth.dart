@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:packlan_alpha/data/auth/models/user_creation_req.dart';
-import 'package:packlan_alpha/data/auth/models/user_signin.dart';
+import 'package:paklan/data/auth/models/user_creation_req.dart';
+import 'package:paklan/data/auth/models/user_signin.dart';
 
 abstract class AuthRepository {
   

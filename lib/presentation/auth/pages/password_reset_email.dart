@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/common/widgets/button/basic_app_button.dart';
-import 'package:packlan_alpha/core/configs/assets/app_vectors.dart';
-import 'package:packlan_alpha/presentation/auth/pages/signin.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/common/widgets/button/basic_app_button.dart';
+import 'package:paklan/core/configs/assets/app_vectors.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
 
 class PasswordResetEmailPage extends StatelessWidget {
   const PasswordResetEmailPage({super.key});

@@ -1,15 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state_cubit.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/common/widgets/appbar/app_bar.dart';
-import 'package:packlan_alpha/common/widgets/button/basic_reactive_button.dart';
-import 'package:packlan_alpha/data/auth/models/user_signin.dart';
-import 'package:packlan_alpha/domain/auth/usecases/signin.dart';
-import 'package:packlan_alpha/presentation/auth/pages/forgot_password.dart';
-import 'package:packlan_alpha/presentation/home/pages/home.dart';
+import 'package:paklan/common/bloc/button/button_state.dart';
+import 'package:paklan/common/bloc/button/button_state_cubit.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/common/widgets/appbar/app_bar.dart';
+import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
+import 'package:paklan/data/auth/models/user_signin.dart';
+import 'package:paklan/domain/auth/usecases/signin.dart';
+import 'package:paklan/presentation/auth/pages/forgot_password.dart';
+import 'package:paklan/presentation/home/pages/home.dart';
 
 
 class EnterPasswordPage extends StatelessWidget {

@@ -1,1 +1,55 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"paklan-45c3c","appId":"1:833776742151:android:c91e58fe4c6eb22c2d9fa2","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"paklan-45c3c","appId":"1:833776742151:ios:42e1fde3755433ce2d9fa2","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"paklan-45c3c","appId":"1:833776742151:ios:42e1fde3755433ce2d9fa2","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"paklan-45c3c","configurations":{"android":"1:833776742151:android:c91e58fe4c6eb22c2d9fa2","ios":"1:833776742151:ios:42e1fde3755433ce2d9fa2","macos":"1:833776742151:ios:42e1fde3755433ce2d9fa2","web":"1:833776742151:web:4310931bced9b4782d9fa2","windows":"1:833776742151:web:ac24e09d0bad48f62d9fa2"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "paklan-45c3c",
+          "appId": "1:833776742151:android:c91e58fe4c6eb22c2d9fa2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "paklan-45c3c",
+          "appId": "1:833776742151:ios:42e1fde3755433ce2d9fa2",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "paklan-45c3c",
+          "appId": "1:833776742151:ios:42e1fde3755433ce2d9fa2",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "paklan-45c3c",
+          "configurations": {
+            "android": "1:833776742151:android:c91e58fe4c6eb22c2d9fa2",
+            "ios": "1:833776742151:ios:42e1fde3755433ce2d9fa2",
+            "macos": "1:833776742151:ios:42e1fde3755433ce2d9fa2",
+            "web": "1:833776742151:web:4310931bced9b4782d9fa2",
+            "windows": "1:833776742151:web:ac24e09d0bad48f62d9fa2"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "runtime": "python313"
+    }
+  ]
+}

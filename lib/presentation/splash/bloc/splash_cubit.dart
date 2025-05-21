@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:packlan_alpha/domain/auth/usecases/is_logged_in.dart';
-import 'package:packlan_alpha/presentation/splash/bloc/splash_state.dart';
-import 'package:packlan_alpha/service_locator.dart';
+import 'package:paklan/domain/auth/usecases/is_logged_in.dart';
+import 'package:paklan/presentation/splash/bloc/splash_state.dart';
+import 'package:paklan/service_locator.dart';
 
 class SplashCubit extends Cubit<SplashState> {
 

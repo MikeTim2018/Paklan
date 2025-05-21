@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:packlan_alpha/data/auth/models/user_creation_req.dart';
-import 'package:packlan_alpha/data/auth/models/user_signin.dart';
+import 'package:paklan/data/auth/models/user_creation_req.dart';
+import 'package:paklan/data/auth/models/user_signin.dart';
 
 abstract class AuthFirebaseService {
   Future<Either> signup(UserCreationReq user);
@@ -11,6 +11,7 @@ abstract class AuthFirebaseService {
   Future<Either> sendPasswordResetEmail(String email);
   Future<bool> isLoggedIn();
   Future<Either> getUser();
+  
 }
 
 class AuthFirebaseServiceImpl extends AuthFirebaseService{
@@ -22,7 +23,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
         email: user.email!,
         password: user.password!);
 
-        await FirebaseFirestore.instance.collection('Usuarios').doc(
+        await FirebaseFirestore.instance.collection('users').doc(
           returnedData.user!.uid
         ).set(
           {
@@ -31,7 +32,8 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
             'email': user.email,
             'gender': user.gender,
             'age': user.age,
-            'phone': user.phone
+            'phone': user.phone,
+            'userId': returnedData.user!.uid
           }
         );
         return Right('Signup was Successful!');
@@ -53,7 +55,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   @override
   Future<Either> getAges() async{
     try{
-      var returnedData = await FirebaseFirestore.instance.collection('Edades').get();
+      var returnedData = await FirebaseFirestore.instance.collection('ages').get();
       List<QueryDocumentSnapshot<Map<String, dynamic>>> returnedListData = returnedData.docs;
       returnedListData.sort((a, b) => a.data()['index'].compareTo(b.data()['index']),);
       return Right(returnedListData);
@@ -120,7 +122,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   Future<Either> getUser() async{
     try{
       var currentUser = FirebaseAuth.instance.currentUser;
-      var userData = FirebaseFirestore.instance.collection("Usuarios").doc(
+      var userData = await FirebaseFirestore.instance.collection("users").doc(
         currentUser?.uid
       ).get().then((value) => value.data());
       return Right(userData);

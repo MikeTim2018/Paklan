@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state.dart';
-import 'package:packlan_alpha/common/bloc/button/button_state_cubit.dart';
-import 'package:packlan_alpha/common/helper/bottomsheet/app_bottomsheet.dart';
-import 'package:packlan_alpha/common/helper/navigator/app_navigator.dart';
-import 'package:packlan_alpha/core/configs/theme/app_colors.dart';
-import 'package:packlan_alpha/data/auth/models/user_creation_req.dart';
-import 'package:packlan_alpha/domain/auth/usecases/signup.dart';
-import 'package:packlan_alpha/presentation/auth/bloc/age_selection_cubit.dart';
-import 'package:packlan_alpha/presentation/auth/bloc/ages_display_cubit.dart';
-import 'package:packlan_alpha/presentation/auth/bloc/gender_selection_cubit.dart';
-import 'package:packlan_alpha/presentation/auth/widgets/ages.dart';
-import 'package:packlan_alpha/presentation/home/pages/home.dart';
+import 'package:paklan/common/bloc/button/button_state.dart';
+import 'package:paklan/common/bloc/button/button_state_cubit.dart';
+import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
+import 'package:paklan/data/auth/models/user_creation_req.dart';
+import 'package:paklan/domain/auth/usecases/signup.dart';
+import 'package:paklan/presentation/auth/bloc/age_selection_cubit.dart';
+import 'package:paklan/presentation/auth/bloc/ages_display_cubit.dart';
+import 'package:paklan/presentation/auth/bloc/gender_selection_cubit.dart';
+import 'package:paklan/presentation/auth/widgets/ages.dart';
+import 'package:paklan/presentation/home/pages/home.dart';
 import '../../../common/widgets/appbar/app_bar.dart';
 import '../../../common/widgets/button/basic_reactive_button.dart';
 
@@ -55,14 +55,13 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
                 AppNavigator.pushAndRemove(context, HomePage());
               }
             },
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 40
                     ),
-                    child: Column(
+              children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _tellUs(),
@@ -78,8 +77,6 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
                               _phone(context),
                       ],
                     ),
-                ),
-                const Spacer(),
                   _finishButton(context)
               ],
             ),
@@ -213,7 +210,6 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
   Widget _finishButton(BuildContext context) {
     return Container(
       height: 100,
-      color: AppColors.secondBackground,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Center(
         child: Builder(
