@@ -55,7 +55,7 @@ class Header extends StatelessWidget {
           image: DecorationImage(
             image: user.image.isEmpty ? 
             const AssetImage(
-              AppImages.appLogo
+              AppImages.userLogo
             ) : NetworkImage(
               user.image
             )
