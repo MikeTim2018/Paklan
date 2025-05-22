@@ -12,6 +12,7 @@ class UserModel {
   final String email;
   final String image;
   final String phone;
+  final String phoneExt;
 
 
   UserModel({
@@ -20,7 +21,8 @@ class UserModel {
     required this.lastName,
     required this.email,
     required this.image,
-    required this.phone
+    required this.phone,
+    required this.phoneExt,
   });
 
   Map<String, dynamic> toMap() {
@@ -31,6 +33,7 @@ class UserModel {
       'email': email,
       'image': image,
       'phone': phone,
+      'phoneExt': phoneExt,
     };
   }
 
@@ -42,6 +45,7 @@ class UserModel {
       email: map['email'] as String,
       image: map['image'] ?? '',
       phone: map['phone'] ?? '',
+      phoneExt: map['phoneExt'] ?? '+52',
     );
   }
   
@@ -59,7 +63,7 @@ extension UserXModel on UserModel {
       lastName: lastName, 
       email: email, 
       image: image,
-      phone: phone
+      phone: "$phoneExt $phone"
     );
   }
 }

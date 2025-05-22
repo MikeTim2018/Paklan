@@ -1,6 +1,8 @@
+import 'package:algoliasearch/algoliasearch_lite.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
 
 abstract class TransactionFirebaseService{
@@ -41,22 +43,18 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   Future<Either> getPerson(String searchVal) async{
     try{
       var currentUser = FirebaseAuth.instance.currentUser;
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> userData = await FirebaseFirestore.instance.collection("users").where(
-        Filter.and(
-        //Filter("firstName", isGreaterThanOrEqualTo: searchVal),
-        Filter("userId", isNotEqualTo: currentUser?.uid),
-        Filter.or(
-        //Filter("firstName", isGreaterThanOrEqualTo: searchVal),
-        Filter("email", isGreaterThanOrEqualTo: searchVal),
-        Filter("phone", isGreaterThanOrEqualTo: searchVal),
-        )
-        )
-    )
-    .get()
-    .then(
-      (value) => value.docs
-      );
-      return Right(userData.map((e) => e.data()).toList());
+      final client = SearchClient(appId: AlgoliaConfigs().appId, apiKey: AlgoliaConfigs().apiKey);
+      final query = SearchForHits(
+        indexName: AlgoliaConfigs().indexName,
+        query: searchVal,
+        );
+      final result = await client.searchIndex(request: query);
+      List<Map<String, dynamic>> finalResult = result.hits.map(
+        (e) => e.toJson()
+        ).where(
+          (e) => e['userId'] != currentUser!.uid
+          ).toList();
+      return Right(finalResult);
     }
     catch(e){
       return Left(

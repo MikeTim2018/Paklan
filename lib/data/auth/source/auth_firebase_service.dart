@@ -32,7 +32,8 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
             'email': user.email,
             'gender': user.gender,
             'age': user.age,
-            'phone': user.phone,
+            'phone': user.phone!.substring(3),
+            'phoneExt': user.phone!.substring(0, 3),
             'userId': returnedData.user!.uid
           }
         );

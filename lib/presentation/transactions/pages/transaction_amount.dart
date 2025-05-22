@@ -55,20 +55,6 @@ class TransactionAmount extends StatelessWidget {
         },
         ),
         BlocListener<UserInfoDisplayCubit, UserInfoDisplayState>(listener: (context, state){
-          if (state is UserInfoLoading) {
-                 var snackbar = SnackBar(
-                  content: Text(
-                    "Cargando Usuario",
-                    style: TextStyle(
-                      color: Colors.white70
-                    ),),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.black87,
-                  showCloseIcon: true,
-                  closeIconColor: Colors.white70,
-                  );
-                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-              }
               if (state is UserInfoLoaded) {
                  userId = state.user.userId;
                  userFirstName = state.user.firstName;

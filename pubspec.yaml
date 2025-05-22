@@ -42,6 +42,7 @@ dependencies:
   dartz:
   get_it:
   intl_phone_field:
+  algoliasearch: ^1.32.0
 
 dev_dependencies:
   flutter_test:

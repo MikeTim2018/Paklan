@@ -3,3 +3,4 @@
 .dart_tool/
 .vscode/
 build/
+/lib/core/configs/algolia_configs.dart

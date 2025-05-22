@@ -15,7 +15,7 @@ class SearchField extends StatelessWidget {
        ),
       child: TextField(
         onChanged: (value){
-          if (value.length > 5){
+          if (value.length > 4){
           context.read<PersonInfoDisplayCubit>().findPerson(searchVal: value);
           } 
         },

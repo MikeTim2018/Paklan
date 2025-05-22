@@ -50,6 +50,7 @@ class PersonCard extends StatelessWidget {
     return ListTile(
       tileColor: AppColors.secondBackground,
       leading: CircleAvatar(
+        backgroundColor: AppColors.secondBackground,
         radius: 30,
         backgroundImage: const AssetImage(
               AppImages.userLogo
