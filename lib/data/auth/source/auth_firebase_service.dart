@@ -39,6 +39,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
             'userId': returnedData.user!.uid
           }
         );
+        await setupToken();
         return Right('Signup was Successful!');
     }on FirebaseAuthException catch(e){
 
@@ -64,7 +65,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
       return Right(returnedListData);
     }catch(e){
       return Left(
-        "Please try again"
+        "Por favor intenta más tarde"
       );
     }
   }
@@ -75,7 +76,8 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: user.email!,
         password: user.password!);
-        return Right('Signup was Successful!');
+      await setupToken();
+      return Right('Signup was Successful!');
     }on FirebaseAuthException catch(e){
 
       String message = '';
@@ -132,7 +134,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
       return Right(userData);
     }catch(e){
       return Left(
-        "Please try again"
+        "Porfavor intenta más tarde"
       );
     }
   }
@@ -150,6 +152,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   
   @override
   Future<void> setupToken() async {
+    await FirebaseMessaging.instance.requestPermission();
     // Get the token each time the application loads
     String? token = await FirebaseMessaging.instance.getToken();
 
