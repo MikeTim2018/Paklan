@@ -31,7 +31,7 @@ class SearchField extends StatelessWidget {
             AppVectors.search,
             fit: BoxFit.none,
           ),
-          hintText: 'Buscar por Email o Teléfono'
+          hintText: 'Buscar por Email, Teléfono o Apellidos'
         ),
       ),
     );

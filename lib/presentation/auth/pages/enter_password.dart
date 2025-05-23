@@ -15,6 +15,7 @@ import 'package:paklan/presentation/home/pages/home.dart';
 class EnterPasswordPage extends StatelessWidget {
   final UserSigninReq signinReq;
   EnterPasswordPage({super.key, required this.signinReq});
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordCon = TextEditingController();
 
   @override
@@ -47,18 +48,21 @@ class EnterPasswordPage extends StatelessWidget {
                 AppNavigator.pushAndRemove(context, HomePage());
               }
             },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50,),
-                _signinText(context),
-                const SizedBox(height: 15,),
-                _passwordField(context),
-                const SizedBox(height: 15,),
-                _continueButton(context),
-                const SizedBox(height: 10,),
-                _forgotPassword(context),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 50,),
+                  _signinText(context),
+                  const SizedBox(height: 15,),
+                  _passwordField(context),
+                  const SizedBox(height: 15,),
+                  _continueButton(context),
+                  const SizedBox(height: 10,),
+                  _forgotPassword(context),
+                ],
+              ),
             ),
           ),
         ),
@@ -81,7 +85,15 @@ class EnterPasswordPage extends StatelessWidget {
   Widget _passwordField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || value.length<7){
+            return 'Ingresa una contraseña mayor a 6 caracteres';
+          }
+          else{
+            return null;
+          }
+        },
         obscureText: true,
         enableSuggestions: false,
         autocorrect: false,
@@ -99,11 +111,13 @@ class EnterPasswordPage extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return BasicReactiveButton(onPressed: (){
+            if (_formKey.currentState!.validate()){
             signinReq.password = _passwordCon.text;
             context.read<ButtonStateCubit>().execute(
             usecase: SigninUseCase(),
             params: signinReq
           );
+            }
           },
           title: 'Ingresar',);
         }

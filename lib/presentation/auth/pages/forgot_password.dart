@@ -10,6 +10,7 @@ import 'package:paklan/presentation/auth/pages/password_reset_email.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
   ForgotPasswordPage({super.key});
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailCon = TextEditingController();
 
   @override
@@ -42,16 +43,19 @@ class ForgotPasswordPage extends StatelessWidget {
               horizontal: 16,
               vertical: 40
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50,),
-                _signinText(context),
-                const SizedBox(height: 15,),
-                _emailField(context),
-                const SizedBox(height: 15,),
-                _continueButton(),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 50,),
+                  _signinText(context),
+                  const SizedBox(height: 15,),
+                  _emailField(context),
+                  const SizedBox(height: 15,),
+                  _continueButton(),
+                ],
+              ),
             ),
           ),
         ),
@@ -74,7 +78,15 @@ class ForgotPasswordPage extends StatelessWidget {
   Widget _emailField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}').hasMatch(value)){
+            return 'Ingresa un Email válido';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _emailCon,
         decoration: InputDecoration(
           hintText: "Ingresa tu Email"
@@ -89,9 +101,11 @@ class ForgotPasswordPage extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return BasicReactiveButton(onPressed: (){
+            if (_formKey.currentState!.validate()){
             context.read<ButtonStateCubit>().execute(
               usecase: SendPasswordResetEmailUseCase(),
               params: _emailCon.text);
+            }
           },
           title: 'Enviar',);
         }

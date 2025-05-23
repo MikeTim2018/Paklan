@@ -9,6 +9,7 @@ import 'package:paklan/presentation/auth/pages/signup.dart';
 
 class SigninPage extends StatelessWidget {
   SigninPage({super.key});
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailCon = TextEditingController();
 
@@ -21,18 +22,21 @@ class SigninPage extends StatelessWidget {
           horizontal: 16,
           vertical: 40
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 50,),
-            _signinText(context),
-            const SizedBox(height: 15,),
-            _emailField(context),
-            const SizedBox(height: 15,),
-            _continueButton(context),
-            const SizedBox(height: 10,),
-            _createAccount(context),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 50,),
+              _signinText(context),
+              const SizedBox(height: 15,),
+              _emailField(context),
+              const SizedBox(height: 15,),
+              _continueButton(context),
+              const SizedBox(height: 10,),
+              _createAccount(context),
+            ],
+          ),
         ),
       ),
     );
@@ -53,7 +57,15 @@ class SigninPage extends StatelessWidget {
   Widget _emailField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}').hasMatch(value)){
+            return 'Ingresa un Email válido';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _emailCon,
         decoration: InputDecoration(
           hintText: "Ingresa tu Email"
@@ -66,11 +78,13 @@ class SigninPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: BasicAppButton(onPressed: (){
+        if (_formKey.currentState!.validate()){
         AppNavigator.push(context, EnterPasswordPage(
           signinReq: UserSigninReq(
             email: _emailCon.text,
             ),
         ));
+        }
       },
       title: 'Continuar',),
     );

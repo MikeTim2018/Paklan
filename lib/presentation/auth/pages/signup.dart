@@ -9,7 +9,7 @@ import 'package:paklan/presentation/auth/pages/signin.dart';
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
-
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
@@ -25,24 +25,27 @@ class SignupPage extends StatelessWidget {
           horizontal: 16,
           vertical: 40,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 50,),
-              _signinText(context),
-              const SizedBox(height: 15,),
-              _emailField(context),
-              const SizedBox(height: 15,),
-              _firstName(context),
-              const SizedBox(height: 15,),
-              _lastName(context),
-              const SizedBox(height: 15,),
-              _password(context),
-              const SizedBox(height: 15,),
-              _continueButton(context),
-              const SizedBox(height: 10,),
-              _createAccount(context),
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 50,),
+                _signinText(context),
+                const SizedBox(height: 15,),
+                _emailField(context),
+                const SizedBox(height: 15,),
+                _firstName(context),
+                const SizedBox(height: 15,),
+                _lastName(context),
+                const SizedBox(height: 15,),
+                _password(context),
+                const SizedBox(height: 15,),
+                _continueButton(context),
+                const SizedBox(height: 10,),
+                _createAccount(context),
+              ],
+            ),
           ),
         ),
       );
@@ -63,10 +66,18 @@ class SignupPage extends StatelessWidget {
   Widget _firstName(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'[a-z A-Z]+').hasMatch(value)){
+            return 'Intenta de nuevo con un nombre válido';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _firstNameCon,
         decoration: InputDecoration(
-          hintText: "Nombre(s)"
+          hintText: "Nombre(s)",
         ),
       ),
     );
@@ -75,7 +86,15 @@ class SignupPage extends StatelessWidget {
   Widget _lastName(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'[a-z A-Z]+').hasMatch(value)){
+            return 'Intenta de nuevo con apellidos válidos';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _lastNameCon,
         decoration: InputDecoration(
           hintText: "Apellidos"
@@ -87,7 +106,15 @@ class SignupPage extends StatelessWidget {
   Widget _password(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || value.length<7){
+            return 'Ingresa una contraseña mayor a 6 caracteres';
+          }
+          else{
+            return null;
+          }
+        },
         obscureText: true,
         enableSuggestions: false,
         autocorrect: false,
@@ -102,7 +129,15 @@ class SignupPage extends StatelessWidget {
   Widget _emailField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}').hasMatch(value)){
+            return 'Ingresa un Email válido';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _emailCon,
         decoration: InputDecoration(
           hintText: "Ingresa tu Email"
@@ -115,10 +150,11 @@ class SignupPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: BasicAppButton(onPressed: (){
-        AppNavigator.push(
-          context, 
-          GenderAndAgeSelectionPage(
-            userCreationReq: UserCreationReq(
+        if (_formKey.currentState!.validate()){
+          AppNavigator.push(
+            context, 
+            GenderAndAgeSelectionPage(
+              userCreationReq: UserCreationReq(
               firstName: _firstNameCon.text,
               email: _emailCon.text,
               lastName: _lastNameCon.text,
@@ -126,6 +162,7 @@ class SignupPage extends StatelessWidget {
             )
             )
             );
+      }
       },
       title: 'Continuar',),
     );

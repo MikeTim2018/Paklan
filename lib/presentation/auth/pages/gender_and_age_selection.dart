@@ -60,23 +60,23 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
                       horizontal: 16,
                       vertical: 40
                     ),
-              children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _tellUs(),
-                        const SizedBox(height: 30, ),
-                          _genders(context),
+              children: [Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _tellUs(),
                           const SizedBox(height: 30, ),
-                            howOld(),
+                            _genders(context),
                             const SizedBox(height: 30, ),
-                              _age(),
+                              howOld(),
                               const SizedBox(height: 30, ),
-                              phoneNum(),
-                              const SizedBox(height: 20, ),
-                              _phone(context),
-                      ],
-                    ),
+                                _age(),
+                                const SizedBox(height: 30, ),
+                                phoneNum(),
+                                const SizedBox(height: 20, ),
+                                _phone(context),
+                        ],
+                      ),
+
                   _finishButton(context)
               ],
             ),
@@ -216,6 +216,7 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
           builder: (context) {
             return BasicReactiveButton(
               onPressed: (){
+                if (_phoneCon.text.length==10){
                 userCreationReq.gender = context.read<GenderSelectionCubit>().selectedIndex;
                 userCreationReq.age = context.read<AgeSelectionCubit>().selectedAge;
                 userCreationReq.phone = "$_countryCodeText${_phoneCon.text}";
@@ -223,6 +224,21 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
                   usecase: SignupUseCase(),
                   params: userCreationReq
                 );
+                }
+                else{
+                  var snackbar = SnackBar(
+                  content: Text(
+                    "Debes llenar el número de teléfono",
+                    style: TextStyle(
+                      color: Colors.white70
+                    ),),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.black87,
+                  showCloseIcon: true,
+                  closeIconColor: Colors.white70,
+                  );
+                ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                }
               },
               title: 'Terminar'
             );

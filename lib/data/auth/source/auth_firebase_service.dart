@@ -77,7 +77,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
     }on FirebaseAuthException catch(e){
 
       String message = '';
-      if (e.code == 'invalid-password'){
+      if (e.code == 'invalid-password' || e.code == 'invalid-credential'){
         message = 'La contraseña ingresada es incorrecta. Intenta de nuevo.';
       } else if(e.code == 'user-not-found'){
         message = 'No se encontró ningún usuario.';
