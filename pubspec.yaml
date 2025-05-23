@@ -43,6 +43,7 @@ dependencies:
   get_it:
   intl_phone_field:
   algoliasearch: ^1.32.0
+  firebase_messaging: ^15.2.6
 
 dev_dependencies:
   flutter_test:
