@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
 
@@ -11,7 +12,8 @@ abstract class AuthFirebaseService {
   Future<Either> sendPasswordResetEmail(String email);
   Future<bool> isLoggedIn();
   Future<Either> getUser();
-  
+  Future <void> saveTokenToDatabase(String token);
+  Future <void> setupToken();
 }
 
 class AuthFirebaseServiceImpl extends AuthFirebaseService{
@@ -112,6 +114,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   @override
   Future<bool> isLoggedIn() async{
     if (FirebaseAuth.instance.currentUser != null){
+      await setupToken();
       return true;
     }
     else{
@@ -132,6 +135,29 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
         "Please try again"
       );
     }
+  }
+  
+  @override
+  Future<void> saveTokenToDatabase(String token) async{
+    var userId = FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance
+    .collection('users')
+    .doc(userId)
+    .update({
+      'tokens': FieldValue.arrayUnion([token]),
+    });
+  }
+  
+  @override
+  Future<void> setupToken() async {
+    // Get the token each time the application loads
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    // Save the initial token to the database
+    await saveTokenToDatabase(token!);
+
+    // Any time the token refreshes, store this in the database too.
+    FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
   }
 
 }

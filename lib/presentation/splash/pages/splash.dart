@@ -28,7 +28,7 @@ class SplashPage extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(height: 190,),
-              Text("paklan",style: TextStyle(
+              Text("Paklan",style: TextStyle(
                 fontSize: 35
               ),),
               Padding(
