@@ -18,6 +18,7 @@ import 'package:paklan/presentation/transactions/pages/transaction_success_wo_co
 // ignore: must_be_immutable
 class TransactionAmount extends StatelessWidget {
   final TextEditingController _amountCon = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final UserEntityTransaction userEntity;
   String userId = '';
   String userFirstName = '';
@@ -90,20 +91,23 @@ class TransactionAmount extends StatelessWidget {
             ),
             ),
           body: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 30,),
-                _selectType(context),
-                SizedBox(height: 15,),
-                _users(context),
-                SizedBox(height: 15,),
-                _amount(context),
-                SizedBox(height: 15,),
-                _amountField(context),
-                SizedBox(height: 15,),
-                _sendDeal(context),
-                    
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  SizedBox(height: 30,),
+                  _selectType(context),
+                  SizedBox(height: 15,),
+                  _users(context),
+                  SizedBox(height: 15,),
+                  _amount(context),
+                  SizedBox(height: 15,),
+                  _amountField(context),
+                  SizedBox(height: 15,),
+                  _sendDeal(context),
+                      
+                ],
+              ),
             ),
           )
           ),
@@ -140,7 +144,15 @@ class TransactionAmount extends StatelessWidget {
   Widget _amountField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(13.0),
-      child: TextField(
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || !RegExp(r'[0-9.]+').hasMatch(value)){
+            return 'Ingresa una cantidad correcta';
+          }
+          else{
+            return null;
+          }
+        },
         controller: _amountCon,
         decoration: InputDecoration(
           hintText: "\$1000.00"
@@ -207,6 +219,7 @@ class TransactionAmount extends StatelessWidget {
           builder: (context) {
             return BasicReactiveButton(
               onPressed: (){
+                if (_formKey.currentState!.validate()){
                 int userType = context.read<UserTypeSelectionCubit>().selectedIndex;
                 NewTransactionModel newTransaction = NewTransactionModel(
                   amount: _amountCon.text,
@@ -223,6 +236,7 @@ class TransactionAmount extends StatelessWidget {
                   usecase: CreateTransactionUseCase(),
                   params: newTransaction
                 );
+              }
               },
               title: 'Terminar'
             );
