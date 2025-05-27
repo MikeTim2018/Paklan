@@ -50,18 +50,20 @@ class EnterPasswordPage extends StatelessWidget {
             },
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 50,),
-                  _signinText(context),
-                  const SizedBox(height: 15,),
-                  _passwordField(context),
-                  const SizedBox(height: 15,),
-                  _continueButton(context),
-                  const SizedBox(height: 10,),
-                  _forgotPassword(context),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 50,),
+                    _signinText(context),
+                    const SizedBox(height: 15,),
+                    _passwordField(context),
+                    const SizedBox(height: 15,),
+                    _continueButton(context),
+                    const SizedBox(height: 10,),
+                    _forgotPassword(context),
+                  ],
+                ),
               ),
             ),
           ),

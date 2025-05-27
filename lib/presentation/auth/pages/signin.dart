@@ -24,18 +24,20 @@ class SigninPage extends StatelessWidget {
         ),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 50,),
-              _signinText(context),
-              const SizedBox(height: 15,),
-              _emailField(context),
-              const SizedBox(height: 15,),
-              _continueButton(context),
-              const SizedBox(height: 10,),
-              _createAccount(context),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 50,),
+                _signinText(context),
+                const SizedBox(height: 15,),
+                _emailField(context),
+                const SizedBox(height: 15,),
+                _continueButton(context),
+                const SizedBox(height: 10,),
+                _createAccount(context),
+              ],
+            ),
           ),
         ),
       ),
