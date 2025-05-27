@@ -36,6 +36,8 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     buyer = db.collection("users").document(transaction.get("members")["buyerId"]).get().to_dict()
     seller = db.collection("users").document(transaction.get("members")["sellerId"]).get().to_dict()
     print(buyer.get("tokens"))
+    if not buyer.get("tokens"):
+        return
     msg = messaging.send_each_for_multicast(
         multicast_message=messaging.MulticastMessage(
             notification=messaging.Notification(
@@ -52,6 +54,8 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     )
     print(msg.failure_count)
     print(msg.responses)
+    if not seller.get("tokens"):
+        return
     msg2 = messaging.send_each_for_multicast(
         multicast_message=messaging.MulticastMessage(
             tokens=seller.get("tokens"),

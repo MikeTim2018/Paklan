@@ -152,7 +152,12 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   
   @override
   Future<void> setupToken() async {
-    await FirebaseMessaging.instance.requestPermission();
+    final notificationSettings = await FirebaseMessaging.instance.requestPermission();
+    if (notificationSettings.authorizationStatus == AuthorizationStatus.denied || 
+        notificationSettings.authorizationStatus ==AuthorizationStatus.notDetermined){
+      return;
+    }
+
     // Get the token each time the application loads
     String? token = await FirebaseMessaging.instance.getToken();
 
