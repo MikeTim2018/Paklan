@@ -26,6 +26,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         )
       ),
     )
+    .orderBy("updatedDate", descending: true)
     .get()
     .then(
       (value) => value.docs
@@ -34,7 +35,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     }
     catch(e){
       return Left(
-        "Please try again"
+        "Por favor intenta más tarde"
       );
     }
   }

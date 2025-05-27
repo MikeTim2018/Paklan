@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:paklan/common/helper/messaging_api/api.dart';
 import 'package:paklan/core/configs/theme/app_theme.dart';
 import 'package:paklan/firebase_options.dart';
 import 'package:paklan/presentation/splash/bloc/splash_cubit.dart';
@@ -12,6 +13,8 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
+  await FirebaseMsgApi().receiveBackgroundMessage();
+  await FirebaseMsgApi().receiveForegroundMessage();
   await initializeDependencies();
   runApp(const MyApp());
 }

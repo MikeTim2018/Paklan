@@ -27,7 +27,31 @@ class TransactionDisplay extends StatelessWidget {
             );
           }
           if (state is TransactionsLoaded){
-            return listTransactions(context, state);
+            return Column(
+              children: [
+                SizedBox(height: 50,),
+                Text(
+                  "Tratos en Curso",
+                  style: TextStyle(
+                    fontSize: 20
+                  ),
+                  ),
+                SizedBox(height: 20,),
+                listTransactions(context, state),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: BasicAppButton(
+                    onPressed: (){
+                      AppNavigator.push(context, TransactionSearch());
+                      },
+                      width: 200,
+                      title: 'Iniciar Trato'
+                  ),
+                ),
+
+              ],
+            );
           }
           if (state is TransactionsLoadFailed){
             return SizedBox(
@@ -102,151 +126,134 @@ Column listNoTransaction(BuildContext context) {
 
 
   Widget listTransactions(BuildContext context, state) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-                SizedBox(height: 50,),
-                Text(
-                  "Tratos en Curso",
-                  style: TextStyle(
-                    fontSize: 20
-                  ),
-                  ),
-                SizedBox(height: 20,),
-                ListView.separated(
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: (){
-                  //AppNavigator.push(context, CategoryProductsPage(categoryEntity: state.categories[index],));
-                              },
-                              child: Container(
-                  height: 80,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondBackground,
-                    borderRadius: BorderRadius.circular(8)
-                  ),
-                  child: Row(
-                    children: [
-                       Column(
-                         children: [
-                          Text(
-                            textAlign: TextAlign.center,
-                            "Vendedor",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.white54
-                            ),
-                            ),
-                            SizedBox(height: 2,),
-                           Flexible(
-                             child: SizedBox(
-                              width: 75,
-                               child: Text(
+    return SizedBox(
+      height: 450,
+      child: RawScrollbar(
+        thumbColor: AppColors.secondBackground,
+        shape: const StadiumBorder(),
+        thickness: 7,
+        child: ListView.separated(
+          padding: EdgeInsets.all(13),
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: (){
+                      //AppNavigator.push(context, CategoryProductsPage(categoryEntity: state.categories[index],));
+                                  },
+                                  child: Container(
+                      height: 80,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondBackground,
+                        borderRadius: BorderRadius.circular(8)
+                      ),
+                      child: Row(
+                        children: [
+                           Column(
+                             children: [
+                              Text(
                                 textAlign: TextAlign.center,
-                                  overflow: TextOverflow.visible,
-                                  state.transaction[index].sellerFirstName,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400
-                                  ),
-                                  ),
-                             ),
+                                "Vendedor",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white54
+                                ),
+                                ),
+                                SizedBox(height: 2,),
+                               Flexible(
+                                 child: SizedBox(
+                                  width: 75,
+                                   child: Text(
+                                    textAlign: TextAlign.center,
+                                      overflow: TextOverflow.visible,
+                                      state.transaction[index].sellerFirstName,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400
+                                      ),
+                                      ),
+                                 ),
+                               ),
+                             ],
                            ),
-                         ],
-                       ),
-                      const VerticalDivider(),
-                       Column(
-                         children: [
-                          Text(
-                            textAlign: TextAlign.center,
-                            "Comprador",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.white54
-                            ),
-                            ),
-                            SizedBox(height: 2,),
-                           Flexible(
-                             child: SizedBox(
-                              width: 75,
+                          const VerticalDivider(),
+                           Column(
+                             children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                "Comprador",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white54
+                                ),
+                                ),
+                                SizedBox(height: 2,),
+                               Flexible(
+                                 child: SizedBox(
+                                  width: 75,
+                                     child: Text(
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.visible,
+                                      state.transaction[index].buyerFirstName,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400
+                                      ),
+                                      ),
+                                 ),
+                               ),
+                             ],
+                           ),
+                          const VerticalDivider(),
+                           Column(
+                             children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                "Monto",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white54
+                                ),
+                                ),
+                                SizedBox(height: 2,),
+                               SizedBox(
+                                width: 75,
                                  child: Text(
                                   textAlign: TextAlign.center,
-                                  overflow: TextOverflow.visible,
-                                  state.transaction[index].buyerFirstName,
+                                  "\$${state.transaction[index].amount}",
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400
                                   ),
+                                                     ),
+                               ),
+                             ],
+                           ),
+                          const SizedBox(width: 5),
+                          const VerticalDivider(),
+                          const SizedBox(width: 3),
+                          Container(
+                            height: 35,
+                            width: 35,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.asset(
+                                  AppVectors.info,
+                                  fit: BoxFit.none,
                                   ),
-                             ),
-                           ),
-                         ],
-                       ),
-                      const VerticalDivider(),
-                       Column(
-                         children: [
-                          Text(
-                            textAlign: TextAlign.center,
-                            "Monto",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.white54
-                            ),
-                            ),
-                            SizedBox(height: 2,),
-                           SizedBox(
-                            width: 75,
-                             child: Text(
-                              textAlign: TextAlign.center,
-                              "\$${state.transaction[index].amount}",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400
-                              ),
-                                                 ),
-                           ),
-                         ],
-                       ),
-                      const SizedBox(width: 5),
-                      const VerticalDivider(),
-                      const SizedBox(width: 3),
-                      Container(
-                        height: 35,
-                        width: 35,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: SvgPicture.asset(
-                              AppVectors.info,
-                              fit: BoxFit.none,
-                              ),
+                          ),
+                          
+                        ],
+                        
                       ),
-                      
-                    ],
-                    
-                  ),
-                              ),
-                            );
-                          },
-                           separatorBuilder: (context, index) => const SizedBox(height: 10,),
-                           itemCount: state.transaction.length
-                        ),
-                
-         const SizedBox(height: 100),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: BasicAppButton(
-                    onPressed: (){
-                      AppNavigator.push(context, TransactionSearch());
-                      },
-                      width: 200,
-                      title: 'Iniciar Trato'
-                  ),
-                ),
-                ]
-                ),
+                                  ),
+                                );
+                              },
+                               separatorBuilder: (context, index) => const SizedBox(height: 10,),
+                               itemCount: state.transaction.length
+                            ),
+      ),
     );
   }

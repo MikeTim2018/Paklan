@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '833776742151',
     projectId: 'paklan-45c3c',
     storageBucket: 'paklan-45c3c.firebasestorage.app',
-    iosBundleId: 'com.example.packlanAlpha',
+    iosBundleId: 'com.example.paklan',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '833776742151',
     projectId: 'paklan-45c3c',
     storageBucket: 'paklan-45c3c.firebasestorage.app',
-    iosBundleId: 'com.example.packlanAlpha',
+    iosBundleId: 'com.example.paklan',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

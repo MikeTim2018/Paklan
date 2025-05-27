@@ -4,3 +4,4 @@
 .vscode/
 build/
 /lib/core/configs/algolia_configs.dart
+.flutter-plugins-dependencies
