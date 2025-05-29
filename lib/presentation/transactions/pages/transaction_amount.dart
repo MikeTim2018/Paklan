@@ -146,7 +146,7 @@ class TransactionAmount extends StatelessWidget {
       padding: const EdgeInsets.all(13.0),
       child: TextFormField(
         validator: (value){
-          if (value!.isEmpty || !RegExp(r'[0-9.]+').hasMatch(value)){
+          if (value!.isEmpty || RegExp(r'[a-z A-Z !"#$%&&/()=<>,\-\*\+\´\}ñ]+').hasMatch(value)){
             return 'Ingresa una cantidad correcta';
           }
           else{

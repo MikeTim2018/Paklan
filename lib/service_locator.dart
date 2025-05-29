@@ -12,6 +12,7 @@ import 'package:paklan/domain/auth/usecases/signin.dart';
 import 'package:paklan/domain/auth/usecases/signup.dart';
 import 'package:paklan/domain/transactions/repository/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
+import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
 import 'package:paklan/domain/transactions/usecases/get_users_by_search.dart';
 
@@ -69,6 +70,10 @@ sl.registerSingleton<GetUsersBySearchUseCase>(
 
 sl.registerSingleton<CreateTransactionUseCase>(
   CreateTransactionUseCase()
+);
+
+sl.registerSingleton<GetTransactionUseCase>(
+  GetTransactionUseCase()
 );
 
 

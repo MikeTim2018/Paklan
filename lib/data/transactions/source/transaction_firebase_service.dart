@@ -4,11 +4,13 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
+import 'package:paklan/data/transactions/models/transaction.dart';
 
 abstract class TransactionFirebaseService{
   Future<Either> getTransactions();
   Future<Either> getPerson(String searchVal);
   Future<Either> createTransaction(NewTransactionModel newTransaction);
+  Future<Either> getTransaction(TransactionModel transaction);
 }
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
@@ -92,5 +94,25 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   }catch (error){
     return Left(error);
   }
+  }
+  
+  @override
+  Future<Either> getTransaction(TransactionModel transaction) async{
+    try{
+      Map<String, dynamic> ? transactionData = await FirebaseFirestore
+                                                                  .instance
+                                                                  .collection("transactions")
+                                                                  .doc(transaction.transactionId)
+                                                                  .collection("status")
+                                                                  .doc(transaction.statusId)
+                                                                  .get()
+                                                                  .then((value)=>value.data());
+      return Right(transactionData);
+    }
+    catch(e){
+      return Left(
+        "Por favor intenta más tarde"
+      );
+    }
   }
 }

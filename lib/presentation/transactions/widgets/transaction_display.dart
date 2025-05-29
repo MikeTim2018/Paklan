@@ -8,6 +8,9 @@ import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/home/pages/home.dart';
+import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 
 class TransactionDisplay extends StatelessWidget {
@@ -27,30 +30,33 @@ class TransactionDisplay extends StatelessWidget {
             );
           }
           if (state is TransactionsLoaded){
-            return Column(
-              children: [
-                SizedBox(height: 50,),
-                Text(
-                  "Tratos en Curso",
-                  style: TextStyle(
-                    fontSize: 20
+            return RefreshIndicator(
+              onRefresh: () => refreshTransactions(context),
+              child: Column(
+                children: [
+                  SizedBox(height: 50,),
+                  Text(
+                    "Tratos en Curso",
+                    style: TextStyle(
+                      fontSize: 20
+                    ),
+                    ),
+                  SizedBox(height: 20,),
+                  listTransactions(context, state),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: BasicAppButton(
+                      onPressed: (){
+                        AppNavigator.push(context, TransactionSearch());
+                        },
+                        width: 200,
+                        title: 'Iniciar Trato'
+                    ),
                   ),
-                  ),
-                SizedBox(height: 20,),
-                listTransactions(context, state),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: BasicAppButton(
-                    onPressed: (){
-                      AppNavigator.push(context, TransactionSearch());
-                      },
-                      width: 200,
-                      title: 'Iniciar Trato'
-                  ),
-                ),
-
-              ],
+              
+                ],
+              ),
             );
           }
           if (state is TransactionsLoadFailed){
@@ -138,7 +144,7 @@ Column listNoTransaction(BuildContext context) {
                               itemBuilder: (context, index) {
                                 return GestureDetector(
                                   onTap: (){
-                      //AppNavigator.push(context, CategoryProductsPage(categoryEntity: state.categories[index],));
+                                  AppNavigator.push(context, TransactionDetail(transaction: state.transaction[index]));
                                   },
                                   child: Container(
                       height: 80,
@@ -256,4 +262,10 @@ Column listNoTransaction(BuildContext context) {
                             ),
       ),
     );
+  }
+
+
+  Future<void> refreshTransactions(context) async{
+    AppNavigator.pushAndRemove(context, HomePage());
+    return;
   }

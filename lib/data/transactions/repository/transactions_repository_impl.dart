@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
+import 'package:paklan/data/transactions/models/status.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
 import 'package:paklan/data/transactions/models/user.dart';
 import 'package:paklan/data/transactions/source/transaction_firebase_service.dart';
@@ -40,5 +41,20 @@ class TransactionsRepositoryImpl extends TransactionRepository{
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
     return await sl<TransactionFirebaseService>().createTransaction(newTransaction);
+  }
+  
+  @override
+  Future<Either> getTransaction(TransactionModel transaction) async{
+    Either transactions = await sl<TransactionFirebaseService>().getTransaction(transaction);
+    return transactions.fold(
+      (error){
+        return Left(error);
+      }, 
+      (data){
+        return Right(
+          StatusModel.fromMap(data).toEntity()
+          );
+      }
+      );
   }
 }

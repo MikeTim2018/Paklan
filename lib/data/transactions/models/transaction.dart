@@ -7,12 +7,16 @@ class TransactionModel {
   String ? status;
   String ? sellerFirstName;
   String ? buyerFirstName;
+  String ? transactionId;
+  String ? statusId;
 
   TransactionModel({
     required this.amount,
     required this.status,
     required this.sellerFirstName,
-    required this.buyerFirstName
+    required this.buyerFirstName,
+    required this.transactionId,
+    required this.statusId,
   });
 
 
@@ -22,6 +26,8 @@ Map<String, dynamic> toMap() {
       'status': status,
       'sellerFirstName': sellerFirstName,
       'buyerFirstName': buyerFirstName,
+      'transactionId': transactionId,
+      'statusId': statusId,
     };
   }
 
@@ -30,7 +36,9 @@ Map<String, dynamic> toMap() {
       amount: map['amount'] as String,
       status: map['status'] as String,
       buyerFirstName: map['members']['buyerFirstName'] as String,
-      sellerFirstName: map['members']['sellerFirstName'] as String,
+      sellerFirstName: map['members']['sellerFirstName'] as String, 
+      transactionId: map['transactionId'] as String,
+      statusId: map['statusId'] ?? '',
     );
   }
   
@@ -47,6 +55,8 @@ extension UserXModel on TransactionModel {
       status: status,
       buyerFirstName: buyerFirstName, 
       sellerFirstName: sellerFirstName,
+      transactionId: transactionId,
+      statusId: statusId
     );
   }
 }
