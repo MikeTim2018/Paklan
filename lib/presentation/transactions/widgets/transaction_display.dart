@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,7 +9,6 @@ import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
-import 'package:paklan/presentation/auth/pages/signin.dart';
 import 'package:paklan/presentation/home/pages/home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
@@ -137,129 +137,76 @@ Column listNoTransaction(BuildContext context) {
       child: RawScrollbar(
         thumbColor: AppColors.secondBackground,
         shape: const StadiumBorder(),
-        thickness: 7,
+        thickness: 8,
         child: ListView.separated(
-          padding: EdgeInsets.all(13),
+          padding: EdgeInsets.all(9),
                               shrinkWrap: true,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
                                   onTap: (){
-                                  AppNavigator.push(context, TransactionDetail(transaction: state.transaction[index]));
+                                    Navigator.of(context).push(
+                                    CupertinoSheetRoute<void>(
+                                     builder: (BuildContext context) => TransactionDetail(transaction: state.transaction[index]),
+                                    ),
+                                    );
                                   },
-                                  child: Container(
-                      height: 80,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondBackground,
-                        borderRadius: BorderRadius.circular(8)
-                      ),
-                      child: Row(
-                        children: [
-                           Column(
-                             children: [
-                              Text(
-                                textAlign: TextAlign.center,
-                                "Vendedor",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white54
-                                ),
-                                ),
-                                SizedBox(height: 2,),
-                               Flexible(
-                                 child: SizedBox(
-                                  width: 75,
-                                   child: Text(
-                                    textAlign: TextAlign.center,
-                                      overflow: TextOverflow.visible,
-                                      state.transaction[index].sellerFirstName,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400
-                                      ),
-                                      ),
-                                 ),
-                               ),
-                             ],
-                           ),
-                          const VerticalDivider(),
-                           Column(
-                             children: [
-                              Text(
-                                textAlign: TextAlign.center,
-                                "Comprador",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white54
-                                ),
-                                ),
-                                SizedBox(height: 2,),
-                               Flexible(
-                                 child: SizedBox(
-                                  width: 75,
-                                     child: Text(
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow.visible,
-                                      state.transaction[index].buyerFirstName,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400
-                                      ),
-                                      ),
-                                 ),
-                               ),
-                             ],
-                           ),
-                          const VerticalDivider(),
-                           Column(
-                             children: [
-                              Text(
-                                textAlign: TextAlign.center,
-                                "Monto",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white54
-                                ),
-                                ),
-                                SizedBox(height: 2,),
-                               SizedBox(
-                                width: 75,
-                                 child: Text(
-                                  textAlign: TextAlign.center,
-                                  "\$${state.transaction[index].amount}",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400
-                                  ),
-                                                     ),
-                               ),
-                             ],
-                           ),
-                          const SizedBox(width: 5),
-                          const VerticalDivider(),
-                          const SizedBox(width: 3),
-                          Container(
-                            height: 35,
-                            width: 35,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: SvgPicture.asset(
-                                  AppVectors.info,
-                                  fit: BoxFit.none,
-                                  ),
-                          ),
-                          
-                        ],
-                        
-                      ),
-                                  ),
+                                  child: transactionTile(state, index),
                                 );
                               },
                                separatorBuilder: (context, index) => const SizedBox(height: 10,),
                                itemCount: state.transaction.length
                             ),
+      ),
+    );
+  }
+
+  Widget transactionTile(state, int index) {
+    return Card(
+      child: ListTile(
+        shape: StadiumBorder(side: BorderSide(width: 2,color: Colors.white24)),
+        tileColor: AppColors.secondBackground,
+        leading: CircleAvatar(
+          backgroundColor: AppColors.secondBackground,
+          radius: 30,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white70,
+              shape: BoxShape.circle,
+            ),
+            height: 40,
+            width: 40,
+            child: SvgPicture.asset(
+                AppVectors.cash,
+                fit: BoxFit.fill,
+              ),
+          ),
+        ),
+        title: Text(
+          'Monto: \$${state.transaction[index].amount}',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
+          ),
+          subtitle: Text(
+            'Vendedor: ${state.transaction[index].sellerFirstName}\nComprador: ${state.transaction[index].buyerFirstName}',
+            style: TextStyle(
+              color: Colors.grey
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.white70,
+              shape: BoxShape.circle,
+            ),
+            child: SvgPicture.asset(
+              AppVectors.info,
+              fit: BoxFit.none,
+            ),
+          ),
       ),
     );
   }

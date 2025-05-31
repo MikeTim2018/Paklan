@@ -14,4 +14,5 @@ class AppVectors{
   static const notFound = '${basePath}not_found$format';
   static const rightArrow = '${basePath}right-arrow-svgrepo-com-2$format';
   static const user = '${basePath}user-circle-svgrepo-com$format';
+  static const cash = '${basePath}cash-payment-pay-money-cash-svgrepo-com$format';
 }

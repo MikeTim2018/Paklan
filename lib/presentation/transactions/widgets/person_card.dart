@@ -47,41 +47,44 @@ class PersonCard extends StatelessWidget {
 
   }
   Widget _buildPersonTile(user){
-    return ListTile(
-      tileColor: AppColors.secondBackground,
-      leading: CircleAvatar(
-        backgroundColor: AppColors.secondBackground,
-        radius: 30,
-        backgroundImage: const AssetImage(
-              AppImages.userLogo
-            ),
-      ),
-      title: Text(
-        user.firstName,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold
+    return Card(
+      child: ListTile(
+        shape: StadiumBorder(side: BorderSide(width: 2)),
+        tileColor: AppColors.secondBackground,
+        leading: CircleAvatar(
+          backgroundColor: AppColors.secondBackground,
+          radius: 30,
+          backgroundImage: const AssetImage(
+                AppImages.userLogo
+              ),
         ),
-        ),
-        subtitle: Text(
-          user.phone,
+        title: Text(
+          user.firstName,
           style: TextStyle(
-            color: Colors.grey
+            color: Colors.white,
+            fontWeight: FontWeight.bold
           ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Container(
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            color: Colors.white70,
-            shape: BoxShape.circle,
           ),
-          child: SvgPicture.asset(
-            AppVectors.rightArrow,
-            fit: BoxFit.none,
+          subtitle: Text(
+            user.phone,
+            style: TextStyle(
+              color: Colors.grey
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
+          trailing: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.white70,
+              shape: BoxShape.circle,
+            ),
+            child: SvgPicture.asset(
+              AppVectors.rightArrow,
+              fit: BoxFit.none,
+            ),
+          ),
+      ),
     );
   }
 }
