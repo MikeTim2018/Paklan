@@ -5,7 +5,7 @@ import 'package:paklan/presentation/transactions/bloc/transaction_state_display_
 import 'package:paklan/service_locator.dart';
 
 class TransactionStateDisplayCubit extends Cubit<TransactionStateDisplayState> {
-  TransactionStateDisplayCubit(): super(TransactionInitial());
+  TransactionStateDisplayCubit(): super(TransactionLoading());
 
   void getTransactionState({TransactionModel ? transaction}) async{
     emit(

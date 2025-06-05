@@ -1,6 +1,6 @@
 
 class TransactionEntity {
-  String ? amount ;
+  String ? amount;
   String ? status;
   String ? sellerFirstName;
   String ? buyerFirstName;

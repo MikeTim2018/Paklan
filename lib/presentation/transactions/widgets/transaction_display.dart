@@ -9,7 +9,6 @@ import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
-import 'package:paklan/presentation/home/pages/home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 
@@ -31,7 +30,7 @@ class TransactionDisplay extends StatelessWidget {
           }
           if (state is TransactionsLoaded){
             return RefreshIndicator(
-              onRefresh: () => refreshTransactions(context),
+              onRefresh: () => context.read<TransactionsDisplayCubit>().displayTransactions(),
               child: Column(
                 children: [
                   SizedBox(height: 50,),
@@ -43,7 +42,7 @@ class TransactionDisplay extends StatelessWidget {
                     ),
                   SizedBox(height: 20,),
                   listTransactions(context, state),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: BasicAppButton(
@@ -82,52 +81,57 @@ class TransactionDisplay extends StatelessWidget {
   }
 }
 
-Column listNoTransaction(BuildContext context) {
-    return Column(
-      children: [
-              SizedBox(height: 100,),
-              Container(
-                width: 350,
-                height: 350,
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: const AssetImage(
-                      AppImages.noTrades
+Widget listNoTransaction(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => context.read<TransactionsDisplayCubit>().displayTransactions(),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+                  SizedBox(height: 100,),
+                  Container(
+                    width: 350,
+                    height: 350,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: const AssetImage(
+                          AppImages.noTrades
+                        ),
+                        )
                     ),
-                    )
-                ),
-              ),
-              SizedBox(height: 50,),
-              Text(
-                "Sin Tratos Activos",
-                style: TextStyle(
-                  fontSize: 23,
-                  color: Colors.white70
-                ),
-              ),
-              SizedBox(height: 10,),
-              Text(
-                "¡Comienza ahora!",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: AppColors.primary
-                ),
-              ),
-              SizedBox(height: 30,),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: BasicAppButton(
-                  onPressed: (){
-                    AppNavigator.push(context, TransactionSearch());
-                    },
-                    width: 200,
-                    title: 'Iniciar Trato'
-                ),
-              ),
-              ]
-              );
+                  ),
+                  SizedBox(height: 50,),
+                  Text(
+                    "Sin Tratos Activos",
+                    style: TextStyle(
+                      fontSize: 23,
+                      color: Colors.white70
+                    ),
+                  ),
+                  SizedBox(height: 10,),
+                  Text(
+                    "¡Comienza ahora!",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppColors.primary
+                    ),
+                  ),
+                  SizedBox(height: 30,),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: BasicAppButton(
+                      onPressed: (){
+                        AppNavigator.push(context, TransactionSearch());
+                        },
+                        width: 200,
+                        title: 'Iniciar Trato'
+                    ),
+                  ),
+                  ]
+                  ),
+      ),
+    );
   }
 
 
@@ -137,6 +141,7 @@ Column listNoTransaction(BuildContext context) {
       child: RawScrollbar(
         thumbColor: AppColors.secondBackground,
         shape: const StadiumBorder(),
+        timeToFade: Duration(seconds: 1),
         thickness: 8,
         child: ListView.separated(
           padding: EdgeInsets.all(9),
@@ -209,10 +214,4 @@ Column listNoTransaction(BuildContext context) {
           ),
       ),
     );
-  }
-
-
-  Future<void> refreshTransactions(context) async{
-    AppNavigator.pushAndRemove(context, HomePage());
-    return;
   }

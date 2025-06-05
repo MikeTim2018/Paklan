@@ -15,4 +15,8 @@ class AppVectors{
   static const rightArrow = '${basePath}right-arrow-svgrepo-com-2$format';
   static const user = '${basePath}user-circle-svgrepo-com$format';
   static const cash = '${basePath}cash-payment-pay-money-cash-svgrepo-com$format';
+  static const check = '${basePath}check-circle-svgrepo-com$format';
+  static const finish = '${basePath}finish-svgrepo-com$format';
+  static const pay = '${basePath}pay-money-svgrepo-com$format';
+  static const handshake = '${basePath}handshake-svgrepo-com$format';
 }

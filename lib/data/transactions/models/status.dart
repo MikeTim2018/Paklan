@@ -8,6 +8,13 @@ class StatusModel {
   bool ? buyerConfirmation;
   bool ? sellerConfirmation;
   String ? transactionId;
+  String ? buyerId;
+  String ? sellerId;
+  String ? currentUser;
+  bool ? paymentDone;
+  bool ? paymentTransferred;
+  bool ? reimbursementDone;
+  bool ? cancelled;
   String ? cancelledBy;
 
   StatusModel({
@@ -16,6 +23,13 @@ class StatusModel {
   required this.buyerConfirmation,
   required this.sellerConfirmation,
   required this.transactionId,
+  required this.buyerId,
+  required this.sellerId,
+  required this.currentUser,
+  required this.paymentDone,
+  required this.paymentTransferred,
+  required this.reimbursementDone,
+  required this.cancelled,
   this.cancelledBy,
   });
 
@@ -26,6 +40,13 @@ Map<String, dynamic> toMap() {
       'buyerConfirmation': buyerConfirmation,
       'sellerConfirmation': sellerConfirmation,
       'transactionId': transactionId,
+      'buyerId': buyerId,
+      'sellerId': sellerId,
+      'curentUser': currentUser,
+      'paymentDone': paymentDone,
+      'paymentTransferred': paymentTransferred,
+      'reimbursementDone': reimbursementDone,
+      'cancelled': cancelled,
       'cancelledBy': cancelledBy,
     };
   }
@@ -37,7 +58,14 @@ Map<String, dynamic> toMap() {
       buyerConfirmation: map['buyerConfirmation'] as bool,
       sellerConfirmation: map['sellerConfirmation'] as bool,
       transactionId: map['transactionId'] as String,
-      cancelledBy: map['cancelledBy'] ?? '',
+      cancelledBy: map['cancelledBy'] ?? '', 
+      buyerId: map['buyerId'] as String, 
+      sellerId: map['sellerId'] as String, 
+      currentUser: map['currentUser'] as String, 
+      paymentDone: map['paymentDone'] as bool, 
+      paymentTransferred: map['paymentTransferred'] as bool, 
+      reimbursementDone: map['reimbursementDone'] as bool, 
+      cancelled: map['cancelled'] as bool,
     );
   }
   
@@ -55,7 +83,14 @@ extension UserXModel on StatusModel {
       buyerConfirmation: buyerConfirmation, 
       sellerConfirmation: sellerConfirmation,
       transactionId: transactionId,
-      cancelledBy: cancelledBy
+      buyerId: buyerId,
+      sellerId: sellerId,
+      cancelledBy: cancelledBy,
+      cancelled: cancelled,
+      currentUser: currentUser,
+      paymentDone: paymentDone,
+      paymentTransferred: paymentTransferred,
+      reimbursementDone: reimbursementDone,
     );
   }
 }

@@ -146,7 +146,7 @@ class TransactionAmount extends StatelessWidget {
       padding: const EdgeInsets.all(13.0),
       child: TextFormField(
         validator: (value){
-          if (value!.isEmpty || RegExp(r'[a-z A-Z !"#$%&&/()=<>,\-\*\+\´\}ñ]+').hasMatch(value)){
+          if (value!.isEmpty || RegExp(r'\D+').hasMatch(value)){
             return 'Ingresa una cantidad correcta';
           }
           else{
@@ -222,7 +222,7 @@ class TransactionAmount extends StatelessWidget {
                 if (_formKey.currentState!.validate()){
                 int userType = context.read<UserTypeSelectionCubit>().selectedIndex;
                 NewTransactionModel newTransaction = NewTransactionModel(
-                  amount: _amountCon.text,
+                  amount: '${_amountCon.text}.00',
                   sellerFirstName: userType == 1 ? userFirstName  : userEntity.firstName,
                   sellerId: userType == 1 ? userId  : userEntity.userId,
                   buyerFirstName: userType == 1 ? userEntity.firstName : userFirstName,

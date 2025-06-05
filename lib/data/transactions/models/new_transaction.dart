@@ -19,7 +19,7 @@ class NewTransactionModel {
     required this.buyerId,
     required this.details,
     required this.buyerConfirmation,
-    required this.sellerConfirmation
+    required this.sellerConfirmation,
   });
 
 }

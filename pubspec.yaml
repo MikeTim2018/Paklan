@@ -45,6 +45,7 @@ dependencies:
   algoliasearch: ^1.32.0
   firebase_messaging: ^15.2.6
   flutter_local_notifications: ^19.2.1
+  easy_stepper: ^0.8.5+1
 
 dev_dependencies:
   flutter_test:

@@ -87,6 +87,12 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "sellerConfirmation": newTransaction.sellerConfirmation ?? false,
         "details": newTransaction.details,
         "status": newTransaction.status,
+        "sellerId": newTransaction.sellerId,
+        "buyerId": newTransaction.buyerId,
+        "cancelled": false,
+        "reimbursementDone": false,
+        "paymentDone": false,
+        "paymentTransferred": false,
         "creationDate": DateTime.timestamp()
       }
     );
@@ -98,6 +104,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   
   @override
   Future<Either> getTransaction(TransactionModel transaction) async{
+    var currentUser = FirebaseAuth.instance.currentUser;
     try{
       Map<String, dynamic> ? transactionData = await FirebaseFirestore
                                                                   .instance
@@ -107,6 +114,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
                                                                   .doc(transaction.statusId)
                                                                   .get()
                                                                   .then((value)=>value.data());
+      transactionData!['currentUser'] = transactionData["buyerId"]==currentUser!.uid ? "buyer": "seller";
       return Right(transactionData);
     }
     catch(e){

@@ -43,7 +43,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
             multicast_message=messaging.MulticastMessage(
                 notification=messaging.Notification(
                     title=f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
-                    body=f"Estatus: {status}, Monto: {transaction.get("amount")}"
+                    body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn."
                 ),
                 tokens=buyer.get("tokens"),
                 data={
@@ -78,7 +78,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
             tokens=seller.get("tokens"),
             notification=messaging.Notification(
                 title=f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
-                body=f"Estatus: {status}, Monto: {transaction.get("amount")}"
+                body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn."
             ),
             data={
                 "message": f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
