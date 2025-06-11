@@ -218,7 +218,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
-            height: 44,
+            height: 50,
             child: const Text(
               "¡Ingresa tu cuenta CLABE para que se te pueda transferir o rembolsar tu dinero!",
               style: TextStyle(
@@ -277,7 +277,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                     value: context.read<ButtonStateCubit>(),
                     child: AlertDialog(
         title: const Text('¿Quieres Cancelar el Trato?'),
-        content: Text("Cancelar el trato notificará inmediatamente al vendedor|comprador"),
+        content: Flexible(child: Text("Cancelar el trato notificará al vendedor/comprador")),
         actions: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -292,9 +292,10 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                   ),
                   onPressed: () => Navigator.pop(innerContext)
                       ),
+                      VerticalDivider(width: 10,),
                       CustomReactiveButton(
                                         color: Colors.redAccent,
-                                        title: "Rechazar Trato",
+                                        title: "Rechazar",
                                         onPressed: (){
                                           context.read<ButtonStateCubit>().execute(
                                           usecase: UpdateDealUseCase(),
@@ -399,9 +400,13 @@ class StepperDeal extends StatelessWidget {
               ),
           ),
           customTitle: const Text(
-            "Trato Envíado",
-            textAlign: TextAlign.center,
-            )
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              "Trato\n Envíado",
+              textAlign: TextAlign.center,
+
+              ),
           ),
                         
           EasyStep(
