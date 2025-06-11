@@ -4,15 +4,15 @@ import 'package:paklan/common/bloc/bottom_nav_bar/navigation_bloc.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/navigation_state.dart';
 import 'package:paklan/common/widgets/bottom_nav_bar/bottom_navigation.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
-import 'package:paklan/presentation/transactions/pages/transaction_success_wo_confirmation.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
   final List<Widget> pages = [
     TransactionHome(),
-    TransactionSuccessWoConfirmation(),
+    TransactionHistory(),
     SigninPage(),
   ];
 

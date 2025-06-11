@@ -2,20 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:paklan/common/helper/navigator/app_navigator.dart';
-import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
-import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
+import 'package:paklan/domain/transactions/usecases/get_completed_transactions.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
-import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 import 'package:paklan/service_locator.dart';
 
-class TransactionDisplay extends StatelessWidget {
-  TransactionDisplay({super.key});
-  final Stream<QuerySnapshot> _transactionsStream =  sl<GetTransactionsUseCase>().call();
+class TransactionHistory extends StatelessWidget {
+  TransactionHistory({super.key});
+  final Stream<QuerySnapshot> _transactionsStream =  sl<GetCompletedTransactionsUseCase>().call();
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +49,7 @@ class TransactionDisplay extends StatelessWidget {
                 children: [
                   SizedBox(height: 50,),
                   Text(
-                    "Tratos en Curso",
+                    "Tratos Completados y Cancelados",
                     style: TextStyle(
                       fontSize: 20
                     ),
@@ -62,17 +59,6 @@ class TransactionDisplay extends StatelessWidget {
                     (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
                     ).toList()
                     ),
-                  const SizedBox(height: 25),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: BasicAppButton(
-                      onPressed: (){
-                        AppNavigator.push(context, TransactionSearch());
-                        },
-                        width: 200,
-                        title: 'Iniciar Trato'
-                    ),
-                  ),
               
                 ],
             );
@@ -101,29 +87,10 @@ Widget listNoTransaction(BuildContext context) {
                   ),
                   SizedBox(height: 50,),
                   Text(
-                    "Sin Tratos Activos",
+                    "No hay Tratos Completados o Cancelados",
                     style: TextStyle(
                       fontSize: 23,
                       color: Colors.white70
-                    ),
-                  ),
-                  SizedBox(height: 10,),
-                  Text(
-                    "¡Comienza ahora!",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: AppColors.primary
-                    ),
-                  ),
-                  SizedBox(height: 30,),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: BasicAppButton(
-                      onPressed: (){
-                        AppNavigator.push(context, TransactionSearch());
-                        },
-                        width: 200,
-                        title: 'Iniciar Trato'
                     ),
                   ),
                   ]
@@ -203,12 +170,12 @@ Widget listNoTransaction(BuildContext context) {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: Colors.white70,
+              color: Colors.lightBlue,
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
-              AppVectors.info,
-              fit: BoxFit.none,
+              state[index].status=='Completado'? AppVectors.check : AppVectors.error,
+              fit: BoxFit.fill,
             ),
           ),
       ),

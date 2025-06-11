@@ -6,12 +6,12 @@ class StatusEntity {
   String ? transactionId;
   String ? buyerId;
   String ? sellerId;
-  String ? currentUser;
   bool ? paymentDone;
   bool ? paymentTransferred;
   bool ? reimbursementDone;
   bool ? cancelled;
   String ? cancelledBy;
+  String ? statusId;
 
   StatusEntity({
   required this.status,
@@ -22,10 +22,10 @@ class StatusEntity {
   required this.sellerId,
   required this.buyerId,
   required this.cancelled,
-  required this.currentUser,
   required this.paymentDone,
   required this.paymentTransferred,
   required this.reimbursementDone,
   this.cancelledBy,
+  required this.statusId,
   });
 }

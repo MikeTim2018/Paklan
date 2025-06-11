@@ -19,4 +19,5 @@ class AppVectors{
   static const finish = '${basePath}finish-svgrepo-com$format';
   static const pay = '${basePath}pay-money-svgrepo-com$format';
   static const handshake = '${basePath}handshake-svgrepo-com$format';
+  static const error = '${basePath}error-svgrepo-com$format';
 }

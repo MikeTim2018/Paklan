@@ -4,42 +4,34 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
+import 'package:paklan/data/transactions/models/status.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
 
 abstract class TransactionFirebaseService{
-  Future<Either> getTransactions();
+  Stream<QuerySnapshot<Map<String, dynamic>>> getTransactions();
   Future<Either> getPerson(String searchVal);
   Future<Either> createTransaction(NewTransactionModel newTransaction);
-  Future<Either> getTransaction(TransactionModel transaction);
+  Map<String,dynamic> getTransaction(TransactionModel transaction);
+  Future<Either> updateDeal(StatusModel transaction);
+  Stream<QuerySnapshot<Map<String, dynamic>>> getCompletedTransactions();
 }
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
 
   @override
-  Future<Either> getTransactions() async{
-    try{
-      var currentUser = FirebaseAuth.instance.currentUser;
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> transactionData = await FirebaseFirestore.instance.collection("transactions").where(
-      Filter.and(
-        Filter("status", isEqualTo: "En proceso"),
-        Filter.or(
-        Filter("members.buyerId", isEqualTo: currentUser?.uid),
-        Filter("members.sellerId", isEqualTo: currentUser?.uid),
-        )
-      ),
+  Stream<QuerySnapshot<Map<String, dynamic>>> getTransactions() {
+    var currentUser = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance.collection('transactions').where(
+           Filter.and(
+           Filter("status", isEqualTo: "En proceso"),
+           Filter.or(
+           Filter("members.buyerId", isEqualTo: currentUser?.uid),
+           Filter("members.sellerId", isEqualTo: currentUser?.uid),
+      )
+    ),
     )
     .orderBy("updatedDate", descending: true)
-    .get()
-    .then(
-      (value) => value.docs
-      );
-      return Right(transactionData.map((e) => e.data()).toList());
-    }
-    catch(e){
-      return Left(
-        "Por favor intenta más tarde"
-      );
-    }
+    .snapshots();
   }
   
   @override
@@ -68,6 +60,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
 
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
+    var currentUser = FirebaseAuth.instance.currentUser;
     try{
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
       {"amount": newTransaction.amount,
@@ -80,7 +73,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
        }
       }
     );
-    await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").doc().set(
+    DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").add(
       {
         "transactionId": transactionDoc.id,
         "buyerConfirmation": newTransaction.buyerConfirmation ?? false,
@@ -96,6 +89,12 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "creationDate": DateTime.timestamp()
       }
     );
+    await statusRef.update({"statusId": statusRef.id});
+    await FirebaseFirestore.instance.collection("users").doc(currentUser!.uid).update(
+      {
+        "CLABEs": FieldValue.arrayUnion([newTransaction.clabe])
+      }
+    );
     return Right("Transaction Created!");
   }catch (error){
     return Left(error);
@@ -103,24 +102,66 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   }
   
   @override
-  Future<Either> getTransaction(TransactionModel transaction) async{
+  Map<String, dynamic> getTransaction(TransactionModel transaction){
     var currentUser = FirebaseAuth.instance.currentUser;
+    final Stream<QuerySnapshot<Map<String, dynamic>>> transactionData = FirebaseFirestore
+                                    .instance
+                                    .collection("transactions")
+                                    .doc(transaction.transactionId)
+                                    .collection("status")
+                                    .orderBy("creationDate", descending: true)
+                                    .snapshots();
+    return {
+      "transactionStream": transactionData, 
+      "currentUserId": currentUser!.uid
+      } as Map<String, dynamic>;
+  }
+  
+  @override
+  Future<Either> updateDeal(StatusModel transactionState) async{
     try{
-      Map<String, dynamic> ? transactionData = await FirebaseFirestore
-                                                                  .instance
-                                                                  .collection("transactions")
-                                                                  .doc(transaction.transactionId)
-                                                                  .collection("status")
-                                                                  .doc(transaction.statusId)
-                                                                  .get()
-                                                                  .then((value)=>value.data());
-      transactionData!['currentUser'] = transactionData["buyerId"]==currentUser!.uid ? "buyer": "seller";
-      return Right(transactionData);
-    }
-    catch(e){
-      return Left(
-        "Por favor intenta más tarde"
+      var currentUser = FirebaseAuth.instance.currentUser;
+      DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionState.transactionId}/status").add(
+        {
+          "transactionId": transactionState.transactionId,
+          "buyerConfirmation": transactionState.buyerConfirmation,
+          "sellerConfirmation": transactionState.sellerConfirmation,
+          "details": transactionState.details,
+          "status": transactionState.status,
+          "sellerId": transactionState.sellerId,
+          "buyerId": transactionState.buyerId,
+          "cancelled": transactionState.cancelled,
+          "reimbursementDone": transactionState.reimbursementDone,
+          "paymentDone": transactionState.paymentDone,
+          "paymentTransferred": transactionState.paymentTransferred,
+          "cancelledBy": currentUser!.uid,
+          "creationDate": DateTime.timestamp(),
+        }
       );
+      await statusRef.update({"statusId": statusRef.id});
+      return Right("Deal Cancelled!");
+    }catch(e){
+      return Left(e);
     }
+    
+  }
+  
+  @override
+  Stream<QuerySnapshot<Map<String, dynamic>>> getCompletedTransactions() {
+    var currentUser = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance.collection('transactions').where(
+           Filter.and(
+           Filter.or(
+           Filter("status", isEqualTo: "Cancelado"),
+           Filter("status", isEqualTo: "Completado"),
+           ),
+           Filter.or(
+           Filter("members.buyerId", isEqualTo: currentUser?.uid),
+           Filter("members.sellerId", isEqualTo: currentUser?.uid),
+      )
+    ),
+    )
+    .orderBy("updatedDate", descending: true)
+    .snapshots();
   }
 }

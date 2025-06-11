@@ -9,6 +9,7 @@ class NewTransactionModel {
   String ? details;
   bool ? buyerConfirmation;
   bool ? sellerConfirmation;
+  String ? clabe;
 
   NewTransactionModel({
     required this.amount,
@@ -20,6 +21,7 @@ class NewTransactionModel {
     required this.details,
     required this.buyerConfirmation,
     required this.sellerConfirmation,
+    required this.clabe
   });
 
 }

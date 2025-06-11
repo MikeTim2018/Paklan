@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:paklan/domain/transactions/repository/transaction.dart';
 import 'package:paklan/service_locator.dart';
 
-class GetTransactionsUseCase{
+class GetCompletedTransactionsUseCase{
   Stream<QuerySnapshot<Map<String, dynamic>>> call({dynamic params}) {
-    return sl<TransactionRepository>().getTransactions();
+    return sl<TransactionRepository>().getCompletedTransactions();
   }
 }

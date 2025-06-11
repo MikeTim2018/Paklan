@@ -49,7 +49,7 @@ class PersonCard extends StatelessWidget {
   Widget _buildPersonTile(user){
     return Card(
       child: ListTile(
-        shape: StadiumBorder(side: BorderSide(width: 2)),
+        shape: StadiumBorder(side: BorderSide(width: 1)),
         tileColor: AppColors.secondBackground,
         leading: CircleAvatar(
           backgroundColor: AppColors.secondBackground,

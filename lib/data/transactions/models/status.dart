@@ -10,11 +10,11 @@ class StatusModel {
   String ? transactionId;
   String ? buyerId;
   String ? sellerId;
-  String ? currentUser;
   bool ? paymentDone;
   bool ? paymentTransferred;
   bool ? reimbursementDone;
   bool ? cancelled;
+  String ? statusId;
   String ? cancelledBy;
 
   StatusModel({
@@ -25,11 +25,11 @@ class StatusModel {
   required this.transactionId,
   required this.buyerId,
   required this.sellerId,
-  required this.currentUser,
   required this.paymentDone,
   required this.paymentTransferred,
   required this.reimbursementDone,
   required this.cancelled,
+  this.statusId,
   this.cancelledBy,
   });
 
@@ -42,12 +42,12 @@ Map<String, dynamic> toMap() {
       'transactionId': transactionId,
       'buyerId': buyerId,
       'sellerId': sellerId,
-      'curentUser': currentUser,
       'paymentDone': paymentDone,
       'paymentTransferred': paymentTransferred,
       'reimbursementDone': reimbursementDone,
       'cancelled': cancelled,
       'cancelledBy': cancelledBy,
+      'statusId': statusId,
     };
   }
 
@@ -61,11 +61,11 @@ Map<String, dynamic> toMap() {
       cancelledBy: map['cancelledBy'] ?? '', 
       buyerId: map['buyerId'] as String, 
       sellerId: map['sellerId'] as String, 
-      currentUser: map['currentUser'] as String, 
       paymentDone: map['paymentDone'] as bool, 
       paymentTransferred: map['paymentTransferred'] as bool, 
       reimbursementDone: map['reimbursementDone'] as bool, 
       cancelled: map['cancelled'] as bool,
+      statusId: map['statusId'] ?? '',
     );
   }
   
@@ -87,10 +87,10 @@ extension UserXModel on StatusModel {
       sellerId: sellerId,
       cancelledBy: cancelledBy,
       cancelled: cancelled,
-      currentUser: currentUser,
       paymentDone: paymentDone,
       paymentTransferred: paymentTransferred,
       reimbursementDone: reimbursementDone,
+      statusId: statusId,
     );
   }
 }

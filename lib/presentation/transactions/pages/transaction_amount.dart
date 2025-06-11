@@ -18,6 +18,7 @@ import 'package:paklan/presentation/transactions/pages/transaction_success_wo_co
 // ignore: must_be_immutable
 class TransactionAmount extends StatelessWidget {
   final TextEditingController _amountCon = TextEditingController();
+  final TextEditingController _clabeCon = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final UserEntityTransaction userEntity;
   String userId = '';
@@ -95,15 +96,19 @@ class TransactionAmount extends StatelessWidget {
               key: _formKey,
               child: Column(
                 children: [
-                  SizedBox(height: 30,),
+                  SizedBox(height: 25,),
                   _selectType(context),
-                  SizedBox(height: 15,),
+                  SizedBox(height: 10,),
                   _users(context),
-                  SizedBox(height: 15,),
+                  SizedBox(height: 10,),
                   _amount(context),
-                  SizedBox(height: 15,),
+                  SizedBox(height: 10,),
                   _amountField(context),
-                  SizedBox(height: 15,),
+                  SizedBox(height: 10,),
+                  _clabe(context),
+                  SizedBox(height: 10,),
+                  _clabeField(context),
+                  SizedBox(height: 10,),
                   _sendDeal(context),
                       
                 ],
@@ -121,7 +126,7 @@ class TransactionAmount extends StatelessWidget {
       child: Text(
         'Define el monto del trato',
         style: TextStyle(
-          fontSize: 27,
+          fontSize: 25,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -134,7 +139,7 @@ class TransactionAmount extends StatelessWidget {
       child: Text(
         '¿Qué quieres hacer?',
         style: TextStyle(
-          fontSize: 27,
+          fontSize: 25,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -161,6 +166,44 @@ class TransactionAmount extends StatelessWidget {
     );
   }
 
+  Widget _clabe(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(13.0),
+      child: Text(
+        'Ingresa tu cuenta CLABE',
+        style: TextStyle(
+          fontSize: 25,
+          fontWeight: FontWeight.bold
+        ),
+      ),
+    );
+  }
+
+  Widget _clabeField(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(13.0),
+      child: TextFormField(
+        autocorrect: false,
+        enableSuggestions: false,
+        
+        validator: (value){
+          if (value!.isEmpty || value.length != 18 || RegExp(r'\D+').hasMatch(value)){
+            return 'Tu cuenta clabe debe contener 18 dígitos';
+          }
+          else{
+            return null;
+          }
+        },
+        controller: _clabeCon,
+        decoration: InputDecoration(
+          helper: Text(
+            "Tu cuenta CLABE es indispensable para hacer tratos",
+            style: TextStyle(fontSize: 12),),
+          hintText: "Cuenta CLABE a 18 dígitos"
+        ),
+      ),
+    );
+  }
 
   Widget _users(BuildContext context) {
     return BlocBuilder<UserTypeSelectionCubit,int>(
@@ -211,8 +254,7 @@ class TransactionAmount extends StatelessWidget {
 
   Widget _sendDeal(context){
         return Container(
-      height: 200,
-      
+      height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Center(
         child: Builder(
@@ -231,6 +273,7 @@ class TransactionAmount extends StatelessWidget {
                   sellerConfirmation: userType == 1 ? true : false,
                   details: "Falta Confirmación de Trato",
                   status: "En proceso",
+                  clabe: _clabeCon.text
                 );
                 context.read<ButtonStateCubit>().execute(
                   usecase: CreateTransactionUseCase(),
