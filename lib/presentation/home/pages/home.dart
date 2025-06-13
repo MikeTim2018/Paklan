@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/navigation_bloc.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/navigation_state.dart';
 import 'package:paklan/common/widgets/bottom_nav_bar/bottom_navigation.dart';
-import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/home/pages/settings.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
 
@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
   final List<Widget> pages = [
     TransactionHome(),
     TransactionHistory(),
-    SigninPage(),
+    Settings(),
   ];
 
   @override
