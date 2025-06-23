@@ -43,7 +43,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
             multicast_message=messaging.MulticastMessage(
                 notification=messaging.Notification(
                     title=f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
-                    body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn."
+                    body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn.\n{event.data.get("details")}"
                 ),
                 tokens=buyer.get("tokens"),
                 data={
@@ -52,6 +52,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
                     "transaction": json.dumps({
                         "transactionId": transaction.get("transactionId"),
                         "statusId": transaction.get("statusId"),
+                        "details": event.data.get("details"),
                     })
                 },
                 android=messaging.AndroidConfig(priority='high')
@@ -78,7 +79,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
             tokens=seller.get("tokens"),
             notification=messaging.Notification(
                 title=f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
-                body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn."
+                body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn.\n{event.data.get("details")}"
             ),
             data={
                 "message": f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
@@ -86,6 +87,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
                 "transaction": json.dumps({
                     "transactionId": transaction.get("transactionId"),
                     "statusId": transaction.get("statusId"),
+                    "details": event.data.get("details"),
                 })
             },
             android=messaging.AndroidConfig(priority='high')

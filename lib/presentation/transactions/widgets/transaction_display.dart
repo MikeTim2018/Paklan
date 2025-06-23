@@ -24,7 +24,7 @@ class TransactionDisplay extends StatelessWidget {
           builder: (context, AsyncSnapshot<QuerySnapshot> state){
           if (state.connectionState == ConnectionState.waiting){
             return SizedBox(
-              height: 450,
+              height: 400,
               child: Container(
                 alignment: Alignment.center,
                 child: const CircularProgressIndicator()
@@ -33,7 +33,7 @@ class TransactionDisplay extends StatelessWidget {
           }
           if (state.hasError){
             return SizedBox(
-              height: 450,
+              height: 400,
               child: Container(
                 alignment: Alignment.center,
                 child: Text(
@@ -134,7 +134,7 @@ Widget listNoTransaction(BuildContext context) {
 
   Widget listTransactions(BuildContext context, state) {
     return SizedBox(
-      height: 450,
+      height: 400,
       child: RawScrollbar(
         thumbColor: AppColors.secondBackground,
         shape: const StadiumBorder(),

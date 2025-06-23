@@ -11,6 +11,9 @@ import 'package:paklan/domain/auth/usecases/send_password_reset_email.dart';
 import 'package:paklan/domain/auth/usecases/signin.dart';
 import 'package:paklan/domain/auth/usecases/signup.dart';
 import 'package:paklan/domain/transactions/repository/transaction.dart';
+import 'package:paklan/domain/transactions/usecases/create_clabe.dart';
+import 'package:paklan/domain/transactions/usecases/delete_clabe.dart';
+import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/domain/transactions/usecases/get_completed_transactions.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
@@ -85,5 +88,18 @@ sl.registerSingleton<UpdateDealUseCase>(
 sl.registerSingleton<GetCompletedTransactionsUseCase>(
   GetCompletedTransactionsUseCase()
 );
+
+sl.registerSingleton<GetClabesUseCase>(
+  GetClabesUseCase()
+);
+
+sl.registerSingleton<DeleteClabenUseCase>(
+  DeleteClabenUseCase()
+);
+
+sl.registerSingleton<CreateClabenUseCase>(
+  CreateClabenUseCase()
+);
+
 
 }

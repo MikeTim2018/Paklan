@@ -11,4 +11,7 @@ abstract class TransactionRepository {
   Map<String, dynamic> getTransaction(TransactionModel transaction);
   Future<Either> updateDeal(StatusModel newStatus);
   Stream<QuerySnapshot<Map<String, dynamic>>> getCompletedTransactions();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes();
+  Future<Either> deleteClabe(String clabe);
+  Future<Either> createClabe(String clabe);
 }

@@ -54,8 +54,47 @@ class TransactionsRepositoryImpl extends TransactionRepository{
       }
       );
   }
+  @override
   Stream<QuerySnapshot<Map<String, dynamic>>> getCompletedTransactions(){
     Stream<QuerySnapshot<Map<String, dynamic>>> transactions = sl<TransactionFirebaseService>().getCompletedTransactions();
     return transactions;
   }
+
+  @override
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes(){
+    Stream<DocumentSnapshot<Map<String, dynamic>>> clabes = sl<TransactionFirebaseService>().getClabes();
+    return clabes;
+  }
+  
+  @override
+  Future<Either> deleteClabe(String clabe) async{
+    Either response = await sl<TransactionFirebaseService>().deleteClabe(clabe);
+    return response.fold(
+      (error){
+        return Left(error);
+      }, 
+      (data){
+        return Right(
+          data
+          );
+      }
+      );
+  }
+
+  @override
+  Future<Either> createClabe(String clabe) async{
+    Either response = await sl<TransactionFirebaseService>().createClabe(clabe);
+    return response.fold(
+      (error){
+        return Left(error);
+      }, 
+      (data){
+        return Right(
+          data
+          );
+      }
+      );
+  }
+
+
 }

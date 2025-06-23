@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
+import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -16,6 +18,7 @@ import 'package:paklan/domain/transactions/entity/status.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
+import 'package:paklan/presentation/auth/pages/signin.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
 import 'package:paklan/service_locator.dart';
 
@@ -197,6 +200,32 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
         "No hay acciones disponibles a realizar, el trato ya está cancelado",
         style: TextStyle(fontSize: 20),
         ),
+    );
+  }
+  if(currentUser == 'Comprador' && state.buyerConfirmation! && state.sellerConfirmation!){
+    return Column(
+      children: [
+        Text("Proceder a pagar la cantidad acordada",
+        style: TextStyle(
+          fontSize: 20
+        ),),
+        SizedBox(height: 5,),
+        BasicAppButton(
+          title: "Pagar",
+          onPressed: () => AppNavigator.push(context, SigninPage()),)
+      ],
+    );
+  }
+  if(currentUser == 'Vendedor' && state.buyerConfirmation! && state.sellerConfirmation!){
+    return Column(
+      children: [
+        Text("El comprador está en proceso de pago...",
+        style: TextStyle(
+          fontSize: 20
+        ),),
+        SizedBox(height: 5,),
+        
+      ],
     );
   }
   if((currentUser == 'Comprador' && state.buyerConfirmation!) || (currentUser == 'Vendedor' && state.sellerConfirmation!)){

@@ -14,6 +14,9 @@ abstract class TransactionFirebaseService{
   Map<String,dynamic> getTransaction(TransactionModel transaction);
   Future<Either> updateDeal(StatusModel transaction);
   Stream<QuerySnapshot<Map<String, dynamic>>> getCompletedTransactions();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes();
+  Future<Either> deleteClabe(String clabe);
+  Future<Either> createClabe(String clabe);
 }
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
@@ -163,5 +166,39 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     )
     .orderBy("updatedDate", descending: true)
     .snapshots();
+  }
+  
+  @override
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes() {
+    var currentUid = FirebaseAuth.instance.currentUser!.uid;
+    Stream<DocumentSnapshot<Map<String, dynamic>>> clabeStream = FirebaseFirestore.instance.collection("users").doc(
+        currentUid
+      ).snapshots();
+    return clabeStream;
+  }
+  
+  @override
+  Future<Either> deleteClabe(String clabe) async{
+    try{
+    var currentUser = FirebaseAuth.instance.currentUser;
+      DocumentReference<Map<String, dynamic>> userData = FirebaseFirestore.instance.collection("users").doc(currentUser!.uid);
+      List<dynamic> clabesList = await userData.get().then((value)=> value["CLABEs"].where((val) => val != clabe).toList() as List<dynamic>);
+      await userData.update({"CLABEs": clabesList});
+      return Right("Clabe deleted!");
+    } catch(error){
+      return Left(error);
+    }
+  }
+  
+  @override
+  Future<Either> createClabe(String clabe) async{
+    try{
+    var currentUser = FirebaseAuth.instance.currentUser;
+      DocumentReference<Map<String, dynamic>> userData = FirebaseFirestore.instance.collection("users").doc(currentUser!.uid);
+      await userData.update({"CLABEs": FieldValue.arrayUnion([clabe])});
+      return Right("Clabe Added!");
+    } catch(error){
+      return Left(error);
+    }
   }
 }

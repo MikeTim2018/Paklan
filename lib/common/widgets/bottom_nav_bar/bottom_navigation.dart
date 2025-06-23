@@ -27,7 +27,7 @@ class BottomNavBar extends StatelessWidget {
             label: "Historial"),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(currentIndex ==2 ? AppVectors.settingsBold : AppVectors.settings),
-            label: "Ajustes")
+            label: "Cuentas")
         ];
     return BottomNavigationBar(
       backgroundColor: AppColors.primary,
