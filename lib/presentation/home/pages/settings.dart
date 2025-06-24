@@ -13,6 +13,7 @@ import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/domain/transactions/usecases/create_clabe.dart';
 import 'package:paklan/domain/transactions/usecases/delete_clabe.dart';
 import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
+import 'package:paklan/presentation/home/widgets/credit_card_ui.dart';
 import 'package:paklan/service_locator.dart';
 
 class Settings extends StatelessWidget{
@@ -77,11 +78,10 @@ class Settings extends StatelessWidget{
               if(state.connectionState == ConnectionState.waiting){
                 return const Center(child: CircularProgressIndicator());
               }
-              if(state.data == null || !state.hasData){
+              Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
+              if (!userData.keys.contains("CLABEs") || userData['CLABEs'].length == 0){
                 return listNoClabes(context);
               }
-              Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
-        
               return Scaffold(
                   appBar: BasicAppbar(hideBack: true,),
                   body: SingleChildScrollView(
@@ -94,7 +94,7 @@ class Settings extends StatelessWidget{
                                       "Cuentas CLABE registradas",
                                       style: TextStyle(fontSize: 23),),
                                     SizedBox(height: 25,),
-                                    listClabes(context, userData["CLABEs"],),
+                                    listClabes(context, userData,),
                                     SizedBox(height: 10,),
                                     _clabe(context),
                                     SizedBox(height: 10,),
@@ -165,66 +165,73 @@ class Settings extends StatelessWidget{
 
 Widget listNoClabes(BuildContext context) {
     return SingleChildScrollView(
-        child: Column(
-          children: [
-                  SizedBox(height: 100,),
-                  Container(
-                    width: 350,
-                    height: 350,
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: const AssetImage(
-                          AppImages.dealSuccess
-                        ),
-                        )
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+                    SizedBox(height: 100,),
+                    Container(
+                      width: 350,
+                      height: 350,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: const AssetImage(
+                            AppImages.dealSuccess
+                          ),
+                          )
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 50,),
-                  Text(
-                    "¡No tienes cuentas CLABE registradas!",
-                    style: TextStyle(
-                      fontSize: 23,
-                      color: Colors.white70
+                    SizedBox(height: 50,),
+                    Text(
+                      "¡No tienes cuentas CLABE registradas!",
+                      style: TextStyle(
+                        fontSize: 23,
+                        color: Colors.white70
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10,),
-                  Text(
-                    "Registra una para iniciar un trato",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: AppColors.primary
+                    SizedBox(height: 10,),
+                    Text(
+                      "Registra una para iniciar un trato",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: AppColors.primary
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 30,),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: BasicReactiveButton(
-                      onPressed: (){
-                          if (_formKey.currentState!.validate()){
-                              context.read<ButtonStateCubit>().execute(
-                              usecase: CreateClabenUseCase(),
-                              params: _clabeCon.text);
-                            }
-                        },
-                        title: 'Añadir CLABE'
+                     SizedBox(height: 10,),
+                     _clabeField(context),
+                     SizedBox(height: 10,),
+                     Padding(
+                       padding: const EdgeInsets.all(13.0),
+                       child: BasicReactiveButton(
+                         title: "Añadir CLABE",
+                         onPressed: () {
+                       if (_formKey.currentState!.validate()){
+                          context.read<ButtonStateCubit>().execute(
+                          usecase: CreateClabenUseCase(),
+                          params: _clabeCon.text);
+                          _clabeCon.clear();
+                       }
+                       },
+                       ),
+                       )
+                    ]
                     ),
-                  ),
-                  ]
-                  ),
+        ),
     );
   }
 
-  Widget listClabes(BuildContext context, List<dynamic> clabes) {
+  Widget listClabes(BuildContext context, Map<String, dynamic> userData) {
     return SizedBox(
-      height: 220,
+      height: 230,
       child: RawScrollbar(
         thumbColor: AppColors.secondBackground,
         shape: const StadiumBorder(),
         timeToFade: Duration(seconds: 1),
         thickness: 8,
         child: ListView.separated(
+          scrollDirection: Axis.horizontal,
           padding: EdgeInsets.all(9),
                               shrinkWrap: true,
                               itemBuilder: (context, index) {
@@ -238,20 +245,21 @@ Widget listNoClabes(BuildContext context) {
                                     // ),
                                     // );
                                   },
-                                  child: clabeTile(context, clabes, index),
+                                  child: clabeCard(context, userData, index),
                                 );
                               },
-                               separatorBuilder: (context, index) => const SizedBox(height: 10,),
-                               itemCount: clabes.length
+                               separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                               itemCount: userData['CLABEs'].length
                             ),
       ),
     );
   }
 
-  Widget clabeTile(context, List<dynamic> clabes, int index) {
+  Widget clabeCard(context, Map<String, dynamic> userData, int index){
     return Builder(
       builder: (context){
       return Dismissible(
+        direction: DismissDirection.vertical,
         key: Key(index.toString()),
         confirmDismiss: (direction) async{
            return await showDialog(
@@ -280,7 +288,7 @@ Widget listNoClabes(BuildContext context) {
               onPressed: (){
                 context.read<ButtonStateCubit>().execute(
                   usecase: DeleteClabenUseCase(),
-                  params: clabes[index]
+                  params: userData['CLABEs'][index]
                 );
                 Navigator.of(innerContext).pop(false);
               },
@@ -295,53 +303,20 @@ Widget listNoClabes(BuildContext context) {
         },
         background: Container( 
           decoration: BoxDecoration(
+            border: Border.all(width: 5),
+            borderRadius: BorderRadius.circular(12),
+            shape: BoxShape.rectangle,
                   color: Colors.redAccent,
                 ),
                 child: SvgPicture.asset(
                   AppVectors.delete,
+                  fit: BoxFit.contain,
                   
                 ),),
-        child: Card(
-          child: ListTile(
-            shape: StadiumBorder(side: BorderSide(width: 2,color: Colors.white24)),
-            tileColor: AppColors.secondBackground,
-            leading: CircleAvatar(
-              backgroundColor: AppColors.secondBackground,
-              radius: 30,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white70,
-                  shape: BoxShape.circle,
-                ),
-                height: 40,
-                width: 40,
-                child: SvgPicture.asset(
-                    AppVectors.bank,
-                    fit: BoxFit.fill,
-                  ),
-              ),
-            ),
-            title: Text(
-              'Cuenta Clabe: ${clabes[index]}',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold
-              ),
-              ),
-              trailing: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white70,
-                  shape: BoxShape.circle,
-                ),
-                child: SvgPicture.asset(
-                  AppVectors.rightArrow,
-                  fit: BoxFit.none,
-                ),
-              ),
+        child: CreditCardUiCustom(
+          userData: userData, 
+          index: index
           ),
-        ),
       );
       }
       );

@@ -9,5 +9,10 @@ class AppImages{
   static const dealSuccess = '${basePath}order_placed$format';
   static const userLogo = '${basePath}user-circle-svgrepo-com$format';
   static const userLogoBlack = '${basePath}user-circle-svgrepo-com-black$format';
+  static const banamex = '${basePath}Citibanamex_logo.svg$format';
+  static const banorte = '${basePath}Logo_de_Banorte.svg$format';
+  static const bbva = '${basePath}BBVA_2019.svg$format';
+  static const hsbc = '${basePath}HSBC_logo_(2018).svg$format';
+  static const santander = '${basePath}Banco_Santander_Logotipo.svg$format';
 
 }

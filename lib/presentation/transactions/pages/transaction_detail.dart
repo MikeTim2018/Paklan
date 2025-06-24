@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
+import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_app_button.dart';
@@ -16,16 +17,18 @@ import 'package:paklan/data/transactions/models/status.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
 import 'package:paklan/domain/transactions/entity/status.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
+import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/presentation/home/widgets/credit_card_ui.dart';
+import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
 import 'package:paklan/service_locator.dart';
 
 class TransactionDetail extends StatelessWidget {
   final TransactionEntity transaction;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _clabe = TextEditingController();
+  final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
   TransactionDetail({super.key, required this.transaction});
   
   @override
@@ -46,6 +49,8 @@ class TransactionDetail extends StatelessWidget {
         providers: [
         BlocProvider(create: (context) => StepperSelectionCubit(),),
         BlocProvider(create: (context) => ButtonStateCubit()),
+        BlocProvider(create: (context) => ClabeSelectionCubit()),
+        
             ],
         child: BlocListener<ButtonStateCubit, ButtonState>(
           listener: (context, state) {
@@ -249,7 +254,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
           child: SizedBox(
             height: 50,
             child: const Text(
-              "¡Ingresa tu cuenta CLABE para que se te pueda transferir o rembolsar tu dinero!",
+              "¡Selecciona una cuenta CLABE para que se te pueda transferir o rembolsar tu dinero!",
               style: TextStyle(
                 fontSize: 17
               ),
@@ -257,29 +262,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
           ),
         ),
         SizedBox(height: 5,),
-        Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: TextFormField(
-            
-            validator: (value){
-              if (value!.isEmpty || value.length!=18 || RegExp(r'\D+').hasMatch(value)){
-                return 'Tu cuenta CLABE debe ser igual a 18 dígitos';
-              }
-              else{
-                return null;
-              }
-            },
-            enableSuggestions: false,
-            autocorrect: false,
-            controller: _clabe,
-            decoration: InputDecoration(
-              hintText: "Ingresa tu cuenta CLABE"
-            ),
-                   ),
-          ),
-        ),
+        _clabes(),
         SizedBox(height: 10,),
         Row(
           children: [
@@ -306,7 +289,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                     value: context.read<ButtonStateCubit>(),
                     child: AlertDialog(
         title: const Text('¿Quieres Cancelar el Trato?'),
-        content: Flexible(child: Text("Cancelar el trato notificará al vendedor/comprador")),
+        content: Text("Cancelar el trato notificará al vendedor/comprador"),
         actions: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -364,7 +347,8 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                 color: Colors.blueAccent,
                                 title: "Aceptar Trato",
                                 onPressed: (){
-                                  if (_formKey.currentState!.validate()){
+                                  String clabe = context.read<ClabeSelectionCubit>().selectedClabe;
+                                   if (clabe.isNotEmpty){
                                     context.read<ButtonStateCubit>().execute(
                                           usecase: UpdateDealUseCase(),
                                           params: StatusModel(
@@ -384,6 +368,20 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                           )
                                         );
                                   }
+                                  else if(clabe.isEmpty){
+                                     var snackbar = SnackBar(
+                                       content: Text(
+                                         "No has seleccionado una cuenta CLABE",
+                                         style: TextStyle(
+                                           color: Colors.white70
+                                         ),),
+                                       behavior: SnackBarBehavior.floating,
+                                       backgroundColor: Colors.black87,
+                                       showCloseIcon: true,
+                                       closeIconColor: Colors.white70,
+                                       );
+                                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                                   }
                                 },
                                 );
               }
@@ -398,6 +396,104 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
   }
   return Column();
 }
+
+Widget _clabes() {
+    return StreamBuilder(
+      stream: _clabeStream, 
+      builder: (context, AsyncSnapshot<DocumentSnapshot> state){
+              if(state.hasError){
+                return SizedBox(
+                  height: 100,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Ha ocurrido un error, por favor intenta más tarde",
+                      style: TextStyle(
+                        fontSize: 24
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if(state.connectionState == ConnectionState.waiting){
+                return const Center(child: CircularProgressIndicator());
+              }
+              Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
+              if (!userData.keys.contains("CLABEs") || userData['CLABEs'].length == 0){
+                return SizedBox(
+                  height: 120,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: const EdgeInsets.all(13.0),
+                      child: Text(
+                        "No Tienes Cuentas registradas, primero registra una en el apartado de Cuentas en la página principal.",
+                        style: TextStyle(
+                          fontSize: 17
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              
+        
+              return BlocBuilder<ClabeSelectionCubit, String>(
+                builder: (context, state) {
+                return  GestureDetector(
+                        onTap: (){
+                          AppBottomsheet.display(
+                            context,
+                            SizedBox(
+                             height: MediaQuery.of(context).size.height / 3.6,
+                             child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.all(16),
+                        itemBuilder: (innerContext, index){
+                          return GestureDetector(
+                            onTap: (){
+                Navigator.pop(innerContext);
+                context.read<ClabeSelectionCubit>().selectClabe(
+                  userData['CLABEs'][index],
+                );
+                            },
+                            child: CreditCardUiCustom(
+                                   userData: userData, 
+                                   index: index
+                               ),
+                          );
+                        }, 
+                        separatorBuilder: (context, index) => SizedBox(width: 20,), 
+                        itemCount: userData['CLABEs'].length
+                        )
+                            )
+                            );
+                        },
+                        child: Container(
+                          height: 60,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondBackground,
+                            borderRadius: BorderRadius.circular(30)
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                             Text(
+                               state
+                             ),
+                             const Icon(
+                               Icons.keyboard_arrow_down
+                             )
+                            ],
+                          ),
+                        ),
+                      );
+      }
+              );
+    }
+    );
+  }
 }
 
 
