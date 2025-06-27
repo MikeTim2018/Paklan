@@ -33,7 +33,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       )
     ),
     )
-    .orderBy("updatedDate", descending: true)
+    .orderBy("updatedDate")
     .snapshots();
   }
   
@@ -72,8 +72,9 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
          "sellerFirstName": newTransaction.sellerFirstName,
          "buyerFirstName": newTransaction.buyerFirstName,
          "sellerId": newTransaction.sellerId,
-         "buyerId": newTransaction.buyerId
-       }
+         "buyerId": newTransaction.buyerId,
+       },
+       "timeLimit": DateTime.now().toUtc().add(Duration(hours: 24)),
       }
     );
     DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").add(
@@ -142,7 +143,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         }
       );
       await statusRef.update({"statusId": statusRef.id});
-      return Right("Deal Cancelled!");
+      return Right("Deal Updated!");
     }catch(e){
       return Left(e);
     }

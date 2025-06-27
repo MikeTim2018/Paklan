@@ -142,7 +142,7 @@ class TransactionDetail extends StatelessWidget {
                                   ),
                                   SizedBox(height: 10,),
                                   SizedBox(
-                                    height: 40,
+                                    height: 70,
                                     child: Text(
                                           statusEntity.details!,
                                           style: TextStyle(
@@ -353,7 +353,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                           usecase: UpdateDealUseCase(),
                                           params: StatusModel(
                                               status: "En proceso", 
-                                              details: "Trato Aceptado por $currentUser", 
+                                              details: "Trato Aceptado por $currentUser . Recuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
                                               buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
                                               sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 
                                               transactionId: state.transactionId, 
@@ -365,6 +365,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                               cancelled: state.cancelled, 
                                               statusId: state.statusId,
                                               cancelledBy: currentUserId,
+                                              timeLimit: DateTime.now().toUtc().add(Duration(days: 8)),
                                           )
                                         );
                                   }
@@ -457,10 +458,13 @@ Widget _clabes() {
                   userData['CLABEs'][index],
                 );
                             },
-                            child: CreditCardUiCustom(
-                                   userData: userData, 
-                                   index: index
-                               ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: CreditCardUiCustom(
+                                     userData: userData, 
+                                     index: index
+                                 ),
+                            ),
                           );
                         }, 
                         separatorBuilder: (context, index) => SizedBox(width: 20,), 

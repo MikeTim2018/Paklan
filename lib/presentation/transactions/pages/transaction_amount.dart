@@ -265,10 +265,13 @@ class TransactionAmount extends StatelessWidget {
                   userData['CLABEs'][index],
                 );
                             },
-                            child: CreditCardUiCustom(
-                                   userData: userData, 
-                                   index: index
-                               ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: CreditCardUiCustom(
+                                     userData: userData, 
+                                     index: index
+                                 ),
+                            ),
                           );
                         }, 
                         separatorBuilder: (context, index) => SizedBox(width: 20,), 
@@ -351,7 +354,7 @@ class TransactionAmount extends StatelessWidget {
                   buyerId: userType == 1 ? userEntity.userId : userId,
                   buyerConfirmation: userType == 1 ? false : true,
                   sellerConfirmation: userType == 1 ? true : false,
-                  details: "Falta Confirmación de Trato",
+                  details: "Falta Confirmación de Trato. Recuerda que se tienen 24 horas para confirmar el trato, de lo contrario se cancelará por sistema.",
                   status: "En proceso",
                   clabe: clabe,
                 );

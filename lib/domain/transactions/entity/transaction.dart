@@ -6,6 +6,7 @@ class TransactionEntity {
   String ? buyerFirstName;
   String ? transactionId;
   String ? statusId;
+  DateTime ? timeLimit;
 
   TransactionEntity({
     required this.amount,
@@ -14,5 +15,6 @@ class TransactionEntity {
     required this.buyerFirstName,
     required this.transactionId,
     required this.statusId,
+    this.timeLimit,
   });
 }

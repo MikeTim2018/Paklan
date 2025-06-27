@@ -16,6 +16,7 @@ class StatusModel {
   bool ? cancelled;
   String ? statusId;
   String ? cancelledBy;
+  DateTime ? timeLimit;
 
   StatusModel({
   required this.status,
@@ -31,6 +32,7 @@ class StatusModel {
   required this.cancelled,
   this.statusId,
   this.cancelledBy,
+  this.timeLimit
   });
 
 Map<String, dynamic> toMap() {
@@ -48,6 +50,7 @@ Map<String, dynamic> toMap() {
       'cancelled': cancelled,
       'cancelledBy': cancelledBy,
       'statusId': statusId,
+      'timeLimit': timeLimit,
     };
   }
 

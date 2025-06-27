@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +13,12 @@ import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 import 'package:paklan/service_locator.dart';
+import 'package:slide_countdown/slide_countdown.dart';
 
 class TransactionDisplay extends StatelessWidget {
   TransactionDisplay({super.key});
   final Stream<QuerySnapshot> _transactionsStream =  sl<GetTransactionsUseCase>().call();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,7 @@ class TransactionDisplay extends StatelessWidget {
               child: Container(
                 alignment: Alignment.center,
                 child: Text(
-                  "Ha ocurrido un error, por favor intenta más tarde",
+                  "Ha ocurrido un error, por favor intenta más tarde.",
                   style: TextStyle(
                     fontSize: 24
                   ),
@@ -60,7 +63,8 @@ class TransactionDisplay extends StatelessWidget {
                   SizedBox(height: 20,),
                   listTransactions(context, state.data!.docs.map(
                     (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
-                    ).toList()
+                    ).toList(),
+                    _scrollController
                     ),
                   const SizedBox(height: 25),
                   Align(
@@ -132,15 +136,18 @@ Widget listNoTransaction(BuildContext context) {
   }
 
 
-  Widget listTransactions(BuildContext context, state) {
+  Widget listTransactions(BuildContext context, state, ScrollController scrollController) {
     return SizedBox(
-      height: 400,
+        height: 400,
       child: RawScrollbar(
-        thumbColor: AppColors.secondBackground,
+        thumbVisibility: true,
+        controller: scrollController,
+        thumbColor: AppColors.primary,
         shape: const StadiumBorder(),
         timeToFade: Duration(seconds: 1),
         thickness: 8,
         child: ListView.separated(
+          controller: scrollController,
           padding: EdgeInsets.all(9),
                               shrinkWrap: true,
                               itemBuilder: (context, index) {
@@ -165,52 +172,73 @@ Widget listNoTransaction(BuildContext context) {
   }
 
   Widget transactionTile(state, int index) {
-    return Card(
-      child: ListTile(
-        shape: StadiumBorder(side: BorderSide(width: 2,color: Colors.white24)),
-        tileColor: AppColors.secondBackground,
-        leading: CircleAvatar(
-          backgroundColor: AppColors.secondBackground,
-          radius: 30,
-          child: Container(
+    return Column(
+      children: [
+        Align(
+          alignment: AlignmentGeometry.directional(0.7, 10),
+          child: SlideCountdown(
+            showZeroValue: false,
+            icon: SizedBox(
+              height: 20, 
+              width: 20,
+              child: SvgPicture.asset(AppVectors.clock, fit: BoxFit.fill,)),
             decoration: BoxDecoration(
-              color: Colors.white70,
-              shape: BoxShape.circle,
+              color: Colors.redAccent, 
+              borderRadius: BorderRadius.circular(15)
+              ),
+            duration: Duration(seconds: state[index].timeLimit!.difference(DateTime.now().toUtc()).inSeconds),
+          )
+          ),
+        Card(
+          child: ListTile(
+            shape: StadiumBorder(side: BorderSide(
+              width: 2,
+              color: state[index].timeLimit!.difference(DateTime.now().toUtc()).inHours>4  ? Colors.lightGreen: Colors.amberAccent)),
+            tileColor: AppColors.secondBackground,
+            leading: CircleAvatar(
+              backgroundColor: AppColors.secondBackground,
+              radius: 30,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white70,
+                  shape: BoxShape.circle,
+                ),
+                height: 40,
+                width: 40,
+                child: SvgPicture.asset(
+                    AppVectors.cash,
+                    fit: BoxFit.fill,
+                  ),
+              ),
             ),
-            height: 40,
-            width: 40,
-            child: SvgPicture.asset(
-                AppVectors.cash,
-                fit: BoxFit.fill,
+            title: Text(
+              'Monto: \$${state[index].amount}',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+              ),
+              ),
+              subtitle: Text(
+                'Vendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
+                style: TextStyle(
+                  color: Colors.grey
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white70,
+                  shape: BoxShape.circle,
+                ),
+                child: SvgPicture.asset(
+                  AppVectors.info,
+                  fit: BoxFit.none,
+                ),
               ),
           ),
         ),
-        title: Text(
-          'Monto: \$${state[index].amount}',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold
-          ),
-          ),
-          subtitle: Text(
-            'Vendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
-            style: TextStyle(
-              color: Colors.grey
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white70,
-              shape: BoxShape.circle,
-            ),
-            child: SvgPicture.asset(
-              AppVectors.info,
-              fit: BoxFit.none,
-            ),
-          ),
-      ),
+      ],
     );
   }
