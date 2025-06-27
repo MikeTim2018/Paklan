@@ -6,7 +6,7 @@ build/
 /lib/core/configs/algolia_configs.dart
 .flutter-plugins-dependencies
 .DS_Store
-.flutter.plugins-dependencies
+.flutter-plugins-dependencies
 functions/
 .firebaserc
 .idea/
