@@ -1,5 +1,6 @@
 
 class NewTransactionModel {
+  String ? name;
   String ? amount;
   String ? status;
   String ? sellerFirstName;
@@ -12,6 +13,7 @@ class NewTransactionModel {
   String ? clabe;
 
   NewTransactionModel({
+    required this.name,
     required this.amount,
     required this.status,
     required this.sellerFirstName,

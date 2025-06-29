@@ -12,6 +12,7 @@ class StatusEntity {
   bool ? cancelled;
   String ? cancelledBy;
   String ? statusId;
+  String ? cancelMessage;
 
   StatusEntity({
   required this.status,
@@ -27,5 +28,6 @@ class StatusEntity {
   required this.reimbursementDone,
   this.cancelledBy,
   required this.statusId,
+  this.cancelMessage
   });
 }

@@ -7,13 +7,17 @@ import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
+import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_completed_transactions.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/service_locator.dart';
+import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
+
 
 class TransactionHistory extends StatelessWidget {
   TransactionHistory({super.key});
   final Stream<QuerySnapshot> _transactionsStream =  sl<GetCompletedTransactionsUseCase>().call();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +64,8 @@ class TransactionHistory extends StatelessWidget {
                     SizedBox(height: 20,),
                     listTransactions(context, state.data!.docs.map(
                       (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
-                      ).toList()
+                      ).toList(),
+                      _scrollController
                       ),
                 
                   ],
@@ -103,15 +108,18 @@ Widget listNoTransaction(BuildContext context) {
   }
 
 
-  Widget listTransactions(BuildContext context, state) {
+  Widget listTransactions(BuildContext context, List<TransactionEntity> state, ScrollController scrollController) {
     return SizedBox(
       height: 450,
       child: RawScrollbar(
-        thumbColor: AppColors.secondBackground,
+        controller: scrollController,
+        thumbVisibility: true,
+        thumbColor: Colors.white24,
         shape: const StadiumBorder(),
         timeToFade: Duration(seconds: 1),
         thickness: 8,
         child: ListView.separated(
+          controller: scrollController,
           padding: EdgeInsets.all(9),
                               shrinkWrap: true,
                               itemBuilder: (context, index) {
@@ -135,10 +143,15 @@ Widget listNoTransaction(BuildContext context) {
     );
   }
 
-  Widget transactionTile(state, int index) {
+  Widget transactionTile(List<TransactionEntity> state, int index) {
     return Card(
       child: ListTile(
-        shape: StadiumBorder(side: BorderSide(width: 2,color: Colors.red)),
+        shape: StadiumBorder(
+          side: BorderSide(
+            width: 2,
+            color: state[index].status=='Cancelado' ? Colors.red : Colors.blue
+            )
+            ),
         tileColor: AppColors.secondBackground,
         leading: CircleAvatar(
           backgroundColor: AppColors.secondBackground,
@@ -157,19 +170,19 @@ Widget listNoTransaction(BuildContext context) {
           ),
         ),
         title: Text(
-          'Monto: \$${state[index].amount}',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold
-          ),
-          ),
-          subtitle: Text(
-            'Vendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
-            style: TextStyle(
-              color: Colors.grey
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
+              '${toBeginningOfSentenceCase(state[index].name)}',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+              ),
+              ),
+              subtitle: Text(
+                'Monto: \$${state[index].amount}\nVendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
+                style: TextStyle(
+                  color: Colors.grey
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
           trailing: Container(
             height: 40,
             width: 40,

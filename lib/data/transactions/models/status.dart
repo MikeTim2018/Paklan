@@ -17,6 +17,7 @@ class StatusModel {
   String ? statusId;
   String ? cancelledBy;
   DateTime ? timeLimit;
+  String ? cancelMessage;
 
   StatusModel({
   required this.status,
@@ -30,6 +31,7 @@ class StatusModel {
   required this.paymentTransferred,
   required this.reimbursementDone,
   required this.cancelled,
+  this.cancelMessage,
   this.statusId,
   this.cancelledBy,
   this.timeLimit
@@ -51,6 +53,7 @@ Map<String, dynamic> toMap() {
       'cancelledBy': cancelledBy,
       'statusId': statusId,
       'timeLimit': timeLimit,
+      'cancelMessage': cancelMessage,
     };
   }
 
@@ -69,6 +72,7 @@ Map<String, dynamic> toMap() {
       reimbursementDone: map['reimbursementDone'] as bool, 
       cancelled: map['cancelled'] as bool,
       statusId: map['statusId'] ?? '',
+      cancelMessage: map['cancelMessage'] ?? '',
     );
   }
   
@@ -94,6 +98,7 @@ extension UserXModel on StatusModel {
       paymentTransferred: paymentTransferred,
       reimbursementDone: reimbursementDone,
       statusId: statusId,
+      cancelMessage: cancelMessage,
     );
   }
 }

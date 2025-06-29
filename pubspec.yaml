@@ -48,6 +48,7 @@ dependencies:
   easy_stepper: ^0.8.5+1
   u_credit_card: ^1.4.0
   slide_countdown: ^2.0.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

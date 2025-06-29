@@ -1,5 +1,6 @@
 
 class TransactionEntity {
+  String ? name;
   String ? amount;
   String ? status;
   String ? sellerFirstName;
@@ -9,6 +10,7 @@ class TransactionEntity {
   DateTime ? timeLimit;
 
   TransactionEntity({
+    required this.name,
     required this.amount,
     required this.status,
     required this.sellerFirstName,

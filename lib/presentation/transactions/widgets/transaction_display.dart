@@ -9,13 +9,16 @@ import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
+import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 import 'package:paklan/service_locator.dart';
 import 'package:slide_countdown/slide_countdown.dart';
+import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 
-class TransactionDisplay extends StatelessWidget {
+
+class TransactionDisplay extends StatelessWidget{
   TransactionDisplay({super.key});
   final Stream<QuerySnapshot> _transactionsStream =  sl<GetTransactionsUseCase>().call();
   final ScrollController _scrollController = ScrollController();
@@ -136,13 +139,13 @@ Widget listNoTransaction(BuildContext context) {
   }
 
 
-  Widget listTransactions(BuildContext context, state, ScrollController scrollController) {
+  Widget listTransactions(BuildContext context, List<TransactionEntity> state, ScrollController scrollController) {
     return SizedBox(
         height: 400,
       child: RawScrollbar(
         thumbVisibility: true,
         controller: scrollController,
-        thumbColor: AppColors.primary,
+        thumbColor: Colors.white24,
         shape: const StadiumBorder(),
         timeToFade: Duration(seconds: 1),
         thickness: 8,
@@ -171,7 +174,7 @@ Widget listNoTransaction(BuildContext context) {
     );
   }
 
-  Widget transactionTile(state, int index) {
+  Widget transactionTile(List<TransactionEntity> state, int index) {
     return Column(
       children: [
         Align(
@@ -183,7 +186,11 @@ Widget listNoTransaction(BuildContext context) {
               width: 20,
               child: SvgPicture.asset(AppVectors.clock, fit: BoxFit.fill,)),
             decoration: BoxDecoration(
-              color: Colors.redAccent, 
+              color: switch (state[index].timeLimit!.difference(DateTime.now().toUtc()).inHours) {
+                             <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
+                             <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
+                             _ => const Color.fromARGB(216, 71, 145, 50),
+                             },
               borderRadius: BorderRadius.circular(15)
               ),
             duration: Duration(seconds: state[index].timeLimit!.difference(DateTime.now().toUtc()).inSeconds),
@@ -193,7 +200,13 @@ Widget listNoTransaction(BuildContext context) {
           child: ListTile(
             shape: StadiumBorder(side: BorderSide(
               width: 2,
-              color: state[index].timeLimit!.difference(DateTime.now().toUtc()).inHours>4  ? Colors.lightGreen: Colors.amberAccent)),
+              color: switch (state[index].timeLimit!.difference(DateTime.now().toUtc()).inHours) {
+                             <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
+                             <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
+                             _ => const Color.fromARGB(216, 71, 145, 50),
+                             },
+                             )
+                             ),
             tileColor: AppColors.secondBackground,
             leading: CircleAvatar(
               backgroundColor: AppColors.secondBackground,
@@ -212,14 +225,14 @@ Widget listNoTransaction(BuildContext context) {
               ),
             ),
             title: Text(
-              'Monto: \$${state[index].amount}',
+              '${toBeginningOfSentenceCase(state[index].name)}',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold
               ),
               ),
               subtitle: Text(
-                'Vendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
+                'Monto: \$${state[index].amount}\nVendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
                 style: TextStyle(
                   color: Colors.grey
                 ),

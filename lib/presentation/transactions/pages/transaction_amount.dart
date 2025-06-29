@@ -26,6 +26,7 @@ class TransactionAmount extends StatelessWidget {
   final TextEditingController _amountCon = TextEditingController();
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameCon = TextEditingController();
   final UserEntityTransaction userEntity;
   String userId = '';
   String userFirstName = '';
@@ -105,6 +106,10 @@ class TransactionAmount extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(height: 25,),
+                  _name(context),
+                  SizedBox(height: 10,),
+                  _nameField(context),
+                  SizedBox(height: 10,),
                   _selectType(context),
                   SizedBox(height: 10,),
                   _users(context),
@@ -116,7 +121,7 @@ class TransactionAmount extends StatelessWidget {
                   _clabe(context),
                   SizedBox(height: 10,),
                   _clabes(),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 25,),
                   _sendDeal(context),
                       
                 ],
@@ -133,6 +138,19 @@ class TransactionAmount extends StatelessWidget {
       padding: const EdgeInsets.all(13.0),
       child: Text(
         'Define el monto del trato',
+        style: TextStyle(
+          fontSize: 25,
+          fontWeight: FontWeight.bold
+        ),
+      ),
+    );
+  }
+
+  Widget _name(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(13.0),
+      child: Text(
+        'Ingresa el Nombre del Trato',
         style: TextStyle(
           fontSize: 25,
           fontWeight: FontWeight.bold
@@ -173,6 +191,30 @@ class TransactionAmount extends StatelessWidget {
       ),
     );
   }
+
+  Widget _nameField(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(13.0),
+      child: TextFormField(
+        validator: (value){
+          if (value!.isEmpty || value.length<3){
+            return 'El campo debe tener al menos 3 caracteres';
+          }
+          if(value.length>24){
+            return 'El campo debe tener menos de 25 caracteres';
+          }
+          else{
+            return null;
+          }
+        },
+        controller: _nameCon,
+        decoration: InputDecoration(
+          hintText: "Nombre del Trato"
+        ),
+      ),
+    );
+  }
+
 
   Widget _clabe(BuildContext context){
     return Padding(
@@ -347,6 +389,7 @@ class TransactionAmount extends StatelessWidget {
                 if (_formKey.currentState!.validate() && clabe.isNotEmpty){
                 int userType = context.read<UserTypeSelectionCubit>().selectedIndex;
                 NewTransactionModel newTransaction = NewTransactionModel(
+                  name: _nameCon.text.trim(),
                   amount: '${_amountCon.text}.00',
                   sellerFirstName: userType == 1 ? userFirstName  : userEntity.firstName,
                   sellerId: userType == 1 ? userId  : userEntity.userId,

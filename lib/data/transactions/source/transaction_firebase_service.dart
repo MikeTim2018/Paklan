@@ -66,7 +66,8 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     var currentUser = FirebaseAuth.instance.currentUser;
     try{
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
-      {"amount": newTransaction.amount,
+      {"name": newTransaction.name,
+        "amount": newTransaction.amount,
        "status": newTransaction.status,
        "members":{
          "sellerFirstName": newTransaction.sellerFirstName,
@@ -140,9 +141,17 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "paymentTransferred": transactionState.paymentTransferred,
           "cancelledBy": currentUser!.uid,
           "creationDate": DateTime.timestamp(),
+          "cancelMessage": transactionState.cancelMessage ?? '',
         }
       );
       await statusRef.update({"statusId": statusRef.id});
+      if (transactionState.timeLimit != null){
+          FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId).update(
+            {
+              "timeLimit": transactionState.timeLimit
+            }
+          );
+      }
       return Right("Deal Updated!");
     }catch(e){
       return Left(e);

@@ -20,7 +20,6 @@ import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
-import 'package:paklan/presentation/auth/pages/signin.dart';
 import 'package:paklan/presentation/home/widgets/credit_card_ui.dart';
 import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
@@ -29,12 +28,15 @@ import 'package:paklan/service_locator.dart';
 class TransactionDetail extends StatelessWidget {
   final TransactionEntity transaction;
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _cancelCon = TextEditingController();
   TransactionDetail({super.key, required this.transaction});
   
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> transactionStream = sl<GetTransactionUseCase>().call(
       params: TransactionModel(
+            name: transaction.name,
             amount: transaction.amount, 
             status: transaction.status, 
             sellerFirstName: transaction.sellerFirstName, 
@@ -141,14 +143,16 @@ class TransactionDetail extends StatelessWidget {
                                   )
                                   ),
                                   SizedBox(height: 10,),
-                                  SizedBox(
-                                    height: 70,
-                                    child: Text(
-                                          statusEntity.details!,
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            )
-                                            ),
+                                  Container(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: 
+                                      Text(
+                                            statusEntity.details!,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                              )
+                                              ),
+                                    
                                   ),
                               const Divider(),
                               SizedBox(height: 10,),
@@ -215,9 +219,129 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
           fontSize: 20
         ),),
         SizedBox(height: 5,),
-        BasicAppButton(
-          title: "Pagar",
-          onPressed: () => AppNavigator.push(context, SigninPage()),)
+        Row(
+          children: [
+            SizedBox(width: 35,),
+            Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: Size(50, 50),
+                      backgroundColor: Colors.redAccent,
+                       ),
+                  child: Text(
+                     "Cancelar Trato",
+                     style: const TextStyle(
+                       color: Colors.white,
+                       fontWeight: FontWeight.w400
+                     ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context, 
+                      builder: (innerContext) => 
+                      BlocProvider.value(
+                    value: context.read<ButtonStateCubit>(),
+                    child: AlertDialog(
+        title: const Text('¿Quieres Cancelar el Trato?'),
+        content: Text("Cancelar el trato notificará al vendedor/comprador.\nPorfavor escribe la razón de la cancelación."),
+        actions: [    
+          Form(
+            key: _formKey,
+            child: TextFormField(
+            controller: _cancelCon,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            validator: (value){
+            if (value!.isEmpty){
+              return 'El campo no debe estar vacío';
+            }
+            if (value.length>150){
+              return 'El Campo no debe exceder los 150 caracteres';
+            }
+            if (value.length<5){
+              return 'El Campo debe ser mayor a 5 caracteres';
+            }
+            else{
+              return null;
+            }
+                    },
+                
+              ),
+          ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                             minimumSize: Size(60, 50),
+                            ),
+                                            child: Text(
+                                               "Regresar",
+                                               style: const TextStyle(
+                           color: Colors.white,
+                           fontWeight: FontWeight.w400
+                                               ),
+                                            ),
+                                            onPressed: () => Navigator.pop(innerContext)
+                          ),
+                          VerticalDivider(width: 20,),
+                      CustomReactiveButton(
+                                        color: Colors.redAccent,
+                                        title: "Cancelar Trato",
+                                        onPressed: (){
+                                          if (_formKey.currentState!.validate()){
+                                          context.read<ButtonStateCubit>().execute(
+                                          usecase: UpdateDealUseCase(),
+                                          params: StatusModel(
+                                              status: "Cancelado", 
+                                              details: "Trato Cancelado por $currentUser", 
+                                              buyerConfirmation: state.buyerConfirmation, 
+                                              sellerConfirmation: state.sellerConfirmation, 
+                                              transactionId: state.transactionId, 
+                                              buyerId: state.buyerId, 
+                                              sellerId: state.sellerId, 
+                                              paymentDone: state.paymentDone, 
+                                              paymentTransferred: state.paymentTransferred, 
+                                              reimbursementDone: state.reimbursementDone, 
+                                              cancelled: true, 
+                                              statusId: state.statusId,
+                                              cancelledBy: currentUserId,
+                                              cancelMessage: _cancelCon.text
+                                          )
+                                        );
+                                        Navigator.pop(innerContext);
+                                        }
+                                        }
+                                        ),
+                        ],
+                      ),
+                      
+                                        ],
+      )
+                      
+                    ) );
+                  },
+                );
+              
+              
+              }
+            ),
+            SizedBox(width: 10,),
+            BasicAppButton(
+              width: 160,
+              title: "Pagar",
+              onPressed: () {
+                // Navigator.of(context).push(
+                //                     CupertinoSheetRoute<void>(
+                //                      builder: (BuildContext context) => TransactionDetail(
+                //                       transaction: state
+                //                       ),
+                //                     ),
+                //                     );
+              }
+              ),
+          ],
+        )
       ],
     );
   }
@@ -353,7 +477,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                           usecase: UpdateDealUseCase(),
                                           params: StatusModel(
                                               status: "En proceso", 
-                                              details: "Trato Aceptado por $currentUser . Recuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
+                                              details: "Trato Aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
                                               buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
                                               sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 
                                               transactionId: state.transactionId, 

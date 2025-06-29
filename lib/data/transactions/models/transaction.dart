@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 
 class TransactionModel {
+  String ? name;
   String ? amount;
   String ? status;
   String ? sellerFirstName;
@@ -12,6 +13,7 @@ class TransactionModel {
   DateTime ? timeLimit;
 
   TransactionModel({
+    required this.name,
     required this.amount,
     required this.status,
     required this.sellerFirstName,
@@ -24,6 +26,7 @@ class TransactionModel {
 
 Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'name': name,
       'amount': amount,
       'status': status,
       'sellerFirstName': sellerFirstName,
@@ -36,6 +39,7 @@ Map<String, dynamic> toMap() {
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
+      name: map['name'] as String,
       amount: map['amount'] as String,
       status: map['status'] as String,
       buyerFirstName: map['members']['buyerFirstName'] as String,
@@ -55,6 +59,7 @@ Map<String, dynamic> toMap() {
 extension UserXModel on TransactionModel {
   TransactionEntity toEntity() {
     return TransactionEntity(
+      name: name,
       amount: amount,
       status: status,
       buyerFirstName: buyerFirstName, 
