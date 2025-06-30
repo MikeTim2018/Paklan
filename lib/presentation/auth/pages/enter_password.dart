@@ -10,6 +10,7 @@ import 'package:paklan/data/auth/models/user_signin.dart';
 import 'package:paklan/domain/auth/usecases/signin.dart';
 import 'package:paklan/presentation/auth/pages/forgot_password.dart';
 import 'package:paklan/presentation/home/pages/home.dart';
+import 'package:show_hide_password/show_hide_password.dart';
 
 
 class EnterPasswordPage extends StatelessWidget {
@@ -87,22 +88,26 @@ class EnterPasswordPage extends StatelessWidget {
   Widget _passwordField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        validator: (value){
-          if (value!.isEmpty || value.length<7){
-            return 'Ingresa una contraseña mayor a 6 caracteres';
-          }
-          else{
-            return null;
-          }
-        },
-        obscureText: true,
-        enableSuggestions: false,
-        autocorrect: false,
-        controller: _passwordCon,
-        decoration: InputDecoration(
-          hintText: "Ingresa tu Contraseña"
-        ),
+      child: ShowHidePassword(
+        passwordField: (bool hidePassword){
+        return TextFormField(
+          validator: (value){
+            if (value!.isEmpty || value.length<7){
+              return 'Ingresa una contraseña mayor a 6 caracteres';
+            }
+            else{
+              return null;
+            }
+          },
+          obscureText: hidePassword,
+          enableSuggestions: false,
+          autocorrect: false,
+          controller: _passwordCon,
+          decoration: InputDecoration(
+            hintText: "Ingresa tu Contraseña"
+          ),
+        );
+        }
       ),
     );
   }

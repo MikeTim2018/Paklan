@@ -49,6 +49,8 @@ dependencies:
   u_credit_card: ^1.4.0
   slide_countdown: ^2.0.2
   intl: ^0.20.2
+  cloud_functions: ^5.5.2
+  show_hide_password: ^0.0.2
 
 dev_dependencies:
   flutter_test:

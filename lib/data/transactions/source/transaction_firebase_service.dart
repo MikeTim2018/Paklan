@@ -1,11 +1,13 @@
 import 'package:algoliasearch/algoliasearch_lite.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
 import 'package:paklan/data/transactions/models/status.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
+
 
 abstract class TransactionFirebaseService{
   Stream<QuerySnapshot<Map<String, dynamic>>> getTransactions();
@@ -125,7 +127,6 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   @override
   Future<Either> updateDeal(StatusModel transactionState) async{
     try{
-      var currentUser = FirebaseAuth.instance.currentUser;
       DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionState.transactionId}/status").add(
         {
           "transactionId": transactionState.transactionId,
@@ -139,9 +140,9 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "reimbursementDone": transactionState.reimbursementDone,
           "paymentDone": transactionState.paymentDone,
           "paymentTransferred": transactionState.paymentTransferred,
-          "cancelledBy": currentUser!.uid,
+          "cancelledBy": transactionState.cancelledBy,
           "creationDate": DateTime.timestamp(),
-          "cancelMessage": transactionState.cancelMessage ?? '',
+          "cancelMessage": transactionState.cancelMessage,
         }
       );
       await statusRef.update({"statusId": statusRef.id});

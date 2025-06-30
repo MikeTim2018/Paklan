@@ -6,6 +6,7 @@ import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/presentation/auth/pages/gender_and_age_selection.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:show_hide_password/show_hide_password.dart';
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
@@ -106,22 +107,26 @@ class SignupPage extends StatelessWidget {
   Widget _password(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        validator: (value){
-          if (value!.isEmpty || value.length<7){
-            return 'Ingresa una contraseña mayor a 6 caracteres';
-          }
-          else{
-            return null;
-          }
-        },
-        obscureText: true,
-        enableSuggestions: false,
-        autocorrect: false,
-        controller: _passwordCon,
-        decoration: InputDecoration(
-          hintText: "Contraseña"
-        ),
+      child: ShowHidePassword(
+        passwordField: (bool hidePassword){
+          return TextFormField(
+          validator: (value){
+            if (value!.isEmpty || value.length<7){
+              return 'Ingresa una contraseña mayor a 6 caracteres';
+            }
+            else{
+              return null;
+            }
+          },
+          obscureText: true,
+          enableSuggestions: false,
+          autocorrect: false,
+          controller: _passwordCon,
+          decoration: InputDecoration(
+            hintText: "Contraseña"
+          ),
+        );
+        }
       ),
     );
   }

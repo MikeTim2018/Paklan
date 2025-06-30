@@ -87,6 +87,7 @@ class TransactionDetail extends StatelessWidget {
         },
           child: Scaffold(
             appBar: BasicAppbar(
+              
               hideBack: true,
               title: 
                   Text("Detalle del Trato"),
@@ -488,7 +489,6 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                               reimbursementDone: state.reimbursementDone, 
                                               cancelled: state.cancelled, 
                                               statusId: state.statusId,
-                                              cancelledBy: currentUserId,
                                               timeLimit: DateTime.now().toUtc().add(Duration(days: 8)),
                                           )
                                         );
