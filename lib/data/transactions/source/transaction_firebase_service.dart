@@ -19,6 +19,7 @@ abstract class TransactionFirebaseService{
   Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes();
   Future<Either> deleteClabe(String clabe);
   Future<Either> createClabe(String clabe);
+  Future<Either> getServerDateTime();
 }
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
@@ -66,6 +67,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
     var currentUser = FirebaseAuth.instance.currentUser;
+    HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
     try{
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
       {"name": newTransaction.name,
@@ -77,7 +79,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
          "sellerId": newTransaction.sellerId,
          "buyerId": newTransaction.buyerId,
        },
-       "timeLimit": DateTime.now().toUtc().add(Duration(hours: 24)),
+       "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(hours: 24)),
       }
     );
     DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").add(
@@ -93,7 +95,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "reimbursementDone": false,
         "paymentDone": false,
         "paymentTransferred": false,
-        "creationDate": DateTime.timestamp()
+        "creationDate": DateTime.parse(serverTime.data['server_datetime'])
       }
     );
     await statusRef.update({"statusId": statusRef.id});
@@ -127,6 +129,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   @override
   Future<Either> updateDeal(StatusModel transactionState) async{
     try{
+      HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
       DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionState.transactionId}/status").add(
         {
           "transactionId": transactionState.transactionId,
@@ -141,15 +144,15 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "paymentDone": transactionState.paymentDone,
           "paymentTransferred": transactionState.paymentTransferred,
           "cancelledBy": transactionState.cancelledBy,
-          "creationDate": DateTime.timestamp(),
+          "creationDate": DateTime.parse(serverTime.data['server_datetime']),
           "cancelMessage": transactionState.cancelMessage,
         }
       );
       await statusRef.update({"statusId": statusRef.id});
-      if (transactionState.timeLimit != null){
+      if (transactionState.status == 'En proceso' && transactionState.details!.contains("Trato aceptado")){
           FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId).update(
             {
-              "timeLimit": transactionState.timeLimit
+              "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(days: 8))
             }
           );
       }
@@ -208,6 +211,16 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       DocumentReference<Map<String, dynamic>> userData = FirebaseFirestore.instance.collection("users").doc(currentUser!.uid);
       await userData.update({"CLABEs": FieldValue.arrayUnion([clabe])});
       return Right("Clabe Added!");
+    } catch(error){
+      return Left(error);
+    }
+  }
+  
+  @override
+  Future<Either> getServerDateTime() async{
+    try{
+      HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
+      return Right(serverTime);
     } catch(error){
       return Left(error);
     }

@@ -95,6 +95,21 @@ class TransactionsRepositoryImpl extends TransactionRepository{
       }
       );
   }
+  
+  @override
+  Future<Either> getServerDateTime() async{
+    Either response = await sl<TransactionFirebaseService>().getServerDateTime();
+    return response.fold(
+      (error){
+        return Left(error);
+      }, 
+      (data){
+        return Right(
+          data.data['server_datetime'] as String
+          );
+      }
+      );
+  }
 
 
 }

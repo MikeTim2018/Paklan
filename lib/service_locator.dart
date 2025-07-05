@@ -15,6 +15,7 @@ import 'package:paklan/domain/transactions/usecases/create_clabe.dart';
 import 'package:paklan/domain/transactions/usecases/delete_clabe.dart';
 import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/domain/transactions/usecases/get_completed_transactions.dart';
+import 'package:paklan/domain/transactions/usecases/get_server_datetime.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
@@ -99,6 +100,10 @@ sl.registerSingleton<DeleteClabenUseCase>(
 
 sl.registerSingleton<CreateClabenUseCase>(
   CreateClabenUseCase()
+);
+
+sl.registerSingleton<GetServerDatetimeUseCase>(
+  GetServerDatetimeUseCase()
 );
 
 

@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
-import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
 import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
@@ -86,9 +85,7 @@ class Settings extends StatelessWidget{
                   appBar: BasicAppbar(hideBack: true,),
                   body: SingleChildScrollView(
                         child: Center(
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
+                          child: Column(
                                   children: [
                                     Text(
                                       "Cuentas CLABE registradas",
@@ -97,25 +94,83 @@ class Settings extends StatelessWidget{
                                     listClabes(context, userData,),
                                     SizedBox(height: 10,),
                                     _clabe(context),
-                                    SizedBox(height: 10,),
-                                    _clabeField(context),
-                                    SizedBox(height: 10,),
-                                    Padding(
-                                      padding: const EdgeInsets.all(13.0),
-                                      child: BasicReactiveButton(
-                                        title: "Añadir CLABE",
-                                        onPressed: () {
-                                      if (_formKey.currentState!.validate()){
-                                         context.read<ButtonStateCubit>().execute(
-                                         usecase: CreateClabenUseCase(),
-                                         params: _clabeCon.text);
-                                         _clabeCon.clear();
-                                      }
-                                      },),
-                                    ),
+                                     SizedBox(width: 1,),
+                                    Center(
+                                     child: FloatingActionButton(
+                                     splashColor: Colors.green,
+                                     onPressed: () async{
+                                       return await showDialog(
+                                         context: context, 
+                                         builder: (innerContext){
+                                           return BlocProvider.value(
+                                                   value: context.read<ButtonStateCubit>(),
+                                                   child: AlertDialog(
+                                       title: const Text("Agregar CLABE"),
+                                       content: const Text("Escribe los 18 dígitos de tu cuenta CLABE"),
+                                       actions: <Widget>[
+                                        
+                                         Form(
+                                          key: _formKey,
+                                           child: Column(
+                                             children: [
+                                               _clabeField(context),
+                                               SizedBox(height: 10,),
+                                            Row(
+                                              children: [
+                                                ElevatedButton(
+                                                             style: ElevatedButton.styleFrom(
+                                                              backgroundColor: Colors.red,
+                                                              minimumSize: Size(50, 50),
+                                                             ),
+                                                       child: Text(
+                                                          "Regresar",
+                                                          style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.w400
+                                                          ),
+                                                       ),
+                                                       onPressed: () => Navigator.of(innerContext).pop()
+                                                           ),
+                                                SizedBox(width: 10,),
+                                                Padding(
+                                              padding: const EdgeInsets.all(13.0),
+                                              child: CustomReactiveButton(
+                                                 
+                                                color: Colors.blue,
+                                                title: "Añadir",
+                                                onPressed: () {
+                                              if (_formKey.currentState!.validate()){
+                                                 context.read<ButtonStateCubit>().execute(
+                                                 usecase: CreateClabenUseCase(),
+                                                 params: _clabeCon.text);
+                                                 _clabeCon.clear();
+                                                 Navigator.of(innerContext).pop();
+                                              }
+                                              },),
+                                            ),
+                                              ],
+                                            ),
+                                             ],
+                                           ),
+                                         ),
+                                        
+                                       ],
+                                                   )
+                                     );
+                                         }
+                                         );
+                                       
+                                     },
+                                     backgroundColor: AppColors.primary,
+                                     shape: const CircleBorder(),
+                                     child: const Icon(Icons.add, color: Colors.white),
+                                      ),
+                                   ),
+                                    
+                                  
                                   ],
                                 ),
-                          ),
+                          
                         ),
               ),
               );    
@@ -129,7 +184,7 @@ class Settings extends StatelessWidget{
     return Padding(
       padding: const EdgeInsets.all(13.0),
       child: Text(
-        'Registra una cuenta CLABE',
+        'Agrega una cuenta CLABE',
         style: TextStyle(
           fontSize: 25,
           fontWeight: FontWeight.bold
@@ -146,7 +201,7 @@ class Settings extends StatelessWidget{
         
         validator: (value){
           if (value!.isEmpty || value.length != 18 || RegExp(r'\D+').hasMatch(value)){
-            return 'Tu cuenta clabe debe contener 18 dígitos';
+            return 'Tu cuenta debe contener 18 dígitos';
           }
           else{
             return null;
@@ -165,9 +220,7 @@ class Settings extends StatelessWidget{
 
 Widget listNoClabes(BuildContext context) {
     return SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
+      child: Column(
             children: [
                     SizedBox(height: 100,),
                     Container(
@@ -193,33 +246,86 @@ Widget listNoClabes(BuildContext context) {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      "Registra una para iniciar un trato",
+                      "Agrega una para iniciar un trato",
                       style: TextStyle(
                         fontSize: 18,
                         color: AppColors.primary
                       ),
                     ),
-                     SizedBox(height: 10,),
-                     _clabeField(context),
-                     SizedBox(height: 10,),
-                     Padding(
-                       padding: const EdgeInsets.all(13.0),
-                       child: BasicReactiveButton(
-                         title: "Añadir CLABE",
-                         onPressed: () {
-                       if (_formKey.currentState!.validate()){
-                          context.read<ButtonStateCubit>().execute(
-                          usecase: CreateClabenUseCase(),
-                          params: _clabeCon.text);
-                          _clabeCon.clear();
-                       }
-                       },
-                       ),
-                       )
+                     Center(
+                                     child: FloatingActionButton(
+                                     splashColor: Colors.green,
+                                     onPressed: () async{
+                                       return await showDialog(
+                                         context: context, 
+                                         builder: (innerContext){
+                                           return BlocProvider.value(
+                                                   value: context.read<ButtonStateCubit>(),
+                                                   child: AlertDialog(
+                                       title: const Text("Agregar CLABE"),
+                                       content: const Text("Escribe los 18 dígitos de tu cuenta CLABE"),
+                                       actions: <Widget>[
+                                        
+                                         Form(
+                                          key: _formKey,
+                                           child: Column(
+                                             children: [
+                                               _clabeField(context),
+                                               SizedBox(height: 10,),
+                                            Row(
+                                              children: [
+                                                ElevatedButton(
+                                                             style: ElevatedButton.styleFrom(
+                                                              backgroundColor: Colors.red,
+                                                              minimumSize: Size(50, 50),
+                                                             ),
+                                                       child: Text(
+                                                          "Regresar",
+                                                          style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.w400
+                                                          ),
+                                                       ),
+                                                       onPressed: () => Navigator.of(innerContext).pop()
+                                                           ),
+                                                SizedBox(width: 10,),
+                                                Padding(
+                                              padding: const EdgeInsets.all(13.0),
+                                              child: CustomReactiveButton(
+                                                 
+                                                color: Colors.blue,
+                                                title: "Añadir",
+                                                onPressed: () {
+                                              if (_formKey.currentState!.validate()){
+                                                 context.read<ButtonStateCubit>().execute(
+                                                 usecase: CreateClabenUseCase(),
+                                                 params: _clabeCon.text);
+                                                 _clabeCon.clear();
+                                                 Navigator.of(innerContext).pop();
+                                              }
+                                              },),
+                                            ),
+                                              ],
+                                            ),
+                                             ],
+                                           ),
+                                         ),
+                                        
+                                       ],
+                                                   )
+                                     );
+                                         }
+                                         );
+                                       
+                                     },
+                                     backgroundColor: AppColors.primary,
+                                     shape: const CircleBorder(),
+                                     child: const Icon(Icons.add, color: Colors.white),
+                                      ),
+                                   ),
                     ]
                     ),
-        ),
-    );
+        );
   }
 
   Widget listClabes(BuildContext context, Map<String, dynamic> userData) {

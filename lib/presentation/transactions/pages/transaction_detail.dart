@@ -478,7 +478,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                           usecase: UpdateDealUseCase(),
                                           params: StatusModel(
                                               status: "En proceso", 
-                                              details: "Trato Aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
+                                              details: "Trato aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
                                               buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
                                               sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 
                                               transactionId: state.transactionId, 
@@ -489,7 +489,6 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                                               reimbursementDone: state.reimbursementDone, 
                                               cancelled: state.cancelled, 
                                               statusId: state.statusId,
-                                              timeLimit: DateTime.now().toUtc().add(Duration(days: 8)),
                                           )
                                         );
                                   }

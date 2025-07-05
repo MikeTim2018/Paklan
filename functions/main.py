@@ -9,14 +9,12 @@ import datetime
 app = initialize_app()
 
 
-@https_fn.on_call()
-def get_time_from_server(_):
+@https_fn.on_call(max_instances=40, memory=256) #min_instances=1 $2.5 dollars month to fasten load times
+def get_time_from_server(req: https_fn.CallableRequest):
     """
     Gets the datetime from firebase directly
     """
-    return json.dumps({
-        "datetime":datetime.datetime.now(datetime.timezone.utc)
-        })
+    return {"server_datetime": str(datetime.datetime.now(datetime.timezone.utc)).replace(" ", "T")}
 
 @scheduler_fn.on_schedule(schedule="0 */6 * * *")
 def send_reminder(_) -> None:
@@ -251,7 +249,7 @@ def update_remaining_hours(_) -> None:
             )
 
 
-@firestore_fn.on_document_created(document="transactions/{transactionId}/status/{statusId}")
+@firestore_fn.on_document_created(max_instances=40, document="transactions/{transactionId}/status/{statusId}") #min_instances=5 costs $35.25 dollars monthly to keep warm in production only to fasten responses on deals
 def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot | None]) -> None:
     """
     Function to update the transaction status and status date when status is created

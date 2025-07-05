@@ -14,4 +14,5 @@ abstract class TransactionRepository {
   Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes();
   Future<Either> deleteClabe(String clabe);
   Future<Either> createClabe(String clabe);
+  Future<Either> getServerDateTime();
 }
