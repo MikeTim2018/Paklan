@@ -36,7 +36,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       )
     ),
     )
-    .orderBy("updatedDate")
+    .orderBy("timeLimit", descending: false)
     .snapshots();
   }
   
