@@ -231,7 +231,8 @@ def update_remaining_hours(_) -> None:
                                                                                         transaction_dict.get("statusId")
                                                                                         ).get()
             status_dict = status.to_dict()
-            db.collection("transactions").document(transaction_dict.get("transactionId")).collection("status").add(
+            cancelled_date = datetime.datetime.now(datetime.timezone.utc)
+            _, new_status = db.collection("transactions").document(transaction_dict.get("transactionId")).collection("status").add(
                 {
                  "transactionId": transaction_dict.get("transactionId"),
                  "buyerConfirmation": status_dict.get("buyerConfirmation"),
@@ -244,8 +245,20 @@ def update_remaining_hours(_) -> None:
                  "reimbursementDone": status_dict.get("reimbursementDone"),
                  "paymentDone": status_dict.get("paymentDone"),
                  "paymentTransferred": status_dict.get("paymentTransferred"),
-                 "creationDate": datetime.datetime.now(datetime.timezone.utc)
+                 "creationDate": cancelled_date
                }
+            )
+            db.collection("transactions").document(transaction_dict.get("transactionId")).update(
+                {
+                    "updatedDate": cancelled_date,
+                    "status": "Cancelado",
+                    "statusId": new_status.id,
+                }
+            )
+            new_status.update(
+                {
+                    "statusId": new_status.id
+                }
             )
 
 
@@ -258,24 +271,14 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         print("no event data is provided!")
         return
     try:
-        created_date = event.data.get("creationDate")
         status = event.data.get("status")
         transaction_id = event.params['transactionId']
-        status_id = event.params['statusId']
     except KeyError:
         # No field, so do nothing.
         return
     db = firestore.client()
 
     transaction_document = db.collection("transactions").document(transaction_id)
-    transaction_document.update(
-        {
-            "updatedDate": created_date,
-            "status": status,
-            "statusId": status_id,
-            "transactionId": transaction_id
-    }
-    )
     transaction = transaction_document.get().to_dict()
     buyer_doc = db.collection("users").document(transaction.get("members")["buyerId"])
     buyer = buyer_doc.get().to_dict()

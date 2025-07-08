@@ -63,7 +63,7 @@ Map<String, dynamic> toMap() {
       status: map['status'] as String,
       buyerConfirmation: map['buyerConfirmation'] as bool,
       sellerConfirmation: map['sellerConfirmation'] as bool,
-      transactionId: map['transactionId'] as String,
+      transactionId: map['transactionId'] ?? '',
       cancelledBy: map['cancelledBy'] ?? '', 
       buyerId: map['buyerId'] as String, 
       sellerId: map['sellerId'] as String, 

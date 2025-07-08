@@ -44,7 +44,7 @@ Map<String, dynamic> toMap() {
       status: map['status'] as String,
       buyerFirstName: map['members']['buyerFirstName'] as String,
       sellerFirstName: map['members']['sellerFirstName'] as String, 
-      transactionId: map['transactionId'] as String,
+      transactionId: map['transactionId'] ?? '',
       statusId: map['statusId'] ?? '',
       timeLimit: map['timeLimit'].toDate() ?? DateTime.now().add(const Duration(hours: 24)).toUtc(),
     );

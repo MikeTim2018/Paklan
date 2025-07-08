@@ -66,12 +66,20 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
 
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
-    var currentUser = FirebaseAuth.instance.currentUser;
     HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
     try{
+    double transactionAmount = double.parse(newTransaction.amount!);
+    String fee;
+    if (transactionAmount < 220){
+      fee = '15';
+    }
+    else{
+      fee = (transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2);
+    }
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
       {"name": newTransaction.name,
         "amount": newTransaction.amount,
+        "fee": fee,
        "status": newTransaction.status,
        "members":{
          "sellerFirstName": newTransaction.sellerFirstName,
@@ -98,12 +106,14 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "creationDate": DateTime.parse(serverTime.data['server_datetime'])
       }
     );
-    await statusRef.update({"statusId": statusRef.id});
-    await FirebaseFirestore.instance.collection("users").doc(currentUser!.uid).update(
+    await transactionDoc.update(
       {
-        "CLABEs": FieldValue.arrayUnion([newTransaction.clabe])
+        "transactionId": transactionDoc.id,
+        "statusId": statusRef.id,
+        "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
       }
-    );
+        );
+    await statusRef.update({"statusId": statusRef.id});
     return Right("Transaction Created!");
   }catch (error){
     return Left(error);
@@ -149,12 +159,23 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         }
       );
       await statusRef.update({"statusId": statusRef.id});
+      DocumentReference<Map<String, dynamic>> transactionRef = FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId);
       if (transactionState.status == 'En proceso' && transactionState.details!.contains("Trato aceptado")){
-          FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId).update(
+          await transactionRef.update(
             {
-              "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(days: 8))
+              "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(days: 8)),
+              "statusId": statusRef.id,
+              "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
             }
           );
+      }
+      else{
+        await transactionRef.update(
+          {
+        "statusId": statusRef.id,
+        "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
+        }
+        );
       }
       return Right("Deal Updated!");
     }catch(e){

@@ -7,7 +7,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
-import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
@@ -21,6 +20,7 @@ import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 import 'package:paklan/domain/transactions/usecases/get_transaction.dart';
 import 'package:paklan/presentation/home/widgets/credit_card_ui.dart';
+import 'package:paklan/presentation/payments/pages/payment.dart';
 import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
 import 'package:paklan/service_locator.dart';
@@ -90,7 +90,7 @@ class TransactionDetail extends StatelessWidget {
               
               hideBack: true,
               title: 
-                  Text("Detalle del Trato"),
+                  Text("Detalle del trato"),
             ),
             body: SingleChildScrollView(
               child: StreamBuilder<QuerySnapshot>(
@@ -123,6 +123,7 @@ class TransactionDetail extends StatelessWidget {
                       else{
                         context.read<StepperSelectionCubit>().selectStep(1);
                       }
+                      double transactionAmount = double.parse(transaction.amount!);
                       return SingleChildScrollView(
                         child: Column(
                           children: [
@@ -136,42 +137,58 @@ class TransactionDetail extends StatelessWidget {
                               width: MediaQuery.sizeOf(context).width,
                               child: Column(
                                 children: [
-                                  SizedBox(height: 10,),
-                                  const Text(
-                                  "Detalle del Estátus:",
-                                  style: TextStyle(
-                                    fontSize: 23
-                                  )
+                                  SizedBox(height: 5,),
+                                  ExpansionTile(
+                                    title: Center(child: const Text(
+                                      'Trato',
+                                      style: TextStyle(
+                                        fontSize: 23
+                                      ),
+                                      )
+                                      ),
+                                    children: <Widget>[
+                                      ListTile(
+                                        
+                                          title: Text(
+                                            textAlign: TextAlign.left,
+                                          'Nombre: ${transaction.name!}\nVendedor: ${transaction.sellerFirstName}\nComprador: ${transaction.buyerFirstName}',
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          ),
+                                          subtitle: ExpansionTile(
+                                            title: Text("Monto"),
+                                            children: [
+                                              Text("Monto acordado: \$${transaction.amount} mnx"),
+                                              Text("Comisión Paklan: \$${(transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2)} mnx"),
+                                              Divider(),
+                                              Text("Total: \$${(transactionAmount + transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2)} mnx"),
+                                            ],
+                                            ),
+                                      
+                                     )
+                                      ],
                                   ),
-                                  SizedBox(height: 10,),
-                                  Container(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: 
-                                      Text(
+                                ExpansionTile(
+                                    title: Center(child: const Text(
+                                      'Detalle del estátus',
+                                      style: TextStyle(
+                                        fontSize: 23
+                                      ),
+                                      )
+                                      ),
+                                    children: <Widget>[
+                                      ListTile(title: Text(
+                                        textAlign: TextAlign.justify,
                                             statusEntity.details!,
                                             style: TextStyle(
                                               fontSize: 17,
                                               )
-                                              ),
-                                    
+                                              ),)
+                                      ],
                                   ),
-                              const Divider(),
-                              SizedBox(height: 10,),
-                              const Text(
-                                "Monto del Trato:",
-                                style: TextStyle(
-                                  fontSize: 23
-                                )
-                                ),
-                              SizedBox(
-                                height: 40,
-                                child: Text(
-                                  '\$${transaction.amount!} mxn',
-                                  style: TextStyle(
-                                    fontSize: 17
-                                  )
-                                  ),
-                              ),
+                              
                                 const Divider(),
                                 SizedBox(height: 10,),
                                 const Text(
@@ -332,13 +349,13 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
               width: 160,
               title: "Pagar",
               onPressed: () {
-                // Navigator.of(context).push(
-                //                     CupertinoSheetRoute<void>(
-                //                      builder: (BuildContext context) => TransactionDetail(
-                //                       transaction: state
-                //                       ),
-                //                     ),
-                //                     );
+                Navigator.of(context).push(
+                                    CupertinoSheetRoute<void>(
+                                     builder: (BuildContext context) => Payment(
+                                      
+                                      ),
+                                    ),
+                                    );
               }
               ),
           ],

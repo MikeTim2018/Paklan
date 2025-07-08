@@ -16,31 +16,52 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => UserInfoDisplayCubit()..displayUserInfo(),
-      child: Padding(
-        padding: const EdgeInsets.only(
-            top: 40,
-            right: 16,
-            left: 16
-          ),
           child: BlocBuilder < UserInfoDisplayCubit, UserInfoDisplayState > (
             builder: (context, state) {
               if (state is UserInfoLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (state is UserInfoLoaded) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _profileImage(state.user,context),
-                    _gender(state.user),
-                    _card(context)
-                  ],
+                return Container(
+                  height: 125,
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(image: const AssetImage(
+                            AppImages.noTrades,
+                          )
+                          ,
+                          fit: BoxFit.fitWidth,
+                          
+                          )),
+                  child: TweenAnimationBuilder(
+                      curve: Curves.easeIn,
+                      tween: Tween<double>(begin: 0, end: 1),
+                      duration: Duration(milliseconds: 1000),
+                      builder: (BuildContext context, double value, Widget ? child){
+                        return Opacity(
+                          opacity: value,
+                          child: Padding(
+                            padding: EdgeInsets.all(value*17.5),
+                            child: child,
+                            )
+                          );
+                      },
+                      child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _profileImage(state.user,context),
+                        _name(state.user, context),
+                        _card(context)
+                      ],
+                    ),
+                  ),
                 );
               }
               return Container();
             },
           ),
-      ),
     );
   }
 
@@ -65,25 +86,27 @@ class Header extends StatelessWidget {
     );
   }
 
-  Widget _gender(UserEntity user) {
+  Widget _name(UserEntity user, BuildContext context) {
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(
         horizontal: 16
       ),
       decoration: BoxDecoration(
-        color: AppColors.secondBackground,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(100)
       ),
       child: Center(
-        child: Text(
-          '¡Bienvienid${user.gender == 1 ? 'o' : 'a'} ${user.firstName}!',
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 18
+        child: 
+        Text(
+            '¡Bienvienid${user.gender == 1 ? 'o' : 'a'} ${user.firstName}!',
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 18,
+              color: Colors.black
+            ),
           ),
         ),
-      ),
     );
   }
 
@@ -96,7 +119,7 @@ class Header extends StatelessWidget {
         height: 40,
         width: 40,
         decoration: const BoxDecoration(
-          color: AppColors.primary,
+          color: Colors.white,
           shape: BoxShape.circle
         ),
         child: SvgPicture.asset(

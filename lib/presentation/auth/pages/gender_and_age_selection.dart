@@ -87,7 +87,7 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
 
   Widget _tellUs() {
     return const Text(
-      'Acerca de Ti',
+      'Selecciona tu género',
       style: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w500
@@ -141,7 +141,7 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
 
   Widget howOld() {
     return const Text(
-      '¿Qué Edad Tienes?',
+      '¿Qué edad tienes?',
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w500
@@ -190,7 +190,7 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
   }
   Widget phoneNum() {
     return const Text(
-      'Ingresa de número de télefono a 10 dígitos',
+      'Ingresa tu número de télefono a 10 dígitos',
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w500

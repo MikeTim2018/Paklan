@@ -23,5 +23,9 @@ class AppVectors{
   static const bank = '${basePath}bank-svgrepo-com$format';
   static const delete = '${basePath}delete-filled-svgrepo-com$format';
   static const clock = '${basePath}alarm-clock-svgrepo-com$format';
+  static const eye = '${basePath}eye-svgrepo-com$format';
+  static const eyeClosed = '${basePath}eye-off-svgrepo-com$format';
+
+
   
 }

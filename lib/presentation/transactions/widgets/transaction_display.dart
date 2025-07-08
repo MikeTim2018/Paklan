@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:paklan/common/bloc/server_time/server_time_state.dart';
 import 'package:paklan/common/bloc/server_time/server_time_state_cubit.dart';
-import 'package:paklan/common/helper/navigator/app_navigator.dart';
-import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -15,7 +13,6 @@ import 'package:paklan/data/transactions/models/transaction.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
-import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 import 'package:paklan/service_locator.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
@@ -61,31 +58,19 @@ class TransactionDisplay extends StatelessWidget{
             }
             return Column(
                   children: [
-                    SizedBox(height: 50,),
+                    SizedBox(height: 20,),
                     Text(
-                      "Tratos en Curso",
+                      "Tratos en curso",
                       style: TextStyle(
                         fontSize: 20
                       ),
                       ),
-                    SizedBox(height: 20,),
+                    SizedBox(height: 40,),
                     listTransactions(context, state.data!.docs.map(
                       (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
                       ).toList(),
                       _scrollController
                       ),
-                    const SizedBox(height: 25),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: BasicAppButton(
-                        onPressed: (){
-                          AppNavigator.push(context, TransactionSearch());
-                          },
-                          width: 200,
-                          title: 'Iniciar Trato'
-                      ),
-                    ),
-                
                   ],
               );
             }
@@ -107,7 +92,7 @@ Widget listNoTransaction(BuildContext context) {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         image: const AssetImage(
-                          AppImages.noTrades
+                          AppImages.dealSuccess
                         ),
                         )
                     ),
@@ -120,23 +105,12 @@ Widget listNoTransaction(BuildContext context) {
                       color: Colors.white70
                     ),
                   ),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 15,),
                   Text(
                     "¡Comienza ahora!",
                     style: TextStyle(
                       fontSize: 18,
                       color: AppColors.primary
-                    ),
-                  ),
-                  SizedBox(height: 30,),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: BasicAppButton(
-                      onPressed: (){
-                        AppNavigator.push(context, TransactionSearch());
-                        },
-                        width: 200,
-                        title: 'Iniciar Trato'
                     ),
                   ),
                   ]
@@ -145,42 +119,7 @@ Widget listNoTransaction(BuildContext context) {
   }
 
 
-  Widget listTransactions(BuildContext context, List<TransactionEntity> state, ScrollController scrollController) {
-    return SizedBox(
-        height: 400,
-      child: RawScrollbar(
-        thumbVisibility: true,
-        controller: scrollController,
-        thumbColor: Colors.white24,
-        shape: const StadiumBorder(),
-        timeToFade: Duration(seconds: 1),
-        thickness: 8,
-        child: ListView.separated(
-          controller: scrollController,
-          padding: EdgeInsets.all(9),
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: (){
-                                    Navigator.of(context).push(
-                                    CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => TransactionDetail(
-                                      transaction: state[index]
-                                      ),
-                                    ),
-                                    );
-                                  },
-                                  child: transactionTile(state, index),
-                                );
-                              },
-                               separatorBuilder: (context, index) => const SizedBox(height: 10,),
-                               itemCount: state.length
-                            ),
-      ),
-    );
-  }
-
-  Widget transactionTile(List<TransactionEntity> status, int index) {
+  Widget listTransactions(BuildContext context, List<TransactionEntity> status, ScrollController scrollController) {
     return BlocBuilder<ServerTimeStateCubit, ServerTimeState>(
       builder: (context, state) {
         if(state is ServerTimeLoadingState){
@@ -194,7 +133,46 @@ Widget listNoTransaction(BuildContext context) {
                     );
         }
         if (state is ServerTimeLoadedState){
-          return Column(
+          return SizedBox(
+          height: 400,
+          child: RawScrollbar(
+          thumbVisibility: true,
+          controller: scrollController,
+          thumbColor: Colors.white24,
+          shape: const StadiumBorder(),
+          timeToFade: Duration(seconds: 1),
+          thickness: 8,
+          child: ListView.separated(
+            controller: scrollController,
+            padding: EdgeInsets.all(9),
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: (){
+                                      Navigator.of(context).push(
+                                      CupertinoSheetRoute<void>(
+                                       builder: (BuildContext context) => TransactionDetail(
+                                        transaction: status[index]
+                                        ),
+                                      ),
+                                      );
+                                    },
+                                    child: transactionTile(status, index, state.serverTime),
+                                  );
+                                },
+                                 separatorBuilder: (context, index) => const SizedBox(height: 10,),
+                                 itemCount: status.length
+                              ),
+        ),
+      );
+  }
+  return Container();
+  }
+  );
+  }
+
+  Widget transactionTile(List<TransactionEntity> status, int index, String serverTime) {
+    return Column(
           children: [
             Align(
              alignment: AlignmentGeometry.directional(0.7, 10),
@@ -205,21 +183,21 @@ Widget listNoTransaction(BuildContext context) {
                 width: 20,
                 child: SvgPicture.asset(AppVectors.clock, fit: BoxFit.fill,)),
               decoration: BoxDecoration(
-                color: switch (status[index].timeLimit!.difference(DateTime.parse(state.serverTime)).inHours) {
+                color: switch (status[index].timeLimit!.difference(DateTime.parse(serverTime)).inHours) {
                                <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
                                <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
                                _ => const Color.fromARGB(216, 71, 145, 50),
                                },
                 borderRadius: BorderRadius.circular(15)
                 ),
-              duration: Duration(seconds: status[index].timeLimit!.difference(DateTime.parse(state.serverTime)).inSeconds),
+              duration: Duration(seconds: status[index].timeLimit!.difference(DateTime.parse(serverTime)).inSeconds),
             )
             ),
           Card(
             child: ListTile(
               shape: StadiumBorder(side: BorderSide(
                 width: 2,
-                color: switch (status[index].timeLimit!.difference(DateTime.parse(state.serverTime)).inHours) {
+                color: switch (status[index].timeLimit!.difference(DateTime.parse(serverTime)).inHours) {
                                <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
                                <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
                                _ => const Color.fromARGB(216, 71, 145, 50),
@@ -273,10 +251,5 @@ Widget listNoTransaction(BuildContext context) {
           ),
         ],
       );
-      }
-      return Container();
 
-      }
-      
-    );
   }

@@ -51,6 +51,9 @@ dependencies:
   intl: ^0.20.2
   cloud_functions: ^5.5.2
   show_hide_password: ^0.0.2
+  checkout_screen_ui: ^1.0.1
+  iconsax_flutter: ^1.0.1
+  iconly: ^1.0.1
 
 dev_dependencies:
   flutter_test:

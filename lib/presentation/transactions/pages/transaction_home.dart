@@ -13,18 +13,12 @@ class TransactionHome extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(9.0),
-              child:  Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+            Column(
                   children: [
                     Header(),
                     TransactionDisplay(),
                   ],
                 ),
-              ),
-              ),
             ]
             ),
       ),
