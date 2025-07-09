@@ -111,14 +111,14 @@ class TransactionDetail extends StatelessWidget {
                       ).toList()[0];
                   return BlocBuilder<StepperSelectionCubit, int>(
                       builder: (context, stepperState){
-                      if (statusEntity.buyerConfirmation! && statusEntity.sellerConfirmation!){
-                        context.read<StepperSelectionCubit>().selectStep(2);
-                      }
-                      else if(statusEntity.paymentDone!){
-                        context.read<StepperSelectionCubit>().selectStep(3);
+                      if(statusEntity.paymentDone!){
+                        context.read<StepperSelectionCubit>().selectStep(4);
                       }
                       else if(statusEntity.paymentTransferred!){
-                        context.read<StepperSelectionCubit>().selectStep(4);
+                        context.read<StepperSelectionCubit>().selectStep(3);
+                      }
+                      else if (statusEntity.buyerConfirmation! && statusEntity.sellerConfirmation!){
+                        context.read<StepperSelectionCubit>().selectStep(2);
                       }
                       else{
                         context.read<StepperSelectionCubit>().selectStep(1);
@@ -161,9 +161,9 @@ class TransactionDetail extends StatelessWidget {
                                             title: Text("Monto"),
                                             children: [
                                               Text("Monto acordado: \$${transaction.amount} mnx"),
-                                              Text("Comisión Paklan: \$${(transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2)} mnx"),
+                                              Text("Comisión Paklan: \$${transaction.fee} mnx"),
                                               Divider(),
-                                              Text("Total: \$${(transactionAmount + transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2)} mnx"),
+                                              Text("Total: \$${(transactionAmount + double.parse(transaction.fee!)).truncateToDouble().toStringAsFixed(2)} mnx"),
                                             ],
                                             ),
                                       
@@ -171,6 +171,7 @@ class TransactionDetail extends StatelessWidget {
                                       ],
                                   ),
                                 ExpansionTile(
+                                  initiallyExpanded: true,
                                     title: Center(child: const Text(
                                       'Detalle del estátus',
                                       style: TextStyle(
@@ -198,7 +199,7 @@ class TransactionDetail extends StatelessWidget {
                                 )
                                 ),
                                 SizedBox(height: 10,),
-                                actions(context, statusEntity, currenUserId),
+                                actions(context, statusEntity, currenUserId, transaction),
                                 ],
                                   
                               ),
@@ -218,7 +219,7 @@ class TransactionDetail extends StatelessWidget {
   }
 
 
-Widget actions(BuildContext context, StatusEntity state, String currentUserId){
+Widget actions(BuildContext context, StatusEntity state, String currentUserId, TransactionEntity transaction){
   final String currentUser = currentUserId == state.buyerId ? 'Comprador' : 'Vendedor';
   if(state.cancelled!){
     return Padding(
@@ -227,6 +228,225 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
         "No hay acciones disponibles a realizar, el trato ya está cancelado",
         style: TextStyle(fontSize: 20),
         ),
+    );
+  }
+  if(state.status == 'Completado'){
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Text(
+        "No hay acciones a realizar, el trato ya fué completado",
+        style: TextStyle(fontSize: 20),
+        ),
+    );
+  }
+  if(currentUser == 'Vendedor' && state.paymentTransferred!){
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Text(
+        "No hay acciones de tu parte, el comprador ya realizó la transferencia, sigue en espera de que el comprador te libere el pago",
+        style: TextStyle(fontSize: 20),
+        ),
+    );
+  
+  }
+  if(currentUser == 'Comprador' && state.paymentTransferred!){
+    return Column(
+      children: [
+        Text("Liberar el pago al vendedor",
+        style: TextStyle(
+          fontSize: 20
+        ),),
+        SizedBox(height: 5,),
+        Row(
+          children: [
+            SizedBox(width: 35,),
+            Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: Size(50, 50),
+                      backgroundColor: Colors.redAccent,
+                       ),
+                  child: Text(
+                     "Cancelar Trato",
+                     style: const TextStyle(
+                       color: Colors.white,
+                       fontWeight: FontWeight.w400
+                     ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context, 
+                      builder: (innerContext) => 
+                      BlocProvider.value(
+                    value: context.read<ButtonStateCubit>(),
+                    child: AlertDialog(
+        title: const Text('¿Quieres Cancelar el Trato?'),
+        content: Text("Cancelar el trato notificará al vendedor/comprador.\nPorfavor escribe la razón de la cancelación."),
+        actions: [    
+          Form(
+            key: _formKey,
+            child: TextFormField(
+            controller: _cancelCon,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            validator: (value){
+            if (value!.isEmpty){
+              return 'El campo no debe estar vacío';
+            }
+            if (value.length>150){
+              return 'El Campo no debe exceder los 150 caracteres';
+            }
+            if (value.length<5){
+              return 'El Campo debe ser mayor a 5 caracteres';
+            }
+            else{
+              return null;
+            }
+                    },
+                
+              ),
+          ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                             minimumSize: Size(60, 50),
+                            ),
+                                            child: Text(
+                                               "Regresar",
+                                               style: const TextStyle(
+                           color: Colors.white,
+                           fontWeight: FontWeight.w400
+                                               ),
+                                            ),
+                                            onPressed: () => Navigator.pop(innerContext)
+                          ),
+                          VerticalDivider(width: 20,),
+                      CustomReactiveButton(
+                                        color: Colors.redAccent,
+                                        title: "Cancelar Trato",
+                                        onPressed: (){
+                                          if (_formKey.currentState!.validate()){
+                                          context.read<ButtonStateCubit>().execute(
+                                          usecase: UpdateDealUseCase(),
+                                          params: StatusModel(
+                                              status: "Cancelado", 
+                                              details: "Trato Cancelado por $currentUser", 
+                                              buyerConfirmation: state.buyerConfirmation, 
+                                              sellerConfirmation: state.sellerConfirmation, 
+                                              transactionId: state.transactionId, 
+                                              buyerId: state.buyerId, 
+                                              sellerId: state.sellerId, 
+                                              paymentDone: state.paymentDone, 
+                                              paymentTransferred: state.paymentTransferred, 
+                                              reimbursementDone: state.reimbursementDone, 
+                                              cancelled: true, 
+                                              statusId: state.statusId,
+                                              cancelledBy: currentUserId,
+                                              cancelMessage: _cancelCon.text
+                                          )
+                                        );
+                                        Navigator.pop(innerContext);
+                                        }
+                                        }
+                                        ),
+                        ],
+                      ),
+                      
+                                        ],
+      )
+                      
+                    ) );
+                  },
+                );
+              
+              
+              }
+            ),
+            SizedBox(width: 10,),
+            Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: Size(50, 50),
+                      backgroundColor: Colors.blue,
+                       ),
+                  child: Text(
+                     "Liberar Pago",
+                     style: const TextStyle(
+                       color: Colors.white,
+                       fontWeight: FontWeight.w400
+                     ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context, 
+                      builder: (innerContext) => 
+                      BlocProvider.value(
+                    value: context.read<ButtonStateCubit>(),
+                    child: AlertDialog(
+        title: const Text('¿Quieres liberar el pago?'),
+        content: Text("Al liberar el pago se le transferirá al vendedor el monto depositado sin la comisión."),
+        actions: [    
+                  Row(
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                             minimumSize: Size(60, 50),
+                            ),
+                                            child: Text(
+                                               "Regresar",
+                                               style: const TextStyle(
+                           color: Colors.white,
+                           fontWeight: FontWeight.w400
+                                               ),
+                                            ),
+                                            onPressed: () => Navigator.pop(innerContext)
+                          ),
+                          VerticalDivider(width: 20,),
+                      CustomReactiveButton(
+                                        color: Colors.blue,
+                                        title: "Liberar",
+                                        onPressed: (){
+                                          context.read<ButtonStateCubit>().execute(
+                                          usecase: UpdateDealUseCase(),
+                                          params: StatusModel(
+                                              status: "Completado", 
+                                              details: "Trato Completado, el monto pagado fué liberado exitosamente al vendedor", 
+                                              buyerConfirmation: state.buyerConfirmation, 
+                                              sellerConfirmation: state.sellerConfirmation, 
+                                              transactionId: state.transactionId, 
+                                              buyerId: state.buyerId, 
+                                              sellerId: state.sellerId, 
+                                              paymentDone: true, 
+                                              paymentTransferred: state.paymentTransferred, 
+                                              reimbursementDone: state.reimbursementDone, 
+                                              cancelled: state.cancelled, 
+                                              statusId: state.statusId,
+                                              cancelledBy: state.cancelledBy,
+                                              cancelMessage: _cancelCon.text
+                                          )
+                                        );
+                                        Navigator.pop(innerContext);
+                                        }
+                                        ),
+                        ],
+                      ),
+                      
+                                        ],
+                      )
+                      
+                    ) );
+                  },
+                );
+              
+              
+              }
+            ),
+          ],
+        )
+      ],
     );
   }
   if(currentUser == 'Comprador' && state.buyerConfirmation! && state.sellerConfirmation!){
@@ -352,7 +572,8 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId){
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
                                      builder: (BuildContext context) => Payment(
-                                      
+                                      transaction: transaction,
+                                      status: state,
                                       ),
                                     ),
                                     );

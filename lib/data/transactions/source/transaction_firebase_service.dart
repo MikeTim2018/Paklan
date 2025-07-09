@@ -163,6 +163,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       if (transactionState.status == 'En proceso' && transactionState.details!.contains("Trato aceptado")){
           await transactionRef.update(
             {
+              "status": transactionState.status,
               "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(days: 8)),
               "statusId": statusRef.id,
               "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
@@ -172,6 +173,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       else{
         await transactionRef.update(
           {
+        "status": transactionState.status,
         "statusId": statusRef.id,
         "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
         }

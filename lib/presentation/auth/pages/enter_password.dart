@@ -98,8 +98,8 @@ class EnterPasswordPage extends StatelessWidget {
         passwordField: (bool hidePassword){
         return TextFormField(
           validator: (value){
-            if (value!.isEmpty || value.length<7){
-              return 'Ingresa una contraseña mayor a 6 caracteres';
+            if (value!.isEmpty){
+              return '¡No puede estar vacío este campo!';
             }
             else{
               return null;

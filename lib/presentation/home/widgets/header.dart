@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
-import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
@@ -23,7 +22,7 @@ class Header extends StatelessWidget {
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 125,
+                  height: 130,
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.transparent,

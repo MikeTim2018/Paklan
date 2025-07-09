@@ -1,13 +1,12 @@
+import 'package:fancy_password_field/fancy_password_field.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/presentation/auth/pages/gender_and_age_selection.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
-import 'package:show_hide_password/show_hide_password.dart';
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
@@ -15,7 +14,8 @@ class SignupPage extends StatelessWidget {
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
-  final TextEditingController _passwordCon = TextEditingController();
+  final FancyPasswordController _passwordCon = FancyPasswordController();
+  final TextEditingController _passwordEditCon = TextEditingController();
 
 
   @override
@@ -108,31 +108,27 @@ class SignupPage extends StatelessWidget {
   Widget _password(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ShowHidePassword(
-        iconSize: 30,
-        visibleOffIcon: Iconsax.eye_slash_copy,
-        visibleOnIcon: Iconsax.eye_copy,
-        passwordField: (bool hidePassword){
-          return TextFormField(
-          validator: (value){
-            if (value!.isEmpty || value.length<7){
-              return 'Ingresa una contraseña mayor a 6 caracteres';
-            }
-            else{
-              return null;
-            }
-          },
-          obscureText: true,
+      child: FancyPasswordField(
+          passwordController: _passwordCon,
           enableSuggestions: false,
           autocorrect: false,
-          controller: _passwordCon,
+          controller: _passwordEditCon,
+          validationRules: {
+            DigitValidationRule(),
+            UppercaseValidationRule(),
+            LowercaseValidationRule(),
+            SpecialCharacterValidationRule(),
+            MinCharactersValidationRule(7),
+            MaxCharactersValidationRule(18),
+          },
+          validator: (value){
+            return _passwordCon.areAllRulesValidated ? null : 'Contraseña incompleta';
+          },
           decoration: InputDecoration(
             hintText: "Contraseña"
           ),
+        )
         );
-        }
-      ),
-    );
   }
 
   Widget _emailField(BuildContext context){
@@ -159,7 +155,7 @@ class SignupPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: BasicAppButton(onPressed: (){
-        if (_formKey.currentState!.validate()){
+        if (_formKey.currentState!.validate() && _passwordCon.areAllRulesValidated){
           AppNavigator.push(
             context, 
             GenderAndAgeSelectionPage(
@@ -167,7 +163,7 @@ class SignupPage extends StatelessWidget {
               firstName: _firstNameCon.text,
               email: _emailCon.text,
               lastName: _lastNameCon.text,
-              password: _passwordCon.text,
+              password: _passwordEditCon.text,
             )
             )
             );

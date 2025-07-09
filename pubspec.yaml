@@ -54,6 +54,7 @@ dependencies:
   checkout_screen_ui: ^1.0.1
   iconsax_flutter: ^1.0.1
   iconly: ^1.0.1
+  fancy_password_field: ^2.0.8
 
 dev_dependencies:
   flutter_test:

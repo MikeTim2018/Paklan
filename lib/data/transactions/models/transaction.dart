@@ -11,6 +11,7 @@ class TransactionModel {
   String ? transactionId;
   String ? statusId;
   DateTime ? timeLimit;
+  String ? fee;
 
   TransactionModel({
     required this.name,
@@ -21,6 +22,7 @@ class TransactionModel {
     required this.transactionId,
     required this.statusId,
     this.timeLimit,
+    this.fee,
   });
 
 
@@ -34,6 +36,7 @@ Map<String, dynamic> toMap() {
       'transactionId': transactionId,
       'statusId': statusId,
       'timeLimit': timeLimit,
+      'fee': fee,
     };
   }
 
@@ -47,6 +50,7 @@ Map<String, dynamic> toMap() {
       transactionId: map['transactionId'] ?? '',
       statusId: map['statusId'] ?? '',
       timeLimit: map['timeLimit'].toDate() ?? DateTime.now().add(const Duration(hours: 24)).toUtc(),
+      fee: map['fee'] ?? '0.00',
     );
   }
   
@@ -66,7 +70,8 @@ extension UserXModel on TransactionModel {
       sellerFirstName: sellerFirstName,
       transactionId: transactionId,
       statusId: statusId,
-      timeLimit: timeLimit
+      timeLimit: timeLimit,
+      fee: fee
     );
   }
 }

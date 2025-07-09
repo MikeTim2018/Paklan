@@ -8,6 +8,7 @@ class TransactionEntity {
   String ? transactionId;
   String ? statusId;
   DateTime ? timeLimit;
+  String ? fee;
 
   TransactionEntity({
     required this.name,
@@ -18,5 +19,6 @@ class TransactionEntity {
     required this.transactionId,
     required this.statusId,
     this.timeLimit,
+    this.fee,
   });
 }
