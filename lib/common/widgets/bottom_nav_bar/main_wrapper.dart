@@ -60,7 +60,7 @@ class _MainWrapperState extends State<MainWrapper> {
   // Bottom Navigation Bar - MainWrapper Widget
   BottomAppBar _mainWrapperBottomNavBar(BuildContext context) {
     return BottomAppBar(
-      height: 82,
+      height: 85,
       color: AppColors.primary,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

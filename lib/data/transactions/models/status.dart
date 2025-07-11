@@ -17,7 +17,7 @@ class StatusModel {
   String ? statusId;
   String ? cancelledBy;
   DateTime ? timeLimit;
-  String ? cancelMessage;
+  List ? cancelMessage;
 
   StatusModel({
   required this.status,
@@ -72,7 +72,7 @@ Map<String, dynamic> toMap() {
       reimbursementDone: map['reimbursementDone'] as bool, 
       cancelled: map['cancelled'] as bool,
       statusId: map['statusId'] ?? '',
-      cancelMessage: map['cancelMessage'] ?? '',
+      cancelMessage: map['cancelMessage'] ?? [],
     );
   }
   

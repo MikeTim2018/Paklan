@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -26,7 +25,7 @@ class TransactionHistory extends StatelessWidget {
           builder: (context, AsyncSnapshot<QuerySnapshot> state){
           if (state.connectionState == ConnectionState.waiting){
             return SizedBox(
-              height: 450,
+              height: 400,
               child: Container(
                 alignment: Alignment.center,
                 child: const CircularProgressIndicator()
@@ -35,7 +34,7 @@ class TransactionHistory extends StatelessWidget {
           }
           if (state.hasError){
             return SizedBox(
-              height: 450,
+              height: 400,
               child: Container(
                 alignment: Alignment.center,
                 child: Text(
@@ -51,17 +50,16 @@ class TransactionHistory extends StatelessWidget {
             return listNoTransaction(context);
           }
           return Scaffold(
-            appBar: BasicAppbar(hideBack: true),
             body: Column(
                   children: [
-                    SizedBox(height: 20,),
+                    SizedBox(height: 100,),
                     Text(
                       "Tratos Completados y Cancelados",
                       style: TextStyle(
                         fontSize: 20
                       ),
                       ),
-                    SizedBox(height: 20,),
+                      SizedBox(height: 20,),
                     listTransactions(context, state.data!.docs.map(
                       (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
                       ).toList(),
@@ -110,7 +108,7 @@ Widget listNoTransaction(BuildContext context) {
 
   Widget listTransactions(BuildContext context, List<TransactionEntity> state, ScrollController scrollController) {
     return SizedBox(
-      height: 450,
+      height: 400,
       child: RawScrollbar(
         controller: scrollController,
         thumbVisibility: true,

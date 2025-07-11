@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_app_button.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/presentation/auth/pages/gender_and_age_selection.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
@@ -121,6 +122,49 @@ class SignupPage extends StatelessWidget {
             MinCharactersValidationRule(7),
             MaxCharactersValidationRule(18),
           },
+          validationRuleBuilder: (rules, value) {
+                  if (value.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return ListView(
+                    shrinkWrap: true,
+                    children: rules
+                        .map(
+                          (rule) => rule.validate(value)
+                              ? Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.check,
+                                        color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                        rule.name,
+                                        style: const TextStyle(
+                                            color: Colors.white54,
+                                        ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                        rule.name,
+                                        style: const TextStyle(
+                                            color: Colors.red,
+                                        ),
+                                    ),
+                                  ],
+                                ),
+                        )
+                        .toList(),
+                  );
+                },
           validator: (value){
             return _passwordCon.areAllRulesValidated ? null : 'Contraseña incompleta';
           },

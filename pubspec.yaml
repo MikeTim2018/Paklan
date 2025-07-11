@@ -55,6 +55,7 @@ dependencies:
   iconsax_flutter: ^1.0.1
   iconly: ^1.0.1
   fancy_password_field: ^2.0.8
+  flutter_multi_select_items: ^0.4.3
 
 dev_dependencies:
   flutter_test:

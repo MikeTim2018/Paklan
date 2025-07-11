@@ -1,3 +1,4 @@
+
 class StatusEntity {
   String ? status;
   String ? details;
@@ -12,7 +13,7 @@ class StatusEntity {
   bool ? cancelled;
   String ? cancelledBy;
   String ? statusId;
-  String ? cancelMessage;
+  List ? cancelMessage;
 
   StatusEntity({
   required this.status,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,9 +93,10 @@ class EnterPasswordPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ShowHidePassword(
+        hidePassword: true,
         iconSize: 30,
-        visibleOffIcon: Iconsax.eye_slash_copy,
-        visibleOnIcon: Iconsax.eye_copy,
+        visibleOffIcon: Icons.visibility_off_sharp,
+        visibleOnIcon: Icons.visibility_sharp,
         passwordField: (bool hidePassword){
         return TextFormField(
           validator: (value){

@@ -23,14 +23,15 @@ import 'package:paklan/presentation/home/widgets/credit_card_ui.dart';
 import 'package:paklan/presentation/payments/pages/payment.dart';
 import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
+import 'package:paklan/presentation/transactions/widgets/cancel_deal.dart';
 import 'package:paklan/service_locator.dart';
 
 class TransactionDetail extends StatelessWidget {
   final TransactionEntity transaction;
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _cancelCon = TextEditingController();
+  final TextEditingController _cancelCon1 = TextEditingController();
   TransactionDetail({super.key, required this.transaction});
+  final GlobalKey<FormState> _formKeyCancel = GlobalKey<FormState>();
   
   @override
   Widget build(BuildContext context) {
@@ -260,190 +261,32 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
         Row(
           children: [
             SizedBox(width: 35,),
-            Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: Size(50, 50),
-                      backgroundColor: Colors.redAccent,
-                       ),
-                  child: Text(
-                     "Cancelar Trato",
-                     style: const TextStyle(
-                       color: Colors.white,
-                       fontWeight: FontWeight.w400
-                     ),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context, 
-                      builder: (innerContext) => 
-                      BlocProvider.value(
-                    value: context.read<ButtonStateCubit>(),
-                    child: AlertDialog(
-        title: const Text('¿Quieres Cancelar el Trato?'),
-        content: Text("Cancelar el trato notificará al vendedor/comprador.\nPorfavor escribe la razón de la cancelación."),
-        actions: [    
-          Form(
-            key: _formKey,
-            child: TextFormField(
-            controller: _cancelCon,
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
-            validator: (value){
-            if (value!.isEmpty){
-              return 'El campo no debe estar vacío';
-            }
-            if (value.length>150){
-              return 'El Campo no debe exceder los 150 caracteres';
-            }
-            if (value.length<5){
-              return 'El Campo debe ser mayor a 5 caracteres';
-            }
-            else{
-              return null;
-            }
-                    },
-                
+            ElevatedButton(
+            style:  ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+               minimumSize: Size(
+                120,
+                50
+               ),
+             ),
+              child: Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.white),
+                ),
+              onPressed: () {
+                Navigator.of(context).push(
+                                    CupertinoSheetRoute<void>(
+                                     builder: (BuildContext context) => CancelDeal(
+                                      transaction: transaction,
+                                      status: state,
+                                      currentUserId: currentUserId,
+                                      ),
+                                    ),
+                                    );
+              }
               ),
-          ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                             minimumSize: Size(60, 50),
-                            ),
-                                            child: Text(
-                                               "Regresar",
-                                               style: const TextStyle(
-                           color: Colors.white,
-                           fontWeight: FontWeight.w400
-                                               ),
-                                            ),
-                                            onPressed: () => Navigator.pop(innerContext)
-                          ),
-                          VerticalDivider(width: 20,),
-                      CustomReactiveButton(
-                                        color: Colors.redAccent,
-                                        title: "Cancelar Trato",
-                                        onPressed: (){
-                                          if (_formKey.currentState!.validate()){
-                                          context.read<ButtonStateCubit>().execute(
-                                          usecase: UpdateDealUseCase(),
-                                          params: StatusModel(
-                                              status: "Cancelado", 
-                                              details: "Trato Cancelado por $currentUser", 
-                                              buyerConfirmation: state.buyerConfirmation, 
-                                              sellerConfirmation: state.sellerConfirmation, 
-                                              transactionId: state.transactionId, 
-                                              buyerId: state.buyerId, 
-                                              sellerId: state.sellerId, 
-                                              paymentDone: state.paymentDone, 
-                                              paymentTransferred: state.paymentTransferred, 
-                                              reimbursementDone: state.reimbursementDone, 
-                                              cancelled: true, 
-                                              statusId: state.statusId,
-                                              cancelledBy: currentUserId,
-                                              cancelMessage: _cancelCon.text
-                                          )
-                                        );
-                                        Navigator.pop(innerContext);
-                                        }
-                                        }
-                                        ),
-                        ],
-                      ),
-                      
-                                        ],
-      )
-                      
-                    ) );
-                  },
-                );
-              
-              
-              }
-            ),
-            SizedBox(width: 10,),
-            Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: Size(50, 50),
-                      backgroundColor: Colors.blue,
-                       ),
-                  child: Text(
-                     "Liberar Pago",
-                     style: const TextStyle(
-                       color: Colors.white,
-                       fontWeight: FontWeight.w400
-                     ),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context, 
-                      builder: (innerContext) => 
-                      BlocProvider.value(
-                    value: context.read<ButtonStateCubit>(),
-                    child: AlertDialog(
-        title: const Text('¿Quieres liberar el pago?'),
-        content: Text("Al liberar el pago se le transferirá al vendedor el monto depositado sin la comisión."),
-        actions: [    
-                  Row(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                             minimumSize: Size(60, 50),
-                            ),
-                                            child: Text(
-                                               "Regresar",
-                                               style: const TextStyle(
-                           color: Colors.white,
-                           fontWeight: FontWeight.w400
-                                               ),
-                                            ),
-                                            onPressed: () => Navigator.pop(innerContext)
-                          ),
-                          VerticalDivider(width: 20,),
-                      CustomReactiveButton(
-                                        color: Colors.blue,
-                                        title: "Liberar",
-                                        onPressed: (){
-                                          context.read<ButtonStateCubit>().execute(
-                                          usecase: UpdateDealUseCase(),
-                                          params: StatusModel(
-                                              status: "Completado", 
-                                              details: "Trato Completado, el monto pagado fué liberado exitosamente al vendedor", 
-                                              buyerConfirmation: state.buyerConfirmation, 
-                                              sellerConfirmation: state.sellerConfirmation, 
-                                              transactionId: state.transactionId, 
-                                              buyerId: state.buyerId, 
-                                              sellerId: state.sellerId, 
-                                              paymentDone: true, 
-                                              paymentTransferred: state.paymentTransferred, 
-                                              reimbursementDone: state.reimbursementDone, 
-                                              cancelled: state.cancelled, 
-                                              statusId: state.statusId,
-                                              cancelledBy: state.cancelledBy,
-                                              cancelMessage: _cancelCon.text
-                                          )
-                                        );
-                                        Navigator.pop(innerContext);
-                                        }
-                                        ),
-                        ],
-                      ),
-                      
-                                        ],
-                      )
-                      
-                    ) );
-                  },
-                );
-              
-              
-              }
-            ),
+            SizedBox(width: 55,),
+            liberarPago(context, state),
           ],
         )
       ],
@@ -460,113 +303,33 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
         Row(
           children: [
             SizedBox(width: 35,),
-            Builder(
-              builder: (context) {
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: Size(50, 50),
-                      backgroundColor: Colors.redAccent,
-                       ),
-                  child: Text(
-                     "Cancelar Trato",
-                     style: const TextStyle(
-                       color: Colors.white,
-                       fontWeight: FontWeight.w400
-                     ),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context, 
-                      builder: (innerContext) => 
-                      BlocProvider.value(
-                    value: context.read<ButtonStateCubit>(),
-                    child: AlertDialog(
-        title: const Text('¿Quieres Cancelar el Trato?'),
-        content: Text("Cancelar el trato notificará al vendedor/comprador.\nPorfavor escribe la razón de la cancelación."),
-        actions: [    
-          Form(
-            key: _formKey,
-            child: TextFormField(
-            controller: _cancelCon,
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
-            validator: (value){
-            if (value!.isEmpty){
-              return 'El campo no debe estar vacío';
-            }
-            if (value.length>150){
-              return 'El Campo no debe exceder los 150 caracteres';
-            }
-            if (value.length<5){
-              return 'El Campo debe ser mayor a 5 caracteres';
-            }
-            else{
-              return null;
-            }
-                    },
-                
-              ),
-          ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                             minimumSize: Size(60, 50),
-                            ),
-                                            child: Text(
-                                               "Regresar",
-                                               style: const TextStyle(
-                           color: Colors.white,
-                           fontWeight: FontWeight.w400
-                                               ),
-                                            ),
-                                            onPressed: () => Navigator.pop(innerContext)
-                          ),
-                          VerticalDivider(width: 20,),
-                      CustomReactiveButton(
-                                        color: Colors.redAccent,
-                                        title: "Cancelar Trato",
-                                        onPressed: (){
-                                          if (_formKey.currentState!.validate()){
-                                          context.read<ButtonStateCubit>().execute(
-                                          usecase: UpdateDealUseCase(),
-                                          params: StatusModel(
-                                              status: "Cancelado", 
-                                              details: "Trato Cancelado por $currentUser", 
-                                              buyerConfirmation: state.buyerConfirmation, 
-                                              sellerConfirmation: state.sellerConfirmation, 
-                                              transactionId: state.transactionId, 
-                                              buyerId: state.buyerId, 
-                                              sellerId: state.sellerId, 
-                                              paymentDone: state.paymentDone, 
-                                              paymentTransferred: state.paymentTransferred, 
-                                              reimbursementDone: state.reimbursementDone, 
-                                              cancelled: true, 
-                                              statusId: state.statusId,
-                                              cancelledBy: currentUserId,
-                                              cancelMessage: _cancelCon.text
-                                          )
-                                        );
-                                        Navigator.pop(innerContext);
-                                        }
-                                        }
-                                        ),
-                        ],
-                      ),
-                      
-                                        ],
-      )
-                      
-                    ) );
-                  },
-                );
-              
-              
+            ElevatedButton(
+            style:  ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+               minimumSize: Size(
+                120,
+                50
+               ),
+             ),
+              child: Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.white),
+                ),
+              onPressed: () {
+                Navigator.of(context).push(
+                                    CupertinoSheetRoute<void>(
+                                     builder: (BuildContext context) => CancelDeal(
+                                      transaction: transaction,
+                                      status: state,
+                                      currentUserId: currentUserId,
+                                      ),
+                                    ),
+                                    );
               }
-            ),
-            SizedBox(width: 10,),
+              ),
+            SizedBox(width: 55,),
             BasicAppButton(
-              width: 160,
+              width: 120,
               title: "Pagar",
               onPressed: () {
                 Navigator.of(context).push(
@@ -759,6 +522,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
   return Column();
 }
 
+
 Widget _clabes() {
     return StreamBuilder(
       stream: _clabeStream, 
@@ -859,6 +623,116 @@ Widget _clabes() {
     }
     );
   }
+
+  Form reasonToCancelForm(BuildContext context) {
+    return Form(
+        key: _formKeyCancel,
+        child: TextFormField(
+        controller: _cancelCon1,
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        validator: (value){
+        if (value!.isEmpty){
+          return 'El campo no debe estar vacío';
+        }
+        if (value.length>150){
+          return 'El Campo no debe exceder los 150 caracteres';
+        }
+        if (value.length<5){
+          return 'El Campo debe ser mayor a 5 caracteres';
+        }
+        else{
+          return null;
+        }
+                },
+            
+          ),
+      );
+  }
+
+Builder liberarPago(BuildContext mainContext, StatusEntity state) {
+  return Builder(
+            builder: (mainContext) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size(120, 50),
+                    backgroundColor: Colors.blue,
+                     ),
+                child: Text(
+                   "Liberar Pago",
+                   style: const TextStyle(
+                     color: Colors.white,
+                     fontWeight: FontWeight.w400
+                   ),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: mainContext, 
+                    builder: (innerContext) => 
+                    BlocProvider.value(
+                  value: mainContext.read<ButtonStateCubit>(),
+                  child: AlertDialog(
+      title: const Text('¿Quieres liberar el pago?'),
+      content: Text("Al liberar el pago se le transferirá al vendedor el monto depositado sin la comisión."),
+      actions: [    
+                Row(
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                           minimumSize: Size(60, 50),
+                          ),
+                                          child: Text(
+                                             "Regresar",
+                                             style: const TextStyle(
+                         color: Colors.white,
+                         fontWeight: FontWeight.w400
+                                             ),
+                                          ),
+                                          onPressed: () => Navigator.pop(innerContext)
+                        ),
+                        VerticalDivider(width: 20,),
+                    CustomReactiveButton(
+                                      color: Colors.blue,
+                                      title: "Liberar",
+                                      onPressed: (){
+                                        mainContext.read<ButtonStateCubit>().execute(
+                                        usecase: UpdateDealUseCase(),
+                                        params: StatusModel(
+                                            status: "Completado", 
+                                            details: "Trato Completado, el monto pagado fué liberado exitosamente al vendedor", 
+                                            buyerConfirmation: state.buyerConfirmation, 
+                                            sellerConfirmation: state.sellerConfirmation, 
+                                            transactionId: state.transactionId, 
+                                            buyerId: state.buyerId, 
+                                            sellerId: state.sellerId, 
+                                            paymentDone: true, 
+                                            paymentTransferred: state.paymentTransferred, 
+                                            reimbursementDone: state.reimbursementDone, 
+                                            cancelled: state.cancelled, 
+                                            statusId: state.statusId,
+                                            cancelledBy: state.cancelledBy,
+                                            cancelMessage: state.cancelMessage
+                                        )
+                                      );
+                                      Navigator.pop(innerContext);
+                                      }
+                                      ),
+                      ],
+                    ),
+                    
+                                      ],
+                    )
+                    
+                  ) );
+                },
+              );
+            
+            
+            }
+          );
+}
+
+
 }
 
 
