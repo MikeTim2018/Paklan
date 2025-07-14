@@ -103,6 +103,7 @@ class _MainWrapperState extends State<MainWrapper> {
   // Floating Action Button - MainWrapper Widget
   FloatingActionButton _mainWrapperFab() {
     return FloatingActionButton.extended(
+      heroTag: 'addDeal',
       label: Text("Nuevo trato"),
       onPressed: () {
         AppNavigator.push(context, TransactionSearch());

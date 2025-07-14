@@ -478,7 +478,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
                                     context.read<ButtonStateCubit>().execute(
                                           usecase: UpdateDealUseCase(),
                                           params: StatusModel(
-                                              status: "En proceso", 
+                                              status: "Aceptado", 
                                               details: "Trato aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
                                               buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
                                               sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 

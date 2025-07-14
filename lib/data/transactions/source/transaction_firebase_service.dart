@@ -29,7 +29,11 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     var currentUser = FirebaseAuth.instance.currentUser;
     return FirebaseFirestore.instance.collection('transactions').where(
            Filter.and(
-           Filter("status", isEqualTo: "En proceso"),
+           Filter.or(
+           Filter("status", isEqualTo: "Enviado"),
+           Filter("status", isEqualTo: "Depositado"),
+           Filter("status", isEqualTo: "Aceptado"),
+           ),
            Filter.or(
            Filter("members.buyerId", isEqualTo: currentUser?.uid),
            Filter("members.sellerId", isEqualTo: currentUser?.uid),

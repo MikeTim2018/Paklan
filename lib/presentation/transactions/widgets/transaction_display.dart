@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:paklan/common/bloc/server_time/server_time_state.dart';
 import 'package:paklan/common/bloc/server_time/server_time_state_cubit.dart';
@@ -12,6 +13,7 @@ import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
+import 'package:paklan/presentation/transactions/bloc/status_filter_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/service_locator.dart';
 import 'package:slide_countdown/slide_countdown.dart';
@@ -25,56 +27,152 @@ class TransactionDisplay extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ServerTimeStateCubit()..getServerTime(),
-      child: StreamBuilder<QuerySnapshot>(
-            stream: _transactionsStream,
-            builder: (context, AsyncSnapshot<QuerySnapshot> state){
-            if (state.connectionState == ConnectionState.waiting){
-              return SizedBox(
-                height: 400,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: const CircularProgressIndicator()
-                  ),
-              );
-            }
-            if (state.hasError){
-              return SizedBox(
-                height: 400,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Ha ocurrido un error, por favor intenta más tarde.",
-                    style: TextStyle(
-                      fontSize: 24
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ServerTimeStateCubit()..getServerTime(),),
+        BlocProvider(create: (context) => StatusFilterSelectionCubit())
+          ],
+          child: StreamBuilder<QuerySnapshot>(
+                stream: _transactionsStream,
+                builder: (context, AsyncSnapshot<QuerySnapshot> state){
+                if (state.connectionState == ConnectionState.waiting){
+                  return SizedBox(
+                    height: 400,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator()
+                      ),
+                  );
+                }
+                if (state.hasError){
+                  print(state.error);
+                  return SizedBox(
+                    height: 400,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Ha ocurrido un error, por favor intenta más tarde. ${state.error}",
+                        style: TextStyle(
+                          fontSize: 24
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }
-            if (state.data == null || state.data!.docs.isEmpty){
-              return listNoTransaction(context);
-            }
-            return Column(
-                  children: [
-                    SizedBox(height: 20,),
-                    Text(
-                      "Tratos en curso",
-                      style: TextStyle(
-                        fontSize: 20
-                      ),
-                      ),
-                    SizedBox(height: 40,),
-                    listTransactions(context, state.data!.docs.map(
-                      (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
-                      ).toList(),
-                      _scrollController
-                      ),
-                  ],
-              );
-            }
-          ),
+                  );
+                }
+                if (state.data == null || state.data!.docs.isEmpty){
+                  return listNoTransaction(context);
+                }
+                List<TransactionEntity> listEntities = state.data!.docs.map(
+                          (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
+                          ).toList();
+                return Column(
+                      children: [
+                        SizedBox(height: 20,),
+                        Text(
+                          "Tratos en curso",
+                          style: TextStyle(
+                            fontSize: 20
+                          ),
+                          ),
+                        Container(
+                          padding: EdgeInsets.all(13),
+                          height: 60,
+                          child: MultiSelectContainer(
+                              itemsDecoration: MultiSelectDecorations(
+                               decoration: BoxDecoration(
+                                   gradient: LinearGradient(colors: [
+                                     Colors.blue.withValues(alpha: 0.1),
+                                     Colors.yellow.withValues(alpha: 0.1),
+                                     
+                                   ]),
+                                   border: Border.all(color: Colors.green[200]!),
+                                   borderRadius: BorderRadius.circular(20)),
+                              
+                               selectedDecoration: BoxDecoration(
+                                   gradient: const LinearGradient(colors: [
+                                    Colors.lightBlueAccent,
+                                    Colors.blueAccent,
+                                    Color.fromARGB(255, 5, 80, 142)
+                                     
+                                   ]),
+                                   border: Border.all(color: Colors.green[700]!),
+                                   borderRadius: BorderRadius.circular(13)),
+                               disabledDecoration: BoxDecoration(
+                                   color: Colors.grey,
+                                   border: Border.all(color: Colors.grey[500]!),
+                                   borderRadius: BorderRadius.circular(10)),
+                             ),
+                            prefix: MultiSelectPrefix(
+                              selectedPrefix: const Padding(
+                                padding: EdgeInsets.only(right: 5),
+                                child: Icon(
+                                  Icons.visibility,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ),
+                              enabledPrefix: const Padding(
+                                padding: EdgeInsets.only(right: 5),
+                                child: Icon(
+                                  Icons.disabled_visible,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ),
+                              ),
+                              showInListView: true,
+                              listViewSettings: ListViewSettings(
+                                  scrollDirection: Axis.horizontal,
+                                  separatorBuilder: (_, _) => const SizedBox(
+                                        width: 10,
+                                      )),
+                              
+                              items: [
+                                MultiSelectCard(
+                                  value: 'Depositado', 
+                                  label: 'Depositado', 
+                                  selected: true,
+                                  textStyles: MultiSelectItemTextStyles(
+                                    selectedTextStyle: TextStyle(color: Colors.white)
+                                    )
+                                  ),
+                                MultiSelectCard(
+                                  value: 'Aceptado', 
+                                  label: 'Aceptado', 
+                                  selected: true,
+                                  textStyles: MultiSelectItemTextStyles(
+                                    selectedTextStyle: TextStyle(color: Colors.white)
+                                    )
+                                    ),
+                                MultiSelectCard(
+                                  value: 'Enviado', 
+                                  label: 'Enviado', 
+                                  selected: true,
+                                  textStyles: MultiSelectItemTextStyles(
+                                    selectedTextStyle: TextStyle(color: Colors.white)
+                                    )
+                                    ),
+                                
+                              ],
+                              onChange: (allSelectedItems, selectedItem) {
+                                context.read<StatusFilterSelectionCubit>().selectFilters(allSelectedItems);
+                              }
+                              ),
+                        ),
+                        SizedBox(height: 10,),
+                        BlocBuilder<StatusFilterSelectionCubit, List<String>>(
+                          builder: (context, state) {
+                            return listTransactions(context, listEntities.where((element) {
+                                  return context.read<StatusFilterSelectionCubit>().selectedFilters.contains(element.status);
+                                }).toList(),
+                              _scrollController
+                              );
+                          }
+                        ),
+                      ],
+                  );
+                }
+              ),  
     );
   }
 }
@@ -83,7 +181,6 @@ Widget listNoTransaction(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
           children: [
-                  SizedBox(height: 100,),
                   Container(
                     width: 350,
                     height: 350,
@@ -97,7 +194,7 @@ Widget listNoTransaction(BuildContext context) {
                         )
                     ),
                   ),
-                  SizedBox(height: 50,),
+                  SizedBox(height: 10,),
                   Text(
                     "Sin Tratos Activos",
                     style: TextStyle(
@@ -183,10 +280,22 @@ Widget listNoTransaction(BuildContext context) {
                 width: 20,
                 child: SvgPicture.asset(AppVectors.clock, fit: BoxFit.fill,)),
               decoration: BoxDecoration(
-                color: switch (status[index].timeLimit!.difference(DateTime.parse(serverTime)).inHours) {
-                               <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
-                               <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
-                               _ => const Color.fromARGB(216, 71, 145, 50),
+                gradient: switch (status[index].timeLimit!.difference(DateTime.parse(serverTime)).inHours) {
+                               <= 12 && >= 6 => LinearGradient(colors: [
+                                 Colors.yellowAccent.withValues(alpha: 0.7),
+                                 Colors.yellow.withValues(alpha: 0.9),
+                                 const Color.fromARGB(255, 161, 147, 20).withValues(alpha: 0.2),
+                               ]),
+                               <= 5 && >= 0 => LinearGradient(colors: [
+                                 Colors.redAccent.withValues(alpha: 0.7),
+                                 Colors.red.withValues(alpha: 0.9),
+                                 const Color.fromARGB(255, 126, 20, 12).withValues(alpha: 0.2),
+                               ]),
+                               _ => LinearGradient(colors: [
+                                 Colors.greenAccent.withValues(alpha: 0.7),
+                                 Colors.green.withValues(alpha: 0.9),
+                                 const Color.fromARGB(255, 25, 112, 28).withValues(alpha: 0.2),
+                               ]),
                                },
                 borderRadius: BorderRadius.circular(15)
                 ),
@@ -194,6 +303,9 @@ Widget listNoTransaction(BuildContext context) {
             )
             ),
           Card(
+            shadowColor: Colors.amber,
+            elevation: 11,
+            shape: StadiumBorder(),
             child: ListTile(
               shape: StadiumBorder(side: BorderSide(
                 width: 2,

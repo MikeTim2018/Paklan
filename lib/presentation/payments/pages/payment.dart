@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
@@ -14,7 +15,8 @@ import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 class Payment extends StatelessWidget {
   final TransactionEntity transaction;
   final StatusEntity status;
-  const Payment({super.key, required this.transaction, required this.status});
+  final TextEditingController _paymentCon = TextEditingController();
+  Payment({super.key, required this.transaction, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +72,21 @@ class Payment extends StatelessWidget {
                      SizedBox(height: 40,),
                      Text("Transfiere el monto total a la siguiente cuenta CLABE:"),
                      SizedBox(height: 25,),
-                     Text(
-                      "123456789123456798",
-                      style: TextStyle(
-                        fontSize: 23,
-                        
-                      ),
-                      ),
+                     Row(
+                       children: [
+                         TextFormField(
+                          readOnly: true,
+                          controller: _paymentCon,
+                          initialValue: "123456789123456798",
+                          style: TextStyle(
+                            fontSize: 23,
+                          ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Clipboard.setData(ClipboardData(text: _paymentCon.text)),
+                            child: Icon(Icons.copy, size: 30,)),
+                       ],
+                     ),
                      SizedBox(height: 25,),
                      Padding(
                        padding: const EdgeInsets.all(8.0),
@@ -93,7 +103,7 @@ class Payment extends StatelessWidget {
                                                 context.read<ButtonStateCubit>().execute(
                                                 usecase: UpdateDealUseCase(),
                                                 params: StatusModel(
-                                                    status: transaction.status, 
+                                                    status: 'Depositado', 
                                                     details: "Trato pagado, pendiente de liberación", 
                                                     buyerConfirmation: status.buyerConfirmation, 
                                                     sellerConfirmation: status.sellerConfirmation, 

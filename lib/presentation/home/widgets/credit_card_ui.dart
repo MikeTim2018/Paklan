@@ -11,7 +11,7 @@ class CreditCardUiCustom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (userData['CLABEs'][index].substring(0,3) == '002'){
-      return CreditCardUi(
+      return CreditCardUi(      
                shouldMaskCardNumber: true,
                cardHolderFullName: userData['firstName'],
                cardNumber: "${userData['CLABEs'][index].substring(0,4)}${userData['CLABEs'][index].substring(6,18)}",

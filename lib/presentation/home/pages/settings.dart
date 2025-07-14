@@ -18,7 +18,7 @@ import 'package:paklan/service_locator.dart';
 class Settings extends StatelessWidget{
   final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
   final TextEditingController _clabeCon = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyHist = GlobalKey<FormState>();
   Settings({super.key});
 
   @override
@@ -110,7 +110,7 @@ class Settings extends StatelessWidget{
                                        actions: <Widget>[
                                         
                                          Form(
-                                          key: _formKey,
+                                          key: _formKeyHist,
                                            child: Column(
                                              children: [
                                                _clabeField(context),
@@ -139,7 +139,7 @@ class Settings extends StatelessWidget{
                                                 color: Colors.blue,
                                                 title: "Añadir",
                                                 onPressed: () {
-                                              if (_formKey.currentState!.validate()){
+                                              if (_formKeyHist.currentState!.validate()){
                                                  context.read<ButtonStateCubit>().execute(
                                                  usecase: CreateClabenUseCase(),
                                                  params: _clabeCon.text);
@@ -224,8 +224,8 @@ Widget listNoClabes(BuildContext context) {
             children: [
                     SizedBox(height: 100,),
                     Container(
-                      width: 350,
-                      height: 350,
+                      width: 300,
+                      height: 300,
                       decoration: BoxDecoration(
                         color: AppColors.background,
                         shape: BoxShape.circle,
@@ -254,7 +254,7 @@ Widget listNoClabes(BuildContext context) {
                     ),
                      Center(
                                      child: FloatingActionButton(
-                                     splashColor: Colors.green,
+                                     heroTag: "clabe",
                                      onPressed: () async{
                                        return await showDialog(
                                          context: context, 
@@ -267,7 +267,7 @@ Widget listNoClabes(BuildContext context) {
                                        actions: <Widget>[
                                         
                                          Form(
-                                          key: _formKey,
+                                          key: _formKeyHist,
                                            child: Column(
                                              children: [
                                                _clabeField(context),
@@ -296,7 +296,7 @@ Widget listNoClabes(BuildContext context) {
                                                 color: Colors.blue,
                                                 title: "Añadir",
                                                 onPressed: () {
-                                              if (_formKey.currentState!.validate()){
+                                              if (_formKeyHist.currentState!.validate()){
                                                  context.read<ButtonStateCubit>().execute(
                                                  usecase: CreateClabenUseCase(),
                                                  params: _clabeCon.text);

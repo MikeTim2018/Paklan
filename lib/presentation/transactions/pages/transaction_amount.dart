@@ -398,7 +398,7 @@ class TransactionAmount extends StatelessWidget {
                   buyerConfirmation: userType == 1 ? false : true,
                   sellerConfirmation: userType == 1 ? true : false,
                   details: "Falta Confirmación de Trato. Recuerda que se tienen 24 horas para confirmar el trato, de lo contrario se cancelará por sistema.",
-                  status: "En proceso",
+                  status: "Enviado",
                   clabe: clabe,
                 );
                 context.read<ButtonStateCubit>().execute(
