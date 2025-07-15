@@ -15,8 +15,7 @@ import 'package:paklan/domain/transactions/usecases/update_deal.dart';
 class Payment extends StatelessWidget {
   final TransactionEntity transaction;
   final StatusEntity status;
-  final TextEditingController _paymentCon = TextEditingController();
-  Payment({super.key, required this.transaction, required this.status});
+  const Payment({super.key, required this.transaction, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -72,20 +71,22 @@ class Payment extends StatelessWidget {
                      SizedBox(height: 40,),
                      Text("Transfiere el monto total a la siguiente cuenta CLABE:"),
                      SizedBox(height: 25,),
-                     Row(
-                       children: [
-                         TextFormField(
-                          readOnly: true,
-                          controller: _paymentCon,
-                          initialValue: "123456789123456798",
-                          style: TextStyle(
-                            fontSize: 23,
-                          ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Clipboard.setData(ClipboardData(text: _paymentCon.text)),
-                            child: Icon(Icons.copy, size: 30,)),
-                       ],
+                     Center(
+                       child: Row(
+                         children: [
+                           SizedBox(width: 50,),
+                           Text(
+                            "123456789123456798",
+                            style: TextStyle(
+                              fontSize: 23,
+                            ),
+                            ),
+                            SizedBox(width: 20,),
+                            GestureDetector(
+                              onTap: () => Clipboard.setData(ClipboardData(text: "123456789123456798")),
+                              child: Icon(Icons.copy, size: 30,)),
+                         ],
+                       ),
                      ),
                      SizedBox(height: 25,),
                      Padding(

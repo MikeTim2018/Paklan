@@ -26,7 +26,7 @@ def send_reminder(_) -> None:
         event (scheduler_fn.ScheduledEvent): _description_
     """
     db = firestore.client()
-    transactions = db.collection("transactions").where("status", "==", "En proceso")
+    transactions = db.collection("transactions").where("status", "in", ["Aceptado", "Depositado", "Enviado"])
     transactions_list = transactions.get()
     for transac in transactions_list:
         transaction_dict = transac.to_dict()
@@ -123,7 +123,7 @@ def send_reminder_days(_) -> None:
         event (scheduler_fn.ScheduledEvent): _description_
     """
     db = firestore.client()
-    transactions = db.collection("transactions").where("status", "==", "En proceso")
+    transactions = db.collection("transactions").where("status", "in", "[Aceptado, Depositado, Enviado]")
     transactions_list = transactions.get()
     for transac in transactions_list:
         transaction_dict = transac.to_dict()
@@ -220,7 +220,7 @@ def update_remaining_hours(_) -> None:
         event (scheduler_fn.ScheduledEvent): _description_
     """
     db = firestore.client()
-    transactions = db.collection("transactions").where("status", "==", "En proceso")
+    transactions = db.collection("transactions").where("status", "in", ["Aceptado", "Depositado", "Enviado"])
     transactions_list = transactions.get()
     for transac in transactions_list:
         transaction_dict = transac.to_dict()

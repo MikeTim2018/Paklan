@@ -164,7 +164,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       );
       await statusRef.update({"statusId": statusRef.id});
       DocumentReference<Map<String, dynamic>> transactionRef = FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId);
-      if (transactionState.status == 'En proceso' && transactionState.details!.contains("Trato aceptado")){
+      if (transactionState.status == 'Aceptado' && transactionState.details!.contains("Trato aceptado")){
           await transactionRef.update(
             {
               "status": transactionState.status,
