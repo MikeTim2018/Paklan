@@ -22,6 +22,7 @@ class Payment extends StatelessWidget {
     return BlocProvider(
       create: (context) => ButtonStateCubit(),
       child: CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(middle: Icon(Icons.horizontal_rule, size: 45,),),
         resizeToAvoidBottomInset: true,
         child: Scaffold(
             appBar: BasicAppbar(

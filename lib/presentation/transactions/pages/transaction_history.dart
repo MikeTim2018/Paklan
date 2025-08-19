@@ -19,6 +19,7 @@ import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 class TransactionHistory extends StatelessWidget {
   final Stream<QuerySnapshot> _transactionsStream =  sl<GetCompletedTransactionsUseCase>().call();
   final ScrollController _scrollController = ScrollController();
+  final MultiSelectController<String> _multicontroller2 = MultiSelectController<String>();
   TransactionHistory({super.key});
 
   @override
@@ -75,6 +76,7 @@ class TransactionHistory extends StatelessWidget {
                           padding: EdgeInsets.all(13),
                           height: 60,
                           child: MultiSelectContainer(
+                              controller: _multicontroller2,
                               itemsDecoration: MultiSelectDecorations(
                                decoration: BoxDecoration(
                                    gradient: LinearGradient(colors: [
@@ -87,9 +89,9 @@ class TransactionHistory extends StatelessWidget {
                               
                                selectedDecoration: BoxDecoration(
                                    gradient: const LinearGradient(colors: [
-                                    Colors.lightBlueAccent,
-                                    Colors.blueAccent,
-                                    Color.fromARGB(255, 6, 111, 197)
+                                    Colors.white70,
+                                    Colors.white60,
+                                    Colors.white54,
                                      
                                    ]),
                                    border: Border.all(color: Colors.green[700]!),
@@ -126,31 +128,45 @@ class TransactionHistory extends StatelessWidget {
                               
                               items: [
                                 MultiSelectCard(
+                                        value: 'Todos', 
+                                        label: 'Todos', 
+                                        selected: true,
+                                        textStyles: MultiSelectItemTextStyles(
+                                          selectedTextStyle: TextStyle(color: Colors.black87)
+                                          )
+                                        ),
+                                MultiSelectCard(
                                   value: 'Completado', 
                                   label: 'Completado', 
-                                  selected: true,
+                                  selected: false,
                                   textStyles: MultiSelectItemTextStyles(
-                                    selectedTextStyle: TextStyle(color: Colors.white)
+                                    selectedTextStyle: TextStyle(color: Colors.black87)
                                     )
                                   ),
                                 MultiSelectCard(
                                   value: 'Cancelado', 
                                   label: 'Cancelado', 
-                                  selected: true,
+                                  selected: false,
                                   textStyles: MultiSelectItemTextStyles(
-                                    selectedTextStyle: TextStyle(color: Colors.white)
+                                    selectedTextStyle: TextStyle(color: Colors.black87)
                                     )
                                     ),
                                 
                               ],
                               onChange: (allSelectedItems, selectedItem) {
-                                context.read<StatusFilterHistorySelectionCubit>().selectFilters(allSelectedItems);
+                                _multicontroller2.select(selectedItem);
+                                allSelectedItems = [selectedItem];
+                                context.read<StatusFilterHistorySelectionCubit>().selectFilters(allSelectedItems.toSet().toList());
                               }
                               ),
                         ),
                     SizedBox(height: 10,),
                     BlocBuilder<StatusFilterHistorySelectionCubit, List<String>>(
                           builder: (context, state) {
+                            if (context.read<StatusFilterHistorySelectionCubit>().selectedFilters.contains("Todos")){
+                              return listTransactions(context, listEntities,_scrollController
+                              );
+                            }
                             return listTransactions(context, listEntities.where((element) {
                                   return context.read<StatusFilterHistorySelectionCubit>().selectedFilters.contains(element.status);
                                 }).toList(),

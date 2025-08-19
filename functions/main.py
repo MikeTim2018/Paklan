@@ -273,27 +273,66 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     try:
         status = event.data.get("status")
         transaction_id = event.params['transactionId']
+        buyer_confirmation = event.data.get("buyerConfirmation")
+        seller_confirmation = event.data.get("seller_confirmation")
     except KeyError:
         # No field, so do nothing.
         return
     db = firestore.client()
-
     transaction_document = db.collection("transactions").document(transaction_id)
     transaction = transaction_document.get().to_dict()
+    previous_state = db.collection("transactions").document(transaction_id).collection("status").document(transaction.get("previousStateId")).get().to_dict()
     buyer_doc = db.collection("users").document(transaction.get("members")["buyerId"])
     buyer = buyer_doc.get().to_dict()
     seller_doc = db.collection("users").document(transaction.get("members")["sellerId"])
     seller = seller_doc.get().to_dict()
+    title_buyer = ""
+    title_seller = ""
+    body_buyer = ""
+    body_seller = ""
+    if status == 'Enviado' and not buyer_confirmation:
+        title_buyer = "🚨 ¡Nueva propuesta esperándote!"
+        body_buyer = f"{seller.get("firstName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
+        title_seller = "✅ ¡Listo! Tu oferta fue enviada"
+        body_seller = f"Tu propuesta ya está en manos de {buyer.get("firstName")}. Espera su respuesta."
+    if status == "Enviado" and not seller_confirmation:
+        title_buyer = "✅ ¡Listo! Tu oferta fue enviada"
+        body_buyer = f"Tu propuesta ya está en manos de {seller.get("firstName")}. Espera su respuesta."
+        title_seller = "🚨 ¡Nueva propuesta esperándote!"
+        body_seller = f"{buyer.get("firstName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
+    if status == 'Aceptado':
+        if previous_state.get("buyerConfirmation"):
+            title_buyer = f"🎉 ¡{seller.get("firstName")} aceptó tu propuesta!"
+            body_buyer = "Recuerda que tienen 8 días para completar su trato"
+            title_seller = "✅ ¡Aceptaste la propuesta!"
+            body_seller = f"Ahora tienes un trato con {buyer.get('firstName')}. Espera el siguiente paso."
+            
+        if previous_state.get("sellerConfirmation"):
+            title_seller = f"🎉 ¡{buyer.get("firstName")} aceptó tu propuesta!"
+            body_seller = "Recuerda que tienen 8 días para completar su trato"
+            title_buyer = "✅ ¡Aceptaste la propuesta!"
+            body_buyer = f"Ahora tienes un trato con {seller.get('firstName')}. Espera el siguiente paso."
+
+    if status == 'Completado':
+        title_seller = '🤝¡Trato finalizado con éxito!'
+        title_buyer = '🤝¡Trato finalizado con éxito!'
+        body_buyer = f'Marcaste el trato con {seller.get("firstName")} como completado. ¡Gracias por formar parte!'
+        body_seller = f'Marcaste el trato con {buyer.get("firstName")} como completado. ¡Gracias por formar parte!'
+    if status == 'Cancelado':
+        title_seller = '🚫 El trato ha sido cancelado'
+        title_buyer = '🚫 El trato ha sido cancelado'
+        body_buyer = f'El trato con {seller.get("firstName")} ha sido cancelado.'
+        body_seller = f'El trato con {buyer.get("firstName")} ha sido cancelado.'
     if buyer.get("tokens"):
         msg = messaging.send_each_for_multicast(
             multicast_message=messaging.MulticastMessage(
                 notification=messaging.Notification(
-                    title=f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
-                    body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn.\n{event.data.get("details")}"
+                    title=title_buyer,
+                    body=body_buyer
                 ),
                 tokens=buyer.get("tokens"),
                 data={
-                    "message": f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
+                    "message": title_buyer,
                     "status": status,
                     "transaction": json.dumps({
                         "transactionId": transaction.get("transactionId"),
@@ -324,11 +363,11 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         multicast_message=messaging.MulticastMessage(
             tokens=seller.get("tokens"),
             notification=messaging.Notification(
-                title=f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
-                body=f"Estatus: {status}, Monto: ${transaction.get("amount")} mxn.\n{event.data.get("details")}"
+                title=title_seller,
+                body=body_seller
             ),
             data={
-                "message": f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
+                "message": title_seller,
                 "status": status,
                 "transaction": json.dumps({
                     "transactionId": transaction.get("transactionId"),

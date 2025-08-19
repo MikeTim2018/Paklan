@@ -8,7 +8,6 @@ import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
-import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -47,6 +46,7 @@ class TransactionDetail extends StatelessWidget {
             ));
     final String currenUserId = transactionStream['currentUserId'];
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(middle: Icon(Icons.horizontal_rule, size: 45),),
       resizeToAvoidBottomInset: true,
       child: MultiBlocProvider(
         providers: [
@@ -139,9 +139,10 @@ class TransactionDetail extends StatelessWidget {
                               child: Column(
                                 children: [
                                   SizedBox(height: 5,),
-                                  ExpansionTile(
+                                ExpansionTile(
+                                  initiallyExpanded: true,
                                     title: Center(child: const Text(
-                                      'Trato',
+                                      'Detalle del estátus',
                                       style: TextStyle(
                                         fontSize: 23
                                       ),
@@ -168,19 +169,7 @@ class TransactionDetail extends StatelessWidget {
                                             ],
                                             ),
                                       
-                                     )
-                                      ],
-                                  ),
-                                ExpansionTile(
-                                  initiallyExpanded: true,
-                                    title: Center(child: const Text(
-                                      'Detalle del estátus',
-                                      style: TextStyle(
-                                        fontSize: 23
-                                      ),
-                                      )
-                                      ),
-                                    children: <Widget>[
+                                     ),
                                       ListTile(title: Text(
                                         textAlign: TextAlign.justify,
                                             statusEntity.details!,
@@ -261,18 +250,26 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
         Row(
           children: [
             SizedBox(width: 35,),
+            liberarPago(context, state),
+            SizedBox(width: 55,),
             ElevatedButton(
             style:  ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Colors.red,
                minimumSize: Size(
                 120,
                 50
                ),
              ),
-              child: Text(
-                "Cancelar",
-                style: TextStyle(color: Colors.white),
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    "Cancelar",
+                    style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.sms_failed_sharp)
+                ],
+              ),
               onPressed: () {
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
@@ -285,8 +282,6 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
                                     );
               }
               ),
-            SizedBox(width: 55,),
-            liberarPago(context, state),
           ],
         )
       ],
@@ -305,16 +300,52 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
             SizedBox(width: 35,),
             ElevatedButton(
             style:  ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: const Color.fromARGB(255, 32, 155, 36),
                minimumSize: Size(
                 120,
                 50
                ),
              ),
-              child: Text(
-                "Cancelar",
-                style: TextStyle(color: Colors.white),
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    "Pagar",
+                    style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.payments_sharp)
+                ],
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                                    CupertinoSheetRoute<void>(
+                                     builder: (BuildContext context) => Payment(
+                                      transaction: transaction,
+                                      status: state,
+                                      ),
+                                    ),
+                                    );
+              }
+              ),
+              SizedBox(width: 55,),
+              ElevatedButton(
+            style:  ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+               minimumSize: Size(
+                120,
+                50
+               ),
+             ),
+              child: Row(
+                children: [
+                  Text(
+                    "Cancelar",
+                    style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.sms_failed_sharp)
+                ],
+              ),
               onPressed: () {
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
@@ -322,21 +353,6 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
                                       transaction: transaction,
                                       status: state,
                                       currentUserId: currentUserId,
-                                      ),
-                                    ),
-                                    );
-              }
-              ),
-            SizedBox(width: 55,),
-            BasicAppButton(
-              width: 120,
-              title: "Pagar",
-              onPressed: () {
-                Navigator.of(context).push(
-                                    CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => Payment(
-                                      transaction: transaction,
-                                      status: state,
                                       ),
                                     ),
                                     );
@@ -392,6 +408,51 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
         SizedBox(height: 10,),
         Row(
           children: [
+            SizedBox(width: 35,),
+            Builder(
+              builder: (context) {
+            return CustomReactiveButton(
+                                color: Colors.blueAccent,
+                                title: "Aceptar Trato",
+                                onPressed: (){
+                                  String clabe = context.read<ClabeSelectionCubit>().selectedClabe;
+                                   if (clabe.isNotEmpty){
+                                    context.read<ButtonStateCubit>().execute(
+                                          usecase: UpdateDealUseCase(),
+                                          params: StatusModel(
+                                              status: "Aceptado", 
+                                              details: "Trato aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
+                                              buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
+                                              sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 
+                                              transactionId: state.transactionId, 
+                                              buyerId: state.buyerId, 
+                                              sellerId: state.sellerId, 
+                                              paymentDone: state.paymentDone, 
+                                              paymentTransferred: state.paymentTransferred, 
+                                              reimbursementDone: state.reimbursementDone, 
+                                              cancelled: state.cancelled, 
+                                              statusId: state.statusId,
+                                          )
+                                        );
+                                  }
+                                  else if(clabe.isEmpty){
+                                     var snackbar = SnackBar(
+                                       content: Text(
+                                         "No has seleccionado una cuenta CLABE",
+                                         style: TextStyle(
+                                           color: Colors.white70
+                                         ),),
+                                       behavior: SnackBarBehavior.floating,
+                                       backgroundColor: Colors.black87,
+                                       showCloseIcon: true,
+                                       closeIconColor: Colors.white70,
+                                       );
+                                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                                   }
+                                },
+                                );
+              }
+            ),
             SizedBox(width: 35,),
             Builder(
               builder: (context) {
@@ -464,51 +525,6 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
                 );
               
               
-              }
-            ),
-            SizedBox(width: 35,),
-            Builder(
-              builder: (context) {
-            return CustomReactiveButton(
-                                color: Colors.blueAccent,
-                                title: "Aceptar Trato",
-                                onPressed: (){
-                                  String clabe = context.read<ClabeSelectionCubit>().selectedClabe;
-                                   if (clabe.isNotEmpty){
-                                    context.read<ButtonStateCubit>().execute(
-                                          usecase: UpdateDealUseCase(),
-                                          params: StatusModel(
-                                              status: "Aceptado", 
-                                              details: "Trato aceptado por $currentUser .\nRecuerda que tienes 8 días para concretar el trato, de lo contrario se cancelará por sistema.", 
-                                              buyerConfirmation: currentUser == 'Comprador' ? true:state.buyerConfirmation, 
-                                              sellerConfirmation: currentUser == 'Vendedor' ? true:state.sellerConfirmation, 
-                                              transactionId: state.transactionId, 
-                                              buyerId: state.buyerId, 
-                                              sellerId: state.sellerId, 
-                                              paymentDone: state.paymentDone, 
-                                              paymentTransferred: state.paymentTransferred, 
-                                              reimbursementDone: state.reimbursementDone, 
-                                              cancelled: state.cancelled, 
-                                              statusId: state.statusId,
-                                          )
-                                        );
-                                  }
-                                  else if(clabe.isEmpty){
-                                     var snackbar = SnackBar(
-                                       content: Text(
-                                         "No has seleccionado una cuenta CLABE",
-                                         style: TextStyle(
-                                           color: Colors.white70
-                                         ),),
-                                       behavior: SnackBarBehavior.floating,
-                                       backgroundColor: Colors.black87,
-                                       showCloseIcon: true,
-                                       closeIconColor: Colors.white70,
-                                       );
-                                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                                   }
-                                },
-                                );
               }
             ),
           ],
@@ -658,13 +674,16 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                     minimumSize: Size(120, 50),
                     backgroundColor: Colors.blue,
                      ),
-                child: Text(
-                   "Liberar Pago",
-                   style: const TextStyle(
-                     color: Colors.white,
-                     fontWeight: FontWeight.w400
-                   ),
-                ),
+                child:  Row(
+                children: [
+                  Text(
+                    "Liberar Pago",
+                    style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.payments_sharp)
+                ],
+              ),
                 onPressed: () {
                   showDialog(
                     context: mainContext, 
@@ -715,6 +734,15 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                                         )
                                       );
                                       Navigator.pop(innerContext);
+                                      Navigator.of(mainContext).push(
+                                      CupertinoSheetRoute<void>(
+                                      builder: (BuildContext context) => CancelDeal(
+                                      transaction: transaction,
+                                      status: state,
+                                      currentUserId: "Comprador",
+                                      ),
+                                    ),
+                                    );
                                       }
                                       ),
                       ],

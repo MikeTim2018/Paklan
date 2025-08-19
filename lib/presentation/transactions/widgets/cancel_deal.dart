@@ -27,6 +27,7 @@ class CancelDeal extends StatelessWidget {
     return BlocProvider(
       create: (context) => ButtonStateCubit(),
       child: CupertinoPageScaffold(
+        navigationBar: const CupertinoNavigationBar(middle: Icon(Icons.horizontal_rule, size: 45,),),
         resizeToAvoidBottomInset: true,
         child: Scaffold(
             appBar: BasicAppbar(
@@ -60,15 +61,15 @@ class CancelDeal extends StatelessWidget {
                       itemsDecoration: MultiSelectDecorations(
                         decoration: BoxDecoration(
                             gradient: LinearGradient(colors: [
-                              Colors.blue.withValues(alpha: 0.1),
+                              Colors.green.withValues(alpha: 0.1),
                               Colors.yellow.withValues(alpha: 0.1),
                             ]),
                             border: Border.all(color: Colors.green[200]!),
                             borderRadius: BorderRadius.circular(20)),
                         selectedDecoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
+                            gradient: LinearGradient(colors: [
                               Colors.red,
-                              AppColors.primary
+                              Colors.red.withValues(alpha: 0.7)
                             ]),
                             border: Border.all(color: Colors.green[700]!),
                             borderRadius: BorderRadius.circular(13)),
@@ -79,7 +80,7 @@ class CancelDeal extends StatelessWidget {
                       ),
                       maxSelectableCount: 3,
                       highlightColor: Colors.white38,
-                      splashColor: const Color.fromRGBO(82, 184, 221, 1),
+                      splashColor: Colors.red,
                     prefix: MultiSelectPrefix(
                         selectedPrefix: const Padding(
                           padding: EdgeInsets.only(right: 5),
@@ -125,54 +126,73 @@ class CancelDeal extends StatelessWidget {
                           },
                     onChange: (allSelectedItems, selectedItem) {}),
                     SizedBox(height: 25,),
-                     Builder(
-                       builder: (context) {
-                         return Padding(
-                           padding: const EdgeInsets.all(8.0),
-                           child: CustomReactiveButton(
-                                              color: Colors.redAccent,           
-                                              title: "Cancelar trato",
-                                              onPressed: (){
-                                                if (_multiCon.getSelectedItems().isNotEmpty){
-                                                  print(_multiCon.getSelectedItems());
-                                                context.read<ButtonStateCubit>().execute(
-                                                usecase: UpdateDealUseCase(),
-                                                params: StatusModel(
-                                                    status: 'Cancelado', 
-                                                    details: "Trato cancelado por usuario", 
-                                                    buyerConfirmation: status.buyerConfirmation, 
-                                                    sellerConfirmation: status.sellerConfirmation, 
-                                                    transactionId: transaction.transactionId, 
-                                                    buyerId: status.buyerId, 
-                                                    sellerId: status.sellerId, 
-                                                    paymentDone: status.paymentDone, 
-                                                    paymentTransferred: status.paymentTransferred, 
-                                                    reimbursementDone: status.reimbursementDone, 
-                                                    cancelled: true, 
-                                                    statusId: status.statusId,
-                                                    cancelledBy: currentUserId,
-                                                    cancelMessage: _multiCon.getSelectedItems()
-                                                )
-                                              );
-                                              }
-                                              else {
-                                                var snackbar = SnackBar(
-                                                 content: Text(
-                                                   "¡Tienes que elegir al menos una razón!",
-                                                   style: TextStyle(
-                                                     color: Colors.white70
-                                                   ),),
-                                                 behavior: SnackBarBehavior.floating,
-                                                 backgroundColor: Colors.black87,
-                                                 showCloseIcon: true,
-                                                 closeIconColor: Colors.white70,
-                                                 );
-                                                 ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                                              }
-                                              }
-                                              ),
-                         );
-                       }
+                     Row(
+                       children: [
+                        SizedBox(width: 50,),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                                 minimumSize: Size(50, 50),
+                                 backgroundColor: AppColors.primary,
+                                  ),
+                          child: Text(
+                            "Regresar",
+                            style: TextStyle(
+                              color: Colors.white
+                            ),
+                            ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        SizedBox(width: 10,),
+                         Builder(
+                           builder: (context) {
+                             return Padding(
+                               padding: const EdgeInsets.all(8.0),
+                               child: CustomReactiveButton(
+                                                  color: Colors.redAccent,           
+                                                  title: "Cancelar trato",
+                                                  onPressed: (){
+                                                    if (_multiCon.getSelectedItems().isNotEmpty){
+                                                      print(_multiCon.getSelectedItems());
+                                                    context.read<ButtonStateCubit>().execute(
+                                                    usecase: UpdateDealUseCase(),
+                                                    params: StatusModel(
+                                                        status: 'Cancelado', 
+                                                        details: "Trato cancelado por usuario", 
+                                                        buyerConfirmation: status.buyerConfirmation, 
+                                                        sellerConfirmation: status.sellerConfirmation, 
+                                                        transactionId: transaction.transactionId, 
+                                                        buyerId: status.buyerId, 
+                                                        sellerId: status.sellerId, 
+                                                        paymentDone: status.paymentDone, 
+                                                        paymentTransferred: status.paymentTransferred, 
+                                                        reimbursementDone: status.reimbursementDone, 
+                                                        cancelled: true, 
+                                                        statusId: status.statusId,
+                                                        cancelledBy: currentUserId,
+                                                        cancelMessage: _multiCon.getSelectedItems()
+                                                    )
+                                                  );
+                                                  }
+                                                  else {
+                                                    var snackbar = SnackBar(
+                                                     content: Text(
+                                                       "¡Tienes que elegir al menos una razón!",
+                                                       style: TextStyle(
+                                                         color: Colors.white70
+                                                       ),),
+                                                     behavior: SnackBarBehavior.floating,
+                                                     backgroundColor: Colors.black87,
+                                                     showCloseIcon: true,
+                                                     closeIconColor: Colors.white70,
+                                                     );
+                                                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                                                  }
+                                                  }
+                                                  ),
+                             );
+                           }
+                         ),
+                       ],
                      )
                 ],
                             ),

@@ -24,6 +24,7 @@ class TransactionDisplay extends StatelessWidget{
   TransactionDisplay({super.key});
   final Stream<QuerySnapshot> _transactionsStream =  sl<GetTransactionsUseCase>().call();
   final ScrollController _scrollController = ScrollController();
+  final MultiSelectController<String> _multicontroller = MultiSelectController<String>();
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +46,12 @@ class TransactionDisplay extends StatelessWidget{
                   );
                 }
                 if (state.hasError){
-                  print(state.error);
                   return SizedBox(
                     height: 400,
                     child: Container(
                       alignment: Alignment.center,
                       child: Text(
-                        "Ha ocurrido un error, por favor intenta más tarde. ${state.error}",
+                        "Ha ocurrido un error, por favor intenta más tarde.",
                         style: TextStyle(
                           fontSize: 24
                         ),
@@ -74,94 +74,118 @@ class TransactionDisplay extends StatelessWidget{
                             fontSize: 20
                           ),
                           ),
-                        Container(
-                          padding: EdgeInsets.all(13),
-                          height: 60,
-                          child: MultiSelectContainer(
-                              itemsDecoration: MultiSelectDecorations(
-                               decoration: BoxDecoration(
-                                   gradient: LinearGradient(colors: [
-                                     Colors.blue.withValues(alpha: 0.1),
-                                     Colors.yellow.withValues(alpha: 0.1),
-                                     
-                                   ]),
-                                   border: Border.all(color: Colors.green[200]!),
-                                   borderRadius: BorderRadius.circular(20)),
-                              
-                               selectedDecoration: BoxDecoration(
-                                   gradient: const LinearGradient(colors: [
-                                    Colors.lightBlueAccent,
-                                    Colors.blueAccent,
-                                    Color.fromARGB(255, 5, 80, 142)
-                                     
-                                   ]),
-                                   border: Border.all(color: Colors.green[700]!),
-                                   borderRadius: BorderRadius.circular(13)),
-                               disabledDecoration: BoxDecoration(
-                                   color: Colors.grey,
-                                   border: Border.all(color: Colors.grey[500]!),
-                                   borderRadius: BorderRadius.circular(10)),
-                             ),
-                            prefix: MultiSelectPrefix(
-                              selectedPrefix: const Padding(
-                                padding: EdgeInsets.only(right: 5),
-                                child: Icon(
-                                  Icons.visibility,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                              ),
-                              enabledPrefix: const Padding(
-                                padding: EdgeInsets.only(right: 5),
-                                child: Icon(
-                                  Icons.disabled_visible,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                              ),
-                              ),
-                              showInListView: true,
-                              listViewSettings: ListViewSettings(
-                                  scrollDirection: Axis.horizontal,
-                                  separatorBuilder: (_, _) => const SizedBox(
-                                        width: 10,
-                                      )),
-                              
-                              items: [
-                                MultiSelectCard(
-                                  value: 'Depositado', 
-                                  label: 'Depositado', 
-                                  selected: true,
-                                  textStyles: MultiSelectItemTextStyles(
-                                    selectedTextStyle: TextStyle(color: Colors.white)
-                                    )
-                                  ),
-                                MultiSelectCard(
-                                  value: 'Aceptado', 
-                                  label: 'Aceptado', 
-                                  selected: true,
-                                  textStyles: MultiSelectItemTextStyles(
-                                    selectedTextStyle: TextStyle(color: Colors.white)
-                                    )
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Container(
+                            padding: EdgeInsets.all(13),
+                            height: 60,
+                            child: Row(
+                              children: [
+                                SizedBox(width: 10,),
+                                MultiSelectContainer(
+                                  maxSelectableCount: 1,
+                                  controller: _multicontroller,
+                                  wrapSettings: WrapSettings(direction: Axis.horizontal),
+                                    itemsDecoration: MultiSelectDecorations(
+                                     decoration: BoxDecoration(
+                                         gradient: LinearGradient(colors: [
+                                           Colors.blue.withValues(alpha: 0.1),
+                                           Colors.yellow.withValues(alpha: 0.1),
+                                           
+                                         ]),
+                                         border: Border.all(color: Colors.green[200]!),
+                                         borderRadius: BorderRadius.circular(20)),
+                                    
+                                     selectedDecoration: BoxDecoration(
+                                         gradient: LinearGradient(colors: [
+                                           Colors.white70,
+                                           Colors.white60,
+                                           Colors.white54,
+                                         ]),
+                                         border: Border.all(color: Colors.green[700]!),
+                                         borderRadius: BorderRadius.circular(13)),
+                                     disabledDecoration: BoxDecoration(
+                                         color: Colors.grey,
+                                         border: Border.all(color: Colors.grey[500]!),
+                                         borderRadius: BorderRadius.circular(10)),
+                                   ),
+                                  prefix: MultiSelectPrefix(
+                                    selectedPrefix: const Padding(
+                                      padding: EdgeInsets.only(right: 5),
+                                      child: Icon(
+                                        Icons.visibility,
+                                        color: Colors.black87,
+                                        size: 14,
+                                      ),
                                     ),
-                                MultiSelectCard(
-                                  value: 'Enviado', 
-                                  label: 'Enviado', 
-                                  selected: true,
-                                  textStyles: MultiSelectItemTextStyles(
-                                    selectedTextStyle: TextStyle(color: Colors.white)
-                                    )
+                                    enabledPrefix: const Padding(
+                                      padding: EdgeInsets.only(right: 5),
+                                      child: Icon(
+                                        Icons.disabled_visible,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
                                     ),
-                                
+                                    ),
+                                    showInListView: true,
+                                    listViewSettings: ListViewSettings(
+                                        scrollDirection: Axis.horizontal,
+                                        separatorBuilder: (_, _) => const SizedBox(
+                                              width: 10,
+                                            )),
+                                    
+                                    items: [
+                                      MultiSelectCard(
+                                        value: 'Todos', 
+                                        label: 'Todos', 
+                                        selected: true,
+                                        textStyles: MultiSelectItemTextStyles(
+                                          selectedTextStyle: TextStyle(color: Colors.black87)
+                                          )
+                                        ),
+                                      MultiSelectCard(
+                                        value: 'Depositado', 
+                                        label: 'Depositado', 
+                                        selected: false,
+                                        textStyles: MultiSelectItemTextStyles(
+                                          selectedTextStyle: TextStyle(color: Colors.black87)
+                                          )
+                                        ),
+                                      MultiSelectCard(
+                                        value: 'Aceptado', 
+                                        label: 'Aceptado', 
+                                        selected: false,
+                                        textStyles: MultiSelectItemTextStyles(
+                                          selectedTextStyle: TextStyle(color: Colors.black87)
+                                          )
+                                          ),
+                                      MultiSelectCard(
+                                        value: 'Enviado', 
+                                        label: 'Enviado', 
+                                        selected: false,
+                                        textStyles: MultiSelectItemTextStyles(
+                                          selectedTextStyle: TextStyle(color: Colors.black87)
+                                          )
+                                          ),
+                                      
+                                    ],
+                                    onChange: (allSelectedItems, selectedItem) {
+                                      _multicontroller.select(selectedItem);
+                                      allSelectedItems = [selectedItem];
+                                      context.read<StatusFilterSelectionCubit>().selectFilters(allSelectedItems.toSet().toList());
+                                    }
+                                    ),
                               ],
-                              onChange: (allSelectedItems, selectedItem) {
-                                context.read<StatusFilterSelectionCubit>().selectFilters(allSelectedItems);
-                              }
-                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(height: 10,),
                         BlocBuilder<StatusFilterSelectionCubit, List<String>>(
                           builder: (context, state) {
+                            if (context.read<StatusFilterSelectionCubit>().selectedFilters.contains("Todos")){
+                              return listTransactions(context, listEntities,_scrollController
+                              );
+                            }
                             return listTransactions(context, listEntities.where((element) {
                                   return context.read<StatusFilterSelectionCubit>().selectedFilters.contains(element.status);
                                 }).toList(),

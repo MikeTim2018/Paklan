@@ -162,7 +162,12 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "cancelMessage": transactionState.cancelMessage,
         }
       );
-      await statusRef.update({"statusId": statusRef.id});
+      await statusRef.update(
+        {
+          "statusId": statusRef.id,
+          "previousStatusId": transactionState.statusId
+          }
+          );
       DocumentReference<Map<String, dynamic>> transactionRef = FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId);
       if (transactionState.status == 'Aceptado' && transactionState.details!.contains("Trato aceptado")){
           await transactionRef.update(
