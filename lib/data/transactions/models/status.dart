@@ -18,6 +18,10 @@ class StatusModel {
   String ? cancelledBy;
   DateTime ? timeLimit;
   List ? cancelMessage;
+  List ? completedRatingMessageForSeller;
+  double ? sellerRating;
+  List ? completedRatingMessageForBuyer;
+  double ? buyerRating;
 
   StatusModel({
   required this.status,
@@ -34,7 +38,11 @@ class StatusModel {
   this.cancelMessage,
   this.statusId,
   this.cancelledBy,
-  this.timeLimit
+  this.timeLimit,
+  this.completedRatingMessageForSeller,
+  this.sellerRating,
+  this.completedRatingMessageForBuyer,
+  this.buyerRating,
   });
 
 Map<String, dynamic> toMap() {
@@ -54,6 +62,10 @@ Map<String, dynamic> toMap() {
       'statusId': statusId,
       'timeLimit': timeLimit,
       'cancelMessage': cancelMessage,
+      'completedRatingMessageForSeller': completedRatingMessageForSeller,
+      'sellerRating': sellerRating,
+      'completedRatingMessageForBuyer': completedRatingMessageForBuyer,
+      'buyerRating': buyerRating,
     };
   }
 
@@ -73,6 +85,10 @@ Map<String, dynamic> toMap() {
       cancelled: map['cancelled'] as bool,
       statusId: map['statusId'] ?? '',
       cancelMessage: map['cancelMessage'] ?? [],
+      completedRatingMessageForSeller: map['completedRatingMessageForSeller'] ?? [],
+      sellerRating: map['sellerRating'] ?? 3.0,
+      completedRatingMessageForBuyer: map['completedRatingMessageForBuyer'] ?? [],
+      buyerRating: map['buyerRating'] ?? 3.0
     );
   }
   
@@ -99,6 +115,10 @@ extension UserXModel on StatusModel {
       reimbursementDone: reimbursementDone,
       statusId: statusId,
       cancelMessage: cancelMessage,
+      completedRatingMessageForBuyer: completedRatingMessageForBuyer,
+      completedRatingMessageForSeller: completedRatingMessageForSeller,
+      sellerRating: sellerRating,
+      buyerRating: buyerRating,
     );
   }
 }

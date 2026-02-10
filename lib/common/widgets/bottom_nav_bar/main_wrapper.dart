@@ -15,6 +15,8 @@ import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
 
+  get pageController => null;
+
   @override
   State<MainWrapper> createState() => _MainWrapperState();
 }
@@ -106,6 +108,7 @@ class _MainWrapperState extends State<MainWrapper> {
       heroTag: 'addDeal',
       label: Text("Nuevo trato"),
       onPressed: () {
+
         AppNavigator.push(context, TransactionSearch());
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),

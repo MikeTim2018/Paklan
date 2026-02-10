@@ -66,7 +66,7 @@ class PersonCard extends StatelessWidget {
           ),
           ),
           subtitle: Text(
-            user.phone,
+            user.email,
             style: TextStyle(
               color: Colors.grey
             ),

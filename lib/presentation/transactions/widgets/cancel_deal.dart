@@ -6,6 +6,7 @@ import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
+import 'package:paklan/common/widgets/button/basic_app_button.dart';
 import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
 import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -152,7 +153,7 @@ class CancelDeal extends StatelessWidget {
                                                   title: "Cancelar trato",
                                                   onPressed: (){
                                                     if (_multiCon.getSelectedItems().isNotEmpty){
-                                                      print(_multiCon.getSelectedItems());
+                                                    print(_multiCon.getSelectedItems());
                                                     context.read<ButtonStateCubit>().execute(
                                                     usecase: UpdateDealUseCase(),
                                                     params: StatusModel(

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -251,6 +252,7 @@ Widget listNoDeal(BuildContext context) {
   }
 
   Widget transactionTile(List<TransactionEntity> state, int index) {
+    String currentUserId = FirebaseAuth.instance.currentUser!.uid;
     return Card(
       shadowColor: Colors.amber,
       elevation: 11,
@@ -263,22 +265,17 @@ Widget listNoDeal(BuildContext context) {
             )
             ),
         tileColor: AppColors.secondBackground,
-        leading: CircleAvatar(
-          backgroundColor: AppColors.secondBackground,
-          radius: 30,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white70,
-              shape: BoxShape.circle,
-            ),
-            height: 40,
-            width: 40,
-            child: SvgPicture.asset(
-                AppVectors.cash,
-                fit: BoxFit.fill,
-              ),
-          ),
-        ),
+        trailing: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                  ),
+                  height: 105,
+                  width: 80,
+                  child: SvgPicture.asset(
+                      AppVectors.cash,
+                      fit: BoxFit.fitHeight,
+                    ),
+                ),
         title: Text(
               '${toBeginningOfSentenceCase(state[index].name)}',
               style: TextStyle(
@@ -287,24 +284,24 @@ Widget listNoDeal(BuildContext context) {
               ),
               ),
               subtitle: Text(
-                'Monto: \$${state[index].amount}\nVendedor: ${state[index].sellerFirstName}\nComprador: ${state[index].buyerFirstName}',
-                style: TextStyle(
-                  color: Colors.grey
+                  currentUserId == state[index].sellerId ? '${state[index].buyerFirstName}':'${state[index].sellerFirstName}',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 13
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-          trailing: Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.lightBlue,
-              shape: BoxShape.circle,
-            ),
-            child: SvgPicture.asset(
-              state[index].status=='Completado'? AppVectors.check : AppVectors.error,
-              fit: BoxFit.fill,
-            ),
-          ),
+              leading:  SizedBox(
+                width: 95,
+                child: Text(
+                                '\$${(double.parse(state[index].amount!) + double.parse(state[index].fee!))
+                                .truncateToDouble().
+                                toStringAsFixed(2).
+                                replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} '
+                                ,style: TextStyle(fontSize: 16, color: Colors.white, decoration: state[index].status=='Completado' ? TextDecoration.none: TextDecoration.lineThrough),
+                                overflow: TextOverflow.ellipsis,
+                                ),
+              )
       ),
     );
   }

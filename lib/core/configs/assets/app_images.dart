@@ -15,5 +15,6 @@ class AppImages{
   static const hsbc = '${basePath}HSBC_logo_(2018).svg$format';
   static const santander = '${basePath}Banco_Santander_Logotipo.svg$format';
   static const background = '${basePath}pexels-umkreisel-app-956999$format2';
+  static const retroHome = '${basePath}retro-home$format';
 
 }

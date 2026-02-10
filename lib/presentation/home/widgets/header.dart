@@ -13,21 +13,19 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserInfoDisplayCubit()..displayUserInfo(),
-          child: BlocBuilder < UserInfoDisplayCubit, UserInfoDisplayState > (
+    return BlocBuilder < UserInfoDisplayCubit, UserInfoDisplayState > (
             builder: (context, state) {
               if (state is UserInfoLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 130,
+                  height: 140,
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     image: DecorationImage(image: const AssetImage(
-                            AppImages.noTrades,
+                            AppImages.retroHome,
                           )
                           ,
                           fit: BoxFit.fitWidth,
@@ -60,8 +58,7 @@ class Header extends StatelessWidget {
               }
               return Container();
             },
-          ),
-    );
+          );
   }
 
   Widget _profileImage(UserEntity user,BuildContext context) {
@@ -102,7 +99,7 @@ class Header extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 18,
-              color: Colors.black
+              color: Colors.white
             ),
           ),
         ),

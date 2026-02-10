@@ -75,7 +75,7 @@ class TransactionAmount extends StatelessWidget {
         ],
         child: Scaffold(
           appBar: BasicAppbar(
-            title: Text("Definir el Trato"),
+            height: 60,
           ),
           bottomNavigationBar: BottomAppBar(
             child: Column(
@@ -105,7 +105,6 @@ class TransactionAmount extends StatelessWidget {
               key: _formKey,
               child: Column(
                 children: [
-                  SizedBox(height: 25,),
                   _name(context),
                   SizedBox(height: 10,),
                   _nameField(context),
@@ -139,7 +138,7 @@ class TransactionAmount extends StatelessWidget {
       child: Text(
         'Define el monto del trato',
         style: TextStyle(
-          fontSize: 25,
+          fontSize: 21,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -150,9 +149,9 @@ class TransactionAmount extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(13.0),
       child: Text(
-        'Ingresa el Nombre del Trato',
+        '¿Qué quieres vender?',
         style: TextStyle(
-          fontSize: 25,
+          fontSize: 21,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -163,9 +162,9 @@ class TransactionAmount extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(13.0),
       child: Text(
-        '¿Qué quieres hacer?',
+        'Sube fotos del producto',
         style: TextStyle(
-          fontSize: 25,
+          fontSize: 21,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -222,7 +221,7 @@ class TransactionAmount extends StatelessWidget {
       child: Text(
         'Ingresa tu cuenta CLABE',
         style: TextStyle(
-          fontSize: 25,
+          fontSize: 21,
           fontWeight: FontWeight.bold
         ),
       ),
@@ -260,7 +259,7 @@ class TransactionAmount extends StatelessWidget {
                     child: Text(
                       "Ha ocurrido un error, por favor intenta más tarde",
                       style: TextStyle(
-                        fontSize: 24
+                        fontSize: 21
                       ),
                     ),
                   ),
@@ -397,7 +396,7 @@ class TransactionAmount extends StatelessWidget {
                   buyerId: userType == 1 ? userEntity.userId : userId,
                   buyerConfirmation: userType == 1 ? false : true,
                   sellerConfirmation: userType == 1 ? true : false,
-                  details: "Falta Confirmación de Trato. Recuerda que se tienen 24 horas para confirmar el trato, de lo contrario se cancelará por sistema.",
+                  details: "En caso de no ser aceptado el trato dentro de 24hrs se cancelará",
                   status: "Enviado",
                   clabe: clabe,
                 );

@@ -9,6 +9,7 @@ class TransactionEntity {
   String ? statusId;
   DateTime ? timeLimit;
   String ? fee;
+  String ? sellerId;
 
   TransactionEntity({
     required this.name,
@@ -20,5 +21,6 @@ class TransactionEntity {
     required this.statusId,
     this.timeLimit,
     this.fee,
+    this.sellerId
   });
 }

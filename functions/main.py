@@ -210,7 +210,7 @@ def send_reminder_days(_) -> None:
             "tokens": new_tokens
         })
 
-@scheduler_fn.on_schedule(schedule="*/5 * * * *")
+@scheduler_fn.on_schedule(schedule="* * */1 * *")
 def update_remaining_hours(_) -> None:
     """
     updates the remaining time on the firestore database for all in progress transactions
@@ -267,25 +267,39 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     """
     Function to update the transaction status and status date when status is created
     """
+    print("entered the function")
     if event.data is None:
         print("no event data is provided!")
         return
     try:
+        print("retrieving data from event")
         status = event.data.get("status")
         transaction_id = event.params['transactionId']
         buyer_confirmation = event.data.get("buyerConfirmation")
-        seller_confirmation = event.data.get("seller_confirmation")
-    except KeyError:
+        seller_confirmation = event.data.get("sellerConfirmation")
+        if "previousStateId" in event.data.to_dict().keys():
+            previous_state_id = event.data.get("previousStateId")
+        else:
+            previous_state_id = None
+    except KeyError as ky:
+        print(f"an error in event data occurred {ky}")
         # No field, so do nothing.
         return
+    print("finished validating the event data")
     db = firestore.client()
+    print("retrieving the transaction")
     transaction_document = db.collection("transactions").document(transaction_id)
     transaction = transaction_document.get().to_dict()
-    previous_state = db.collection("transactions").document(transaction_id).collection("status").document(transaction.get("previousStateId")).get().to_dict()
+    print("validating previous state id")
+    previous_state = {}
+    if previous_state_id and status == 'Aceptado':
+        print("previous id found!")
+        previous_state = db.collection("transactions").document(transaction_id).collection("status").document(previous_state_id).get().to_dict()
     buyer_doc = db.collection("users").document(transaction.get("members")["buyerId"])
     buyer = buyer_doc.get().to_dict()
     seller_doc = db.collection("users").document(transaction.get("members")["sellerId"])
     seller = seller_doc.get().to_dict()
+    print(f"building the response for each step of the process {status}")
     title_buyer = ""
     title_seller = ""
     body_buyer = ""
@@ -301,6 +315,8 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         title_seller = "🚨 ¡Nueva propuesta esperándote!"
         body_seller = f"{buyer.get("firstName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
     if status == 'Aceptado':
+        print("validating previous state...")
+        print(previous_state.get("buyerConfirmation"))
         if previous_state.get("buyerConfirmation"):
             title_buyer = f"🎉 ¡{seller.get("firstName")} aceptó tu propuesta!"
             body_buyer = "Recuerda que tienen 8 días para completar su trato"
@@ -312,7 +328,11 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
             body_seller = "Recuerda que tienen 8 días para completar su trato"
             title_buyer = "✅ ¡Aceptaste la propuesta!"
             body_buyer = f"Ahora tienes un trato con {seller.get('firstName')}. Espera el siguiente paso."
-
+    if status == 'Depositado':
+        title_seller = f'💰 {buyer.get("firstName")} realizó el pago'
+        title_buyer = '✅ Pago exitoso'
+        body_buyer = f'Se realizó el pago, ahora solo queda liberar los fondos a {seller.get("firstName")} para finalizar el trato'
+        body_seller = f'{buyer.get("firstName")} realizó el pago, espera a que libere los fondos para cerrar el trato.'
     if status == 'Completado':
         title_seller = '🤝¡Trato finalizado con éxito!'
         title_buyer = '🤝¡Trato finalizado con éxito!'
@@ -324,6 +344,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         body_buyer = f'El trato con {seller.get("firstName")} ha sido cancelado.'
         body_seller = f'El trato con {buyer.get("firstName")} ha sido cancelado.'
     if buyer.get("tokens"):
+        print("sending multicast message to buyer")
         msg = messaging.send_each_for_multicast(
             multicast_message=messaging.MulticastMessage(
                 notification=messaging.Notification(
@@ -359,6 +380,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         })
     if not seller.get("tokens"):
         return
+    print("sending multicast message to seller")
     msg2 = messaging.send_each_for_multicast(
         multicast_message=messaging.MulticastMessage(
             tokens=seller.get("tokens"),

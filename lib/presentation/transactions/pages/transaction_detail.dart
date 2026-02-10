@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
@@ -23,6 +24,8 @@ import 'package:paklan/presentation/payments/pages/payment.dart';
 import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/stepper_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/widgets/cancel_deal.dart';
+import 'package:paklan/presentation/transactions/widgets/rating.dart';
+import 'package:paklan/presentation/transactions/widgets/rating_buyer.dart';
 import 'package:paklan/service_locator.dart';
 
 class TransactionDetail extends StatelessWidget {
@@ -91,7 +94,7 @@ class TransactionDetail extends StatelessWidget {
               
               hideBack: true,
               title: 
-                  Text("Detalle del trato"),
+                  Text(toBeginningOfSentenceCase(transaction.name!),),
             ),
             body: SingleChildScrollView(
               child: StreamBuilder<QuerySnapshot>(
@@ -141,42 +144,43 @@ class TransactionDetail extends StatelessWidget {
                                   SizedBox(height: 5,),
                                 ExpansionTile(
                                   initiallyExpanded: true,
-                                    title: Center(child: const Text(
-                                      'Detalle del estátus',
-                                      style: TextStyle(
+                                    title: Center(child: Text(
+                                      "Detalles",
+                                      style: const TextStyle(
                                         fontSize: 23
                                       ),
                                       )
                                       ),
                                     children: <Widget>[
                                       ListTile(
-                                        
                                           title: Text(
                                             textAlign: TextAlign.left,
-                                          'Nombre: ${transaction.name!}\nVendedor: ${transaction.sellerFirstName}\nComprador: ${transaction.buyerFirstName}',
+                                          'Trato con: ${currenUserId == statusEntity.buyerId ? toBeginningOfSentenceCase(transaction.buyerFirstName) : toBeginningOfSentenceCase(transaction.sellerFirstName)}',
                                           style: TextStyle(
                                             fontSize: 17,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           ),
-                                          subtitle: ExpansionTile(
-                                            title: Text("Monto"),
-                                            children: [
-                                              Text("Monto acordado: \$${transaction.amount} mnx"),
-                                              Text("Comisión Paklan: \$${transaction.fee} mnx"),
-                                              Divider(),
-                                              Text("Total: \$${(transactionAmount + double.parse(transaction.fee!)).truncateToDouble().toStringAsFixed(2)} mnx"),
-                                            ],
-                                            ),
                                       
                                      ),
-                                      ListTile(title: Text(
+                                      ListTile(title: ExpansionTile(
+                                        initiallyExpanded: false,
+                                            title: Text("Total: \$${(transactionAmount + double.parse(transaction.fee!)).
+                                            truncateToDouble().
+                                            toStringAsFixed(2).
+                                            replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}"),
+                                            children: [
+                                              Text("Monto acordado: \$${transaction.amount!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mnx."),
+                                              Text("Comisión Paklan: \$${transaction.fee!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mnx IVA incluido.\n"),
+                                              Text(
                                         textAlign: TextAlign.justify,
                                             statusEntity.details!,
                                             style: TextStyle(
                                               fontSize: 17,
                                               )
-                                              ),)
+                                              )
+                                            ],
+                                            ) ,)
                                       ],
                                   ),
                               
@@ -216,16 +220,19 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
       padding: const EdgeInsets.all(15.0),
       child: Text(
         "No hay acciones disponibles a realizar, el trato ya está cancelado",
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 17),
         ),
     );
+  }
+  if (currentUser == 'Vendedor' && state.status == 'Completado' && state.completedRatingMessageForBuyer!.isEmpty){
+    return calificarUsuario(context, state);
   }
   if(state.status == 'Completado'){
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Text(
         "No hay acciones a realizar, el trato ya fué completado",
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 17),
         ),
     );
   }
@@ -234,7 +241,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
       padding: const EdgeInsets.all(15.0),
       child: Text(
         "No hay acciones de tu parte, el comprador ya realizó la transferencia, sigue en espera de que el comprador te libere el pago",
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 17),
         ),
     );
   
@@ -292,7 +299,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
       children: [
         Text("Proceder a pagar la cantidad acordada",
         style: TextStyle(
-          fontSize: 20
+          fontSize: 17
         ),),
         SizedBox(height: 5,),
         Row(
@@ -300,7 +307,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
             SizedBox(width: 35,),
             ElevatedButton(
             style:  ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 32, 155, 36),
+              backgroundColor: const Color.fromARGB(255, 22, 136, 26),
                minimumSize: Size(
                 120,
                 50
@@ -368,7 +375,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
       children: [
         Text("El comprador está en proceso de pago...",
         style: TextStyle(
-          fontSize: 20
+          fontSize: 17
         ),),
         SizedBox(height: 5,),
         
@@ -381,7 +388,7 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
       child: Text(
         "No hay acciones de tu parte, hay que esperar a que la otra parte acepte el trato",
         style: TextStyle(
-          fontSize: 20
+          fontSize: 17
         ),
         ),
       
@@ -685,83 +692,62 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                 ],
               ),
                 onPressed: () {
-                  showDialog(
-                    context: mainContext, 
-                    builder: (innerContext) => 
-                    BlocProvider.value(
-                  value: mainContext.read<ButtonStateCubit>(),
-                  child: AlertDialog(
-      title: const Text('¿Quieres liberar el pago?'),
-      content: Text("Al liberar el pago se le transferirá al vendedor el monto depositado sin la comisión."),
-      actions: [    
-                Row(
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                           minimumSize: Size(60, 50),
-                          ),
-                                          child: Text(
-                                             "Regresar",
-                                             style: const TextStyle(
-                         color: Colors.white,
-                         fontWeight: FontWeight.w400
-                                             ),
-                                          ),
-                                          onPressed: () => Navigator.pop(innerContext)
-                        ),
-                        VerticalDivider(width: 20,),
-                    CustomReactiveButton(
-                                      color: Colors.blue,
-                                      title: "Liberar",
-                                      onPressed: (){
-                                        mainContext.read<ButtonStateCubit>().execute(
-                                        usecase: UpdateDealUseCase(),
-                                        params: StatusModel(
-                                            status: "Completado", 
-                                            details: "Trato Completado, el monto pagado fué liberado exitosamente al vendedor", 
-                                            buyerConfirmation: state.buyerConfirmation, 
-                                            sellerConfirmation: state.sellerConfirmation, 
-                                            transactionId: state.transactionId, 
-                                            buyerId: state.buyerId, 
-                                            sellerId: state.sellerId, 
-                                            paymentDone: true, 
-                                            paymentTransferred: state.paymentTransferred, 
-                                            reimbursementDone: state.reimbursementDone, 
-                                            cancelled: state.cancelled, 
-                                            statusId: state.statusId,
-                                            cancelledBy: state.cancelledBy,
-                                            cancelMessage: state.cancelMessage
-                                        )
-                                      );
-                                      Navigator.pop(innerContext);
-                                      Navigator.of(mainContext).push(
-                                      CupertinoSheetRoute<void>(
-                                      builder: (BuildContext context) => CancelDeal(
-                                      transaction: transaction,
-                                      status: state,
-                                      currentUserId: "Comprador",
-                                      ),
-                                    ),
-                                    );
-                                      }
-                                      ),
-                      ],
-                    ),
+                              Navigator.of(mainContext).push(
+                              CupertinoSheetRoute<void>(
+                              builder: (BuildContext context) => Rating(
+                              transaction: transaction,
+                              status: state,
+                              currentUserId: "Comprador",
+                              ),
+                            ),
+                            );
+                              }
                     
-                                      ],
-                    )
-                    
-                  ) );
+                 );
                 },
               );
             
             
             }
-          );
+  
+  Builder calificarUsuario(BuildContext mainContext, StatusEntity state) {
+  return Builder(
+            builder: (mainContext) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size(120, 50),
+                    backgroundColor: Colors.blue,
+                     ),
+                child:  Row(
+                children: [
+                  Text(textAlign: TextAlign.center,
+                    "Calificar Usuario",
+                    style: TextStyle(color: Colors.white,),
+                    ),
+                    SizedBox(width: 5,),
+                    Icon(Icons.rate_review_sharp)
+                ],
+              ),
+                onPressed: () {
+                              Navigator.of(mainContext).push(
+                              CupertinoSheetRoute<void>(
+                              builder: (BuildContext context) => RatingBuyer(
+                              transaction: transaction,
+                              status: state,
+                              currentUserId: "Comprador",
+                              ),
+                            ),
+                            );
+                              }
+                    
+                 );
+                },
+              );
+            
+            
+            }
 }
 
-
-}
 
 
 class StepperDeal extends StatelessWidget {

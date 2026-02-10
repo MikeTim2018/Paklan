@@ -14,6 +14,10 @@ class StatusEntity {
   String ? cancelledBy;
   String ? statusId;
   List ? cancelMessage;
+  List ? completedRatingMessageForSeller;
+  double ? sellerRating;
+  List ? completedRatingMessageForBuyer;
+  double ? buyerRating;
 
   StatusEntity({
   required this.status,
@@ -29,6 +33,10 @@ class StatusEntity {
   required this.reimbursementDone,
   this.cancelledBy,
   required this.statusId,
-  this.cancelMessage
+  this.cancelMessage,
+  this.completedRatingMessageForSeller,
+  this.sellerRating,
+  this.completedRatingMessageForBuyer,
+  this.buyerRating,
   });
 }

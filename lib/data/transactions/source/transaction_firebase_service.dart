@@ -160,12 +160,16 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "cancelledBy": transactionState.cancelledBy,
           "creationDate": DateTime.parse(serverTime.data['server_datetime']),
           "cancelMessage": transactionState.cancelMessage,
+          "previousStateId": transactionState.statusId,
+          "completedRatingMessageForSeller": transactionState.completedRatingMessageForSeller,
+          "sellerRating": transactionState.sellerRating,
+          "completedRatingMessageForBuyer": transactionState.completedRatingMessageForBuyer,
+          "buyerRating": transactionState.buyerRating
         }
       );
       await statusRef.update(
         {
           "statusId": statusRef.id,
-          "previousStatusId": transactionState.statusId
           }
           );
       DocumentReference<Map<String, dynamic>> transactionRef = FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId);
