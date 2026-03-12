@@ -2,6 +2,7 @@ class AppImages{
   static const basePath = 'assets/images/';
   static const format = '.png';
   static const format2 = '.jpg';
+  static const format3 = '.jpeg';
   static const appLogo = '${basePath}Vector_(2)$format';
   static const noTrades = '${basePath}82638294_9978094$format2';
   static const findPerson = '${basePath}people-search-icon-13$format';
@@ -15,6 +16,6 @@ class AppImages{
   static const hsbc = '${basePath}HSBC_logo_(2018).svg$format';
   static const santander = '${basePath}Banco_Santander_Logotipo.svg$format';
   static const background = '${basePath}pexels-umkreisel-app-956999$format2';
-  static const retroHome = '${basePath}retro-home$format';
+  static const retroHome = '${basePath}retro-home$format3';
 
 }

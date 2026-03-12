@@ -47,4 +47,17 @@ class AuthRepositoryImpl extends AuthRepository{
       });
   }
   
+  @override
+  Future<Either> signout() async{
+    var logout_status = await sl<AuthFirebaseService>().logout();
+    return logout_status.fold(
+      (error){
+        return Left(error);
+      }
+      , (data){
+        return Right(data);
+      }
+    );
+  }
+  
 }

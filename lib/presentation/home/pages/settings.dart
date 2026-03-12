@@ -87,17 +87,23 @@ class Settings extends StatelessWidget{
                         child: Center(
                           child: Column(
                                   children: [
-                                    Text(
-                                      "Cuentas CLABE registradas",
-                                      style: TextStyle(fontSize: 23),),
+                                    Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Text(
+                                        "¡Registra tu cuenta!",
+                                        style: TextStyle(fontSize: 20),
+                                        ),
+                                        ),
                                     SizedBox(height: 25,),
                                     listClabes(context, userData,),
-                                    SizedBox(height: 10,),
-                                    _clabe(context),
                                      SizedBox(width: 1,),
+                                     Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Text("Agrega una cuenta CLABE para recibir el dinero de tus ventas"),
+                                    ),
                                     Center(
                                      child: FloatingActionButton(
-                                     splashColor: Colors.green,
+                                     splashColor: const Color.fromARGB(255, 13, 37, 13),
                                      onPressed: () async{
                                        return await showDialog(
                                          context: context, 
@@ -105,10 +111,9 @@ class Settings extends StatelessWidget{
                                            return BlocProvider.value(
                                                    value: context.read<ButtonStateCubit>(),
                                                    child: AlertDialog(
-                                       title: const Text("Agregar CLABE"),
+                                       title: const Text("Agregar cuenta"),
                                        content: const Text("Escribe los 18 dígitos de tu cuenta CLABE"),
                                        actions: <Widget>[
-                                        
                                          Form(
                                           key: _formKeyHist,
                                            child: Column(
@@ -164,10 +169,8 @@ class Settings extends StatelessWidget{
                                      backgroundColor: AppColors.primary,
                                      shape: const CircleBorder(),
                                      child: const Icon(Icons.add, color: Colors.white),
-                                      ),
+                                      ), 
                                    ),
-                                    
-                                  
                                   ],
                                 ),
                           
@@ -180,18 +183,6 @@ class Settings extends StatelessWidget{
     )
     );
     }
-  Widget _clabe(BuildContext context){
-    return Padding(
-      padding: const EdgeInsets.all(13.0),
-      child: Text(
-        'Agrega una cuenta CLABE',
-        style: TextStyle(
-          fontSize: 25,
-          fontWeight: FontWeight.bold
-        ),
-      ),
-    );
-  }
   Widget _clabeField(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(13.0),
@@ -224,8 +215,8 @@ Widget listNoClabes(BuildContext context) {
             children: [
                     SizedBox(height: 100,),
                     Container(
-                      width: 300,
-                      height: 300,
+                      width: 270,
+                      height: 270,
                       decoration: BoxDecoration(
                         color: AppColors.background,
                         shape: BoxShape.circle,
@@ -323,6 +314,7 @@ Widget listNoClabes(BuildContext context) {
                                      child: const Icon(Icons.add, color: Colors.white),
                                       ),
                                    ),
+                                   
                     ]
                     ),
         );
@@ -330,7 +322,7 @@ Widget listNoClabes(BuildContext context) {
 
   Widget listClabes(BuildContext context, Map<String, dynamic> userData) {
     return SizedBox(
-      height: 230,
+      height: 179,
       child: RawScrollbar(
         thumbColor: AppColors.secondBackground,
         shape: const StadiumBorder(),

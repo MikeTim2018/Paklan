@@ -6,6 +6,7 @@ class UserEntity {
   final String image;
   final int gender;
   final String phone;
+  final bool clabe;
 
   UserEntity({
     required this.userId,
@@ -14,6 +15,7 @@ class UserEntity {
     required this.email,
     required this.image,
     required this.gender,
-    required this.phone
+    required this.phone,
+    required this.clabe
   });
 }

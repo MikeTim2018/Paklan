@@ -63,7 +63,7 @@ extension UserXModel on UserModel {
       lastName: lastName, 
       email: email, 
       image: image,
-      phone: "$phoneExt $phone"
+      phone: "$phoneExt $phone",
     );
   }
 }

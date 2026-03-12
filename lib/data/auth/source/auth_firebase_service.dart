@@ -14,6 +14,7 @@ abstract class AuthFirebaseService {
   Future<Either> getUser();
   Future <void> saveTokenToDatabase(String token);
   Future <void> setupToken();
+  Future <Either> logout();
 }
 
 class AuthFirebaseServiceImpl extends AuthFirebaseService{
@@ -166,6 +167,18 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
 
     // Any time the token refreshes, store this in the database too.
     FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
+  }
+  
+  @override
+  Future<Either> logout() async{
+    try{
+      FirebaseAuth.instance.signOut();
+      return Right("Éxito");
+    }catch(e){
+      return Left(
+        "Porfavor intenta más tarde"
+      );
+    }
   }
 
 }

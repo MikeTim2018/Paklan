@@ -1,14 +1,17 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconly/iconly.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
-import 'package:paklan/presentation/home/pages/settings.dart';
+import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
+import 'package:paklan/presentation/home/pages/settings.dart' as home_settings;
 import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
+import 'package:paklan/service_locator.dart';
 
 
 
@@ -23,6 +26,7 @@ class MainWrapper extends StatefulWidget {
 
 class _MainWrapperState extends State<MainWrapper> {
   late PageController pageController;
+  final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
 
   @override
   void initState() {
@@ -40,7 +44,7 @@ class _MainWrapperState extends State<MainWrapper> {
   final List<Widget> topLevelPages =  [
     TransactionHome(),
     TransactionHistory(),
-    Settings(),
+    home_settings.Settings(),
   ];
 
   /// on Page Changed
@@ -103,17 +107,57 @@ class _MainWrapperState extends State<MainWrapper> {
   }
 
   // Floating Action Button - MainWrapper Widget
-  FloatingActionButton _mainWrapperFab() {
-    return FloatingActionButton.extended(
-      heroTag: 'addDeal',
-      label: Text("Nuevo trato"),
-      onPressed: () {
+  Widget _mainWrapperFab() {
+    return StreamBuilder<DocumentSnapshot>(
+              stream: _clabeStream,
+              builder: (context, AsyncSnapshot<DocumentSnapshot> state){
+              if(state.hasError){
+                return SizedBox(
+                  height: 400,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Ha ocurrido un error, por favor intenta más tarde",
+                      style: TextStyle(
+                        fontSize: 24
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if(state.connectionState == ConnectionState.waiting){
+                return const Center(child: CircularProgressIndicator());
+              }
+              Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
+              return FloatingActionButton.extended(
+                heroTag: 'addDeal',
+                label: Text("Nuevo trato"),
+                onPressed: () {
+                  if (!userData.keys.contains("CLABEs") || userData['CLABEs'].length == 0){
+                  var snackbar = SnackBar(
+                  content: Text(
+                    "¡Debes primero registrar una cuenta clabe!",
+                    style: TextStyle(
+                      color: Colors.white70
+                    ),),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.black87,
+                  showCloseIcon: true,
+                  closeIconColor: Colors.white70,
+                  );
+                ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                  
+                  }
+                  else{
+                  AppNavigator.push(context, TransactionSearch());
+                  }
+                },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                backgroundColor: const Color.fromARGB(255, 92, 144, 212),
+                icon: const Icon(Icons.handshake_outlined),
 
-        AppNavigator.push(context, TransactionSearch());
-      },
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-      backgroundColor: const Color.fromARGB(255, 92, 144, 212),
-      icon: const Icon(Icons.handshake_outlined),
+      );
+        }
     );
   }
 

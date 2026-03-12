@@ -13,6 +13,7 @@ class UserModel {
   final int gender;
   final String phone;
   final String phoneExt;
+  final bool clabe;
 
   UserModel({
     required this.userId,
@@ -23,6 +24,7 @@ class UserModel {
     required this.gender,
     required this.phone,
     required this.phoneExt,
+    required this.clabe,
   });
 
   Map<String, dynamic> toMap() {
@@ -35,6 +37,7 @@ class UserModel {
       'gender': gender,
       'phone': phone,
       'phoneExt': phoneExt,
+      'clabe': clabe,
     };
   }
 
@@ -48,6 +51,7 @@ class UserModel {
       gender: map['gender'] as int,
       phone: map['phone'] ?? '',
       phoneExt: map['phoneExt'] ?? '+52',
+      clabe: map['CLABEs'].length > 0 ? true : false
     );
   }
   
@@ -66,7 +70,8 @@ extension UserXModel on UserModel {
       email: email, 
       image: image, 
       gender: gender,
-      phone: "$phoneExt $phone"
+      phone: "$phoneExt $phone",
+      clabe: clabe,
     );
   }
 }

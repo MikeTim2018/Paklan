@@ -9,6 +9,7 @@ import 'package:paklan/domain/auth/usecases/get_user.dart';
 import 'package:paklan/domain/auth/usecases/is_logged_in.dart';
 import 'package:paklan/domain/auth/usecases/send_password_reset_email.dart';
 import 'package:paklan/domain/auth/usecases/signin.dart';
+import 'package:paklan/domain/auth/usecases/signout.dart';
 import 'package:paklan/domain/auth/usecases/signup.dart';
 import 'package:paklan/domain/transactions/repository/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/create_clabe.dart';
@@ -46,6 +47,10 @@ sl.registerSingleton<TransactionRepository>(
   sl.registerSingleton<SignupUseCase>(
   SignupUseCase()
 );
+
+  sl.registerSingleton<SignoutUseCase>(
+    SignoutUseCase()
+  );
 
   sl.registerSingleton<GetAgesUseCase>(
   GetAgesUseCase()

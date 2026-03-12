@@ -2,11 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
+import 'package:paklan/presentation/profile/pages/profile_home.dart';
 
 class Header extends StatelessWidget {
   const Header({super.key});
@@ -20,7 +22,7 @@ class Header extends StatelessWidget {
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 140,
+                  height: 120,
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
@@ -63,6 +65,9 @@ class Header extends StatelessWidget {
 
   Widget _profileImage(UserEntity user,BuildContext context) {
     return GestureDetector(
+      onTap: () {
+        AppNavigator.push(context, ProfileHome());
+      },
       child: Container(
         height: 40,
         width: 40,

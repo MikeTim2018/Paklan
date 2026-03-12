@@ -57,6 +57,7 @@ dependencies:
   fancy_password_field: ^2.0.8
   flutter_multi_select_items: ^0.4.3
   flutter_rating: ^2.0.2
+  firebase_storage: ^12.4.10
 
 dev_dependencies:
   flutter_test:

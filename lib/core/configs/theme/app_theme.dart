@@ -6,9 +6,9 @@ class AppTheme {
 
 
   static final appTheme = ThemeData(
-    primaryColor: const Color.fromARGB(255, 18, 34, 75),
+    primaryColor: const Color(0xFFF8F9FA),
     scaffoldBackgroundColor: AppColors.background,
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     fontFamily: 'CircularStd',
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: AppColors.background,
@@ -33,7 +33,7 @@ class AppTheme {
       ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryButton,
         elevation: 0,
         textStyle: const TextStyle(fontSize: 16,fontWeight: FontWeight.w400),
         shape: RoundedRectangleBorder(

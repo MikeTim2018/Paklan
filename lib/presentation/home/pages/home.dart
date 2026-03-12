@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/common/widgets/bottom_nav_bar/main_wrapper.dart';
+import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/pages/settings.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
@@ -22,6 +23,7 @@ class HomePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => BottomNavCubit()),
+        BlocProvider(create: (context) => UserInfoDisplayCubit()..displayUserInfo()),
                 ],
         child: MainWrapper(),
     );
