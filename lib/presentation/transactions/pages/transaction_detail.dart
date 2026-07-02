@@ -280,11 +280,14 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
               onPressed: () {
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => CancelDeal(
+                                     scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => CancelDeal(
                                       transaction: transaction,
                                       status: state,
                                       currentUserId: currentUserId,
-                                      ),
+                                      );
+      return widgetBuilder(context);
+    },
                                     ),
                                     );
               }
@@ -326,10 +329,13 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
               onPressed: () {
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => Payment(
+                                     scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Payment(
                                       transaction: transaction,
                                       status: state,
-                                      ),
+                                      );
+      return widgetBuilder(context);
+    },
                                     ),
                                     );
               }
@@ -356,11 +362,14 @@ Widget actions(BuildContext context, StatusEntity state, String currentUserId, T
               onPressed: () {
                 Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => CancelDeal(
+                                     scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => CancelDeal(
                                       transaction: transaction,
                                       status: state,
                                       currentUserId: currentUserId,
-                                      ),
+                                      );
+      return widgetBuilder(context);
+    },
                                     ),
                                     );
               }
@@ -694,11 +703,14 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                 onPressed: () {
                               Navigator.of(mainContext).push(
                               CupertinoSheetRoute<void>(
-                              builder: (BuildContext context) => Rating(
+                              scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Rating(
                               transaction: transaction,
                               status: state,
                               currentUserId: "Comprador",
-                              ),
+                              );
+      return widgetBuilder(context);
+    },
                             ),
                             );
                               }
@@ -731,11 +743,14 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                 onPressed: () {
                               Navigator.of(mainContext).push(
                               CupertinoSheetRoute<void>(
-                              builder: (BuildContext context) => RatingBuyer(
+                              scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => RatingBuyer(
                               transaction: transaction,
                               status: state,
                               currentUserId: "Comprador",
-                              ),
+                              );
+      return widgetBuilder(context);
+    },
                             ),
                             );
                               }

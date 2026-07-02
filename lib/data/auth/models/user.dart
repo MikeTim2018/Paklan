@@ -6,6 +6,7 @@ import 'package:paklan/domain/auth/entity/user.dart';
 
 class UserModel {
   final String userId;
+  final String displayName;
   final String firstName;
   final String lastName;
   final String email;
@@ -13,17 +14,20 @@ class UserModel {
   final int gender;
   final String phone;
   final String phoneExt;
+  final String photoLink;
   final bool clabe;
 
   UserModel({
     required this.userId,
     required this.firstName,
     required this.lastName,
+    required this.displayName,
     required this.email,
     required this.image,
     required this.gender,
     required this.phone,
     required this.phoneExt,
+    required this.photoLink,
     required this.clabe,
   });
 
@@ -44,14 +48,16 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       userId: map['userId'] ?? '',
-      firstName: map['firstName'] as String,
-      lastName: map['lastName'] as String,
+      firstName: map['firstName'] ?? '',
+      lastName: map['lastName'] ?? '',
+      displayName: map['displayName'] as String,
       email: map['email'] as String,
       image: map['image'] ?? '',
-      gender: map['gender'] as int,
+      gender: map['gender'] ?? 1,
       phone: map['phone'] ?? '',
       phoneExt: map['phoneExt'] ?? '+52',
-      clabe: map['CLABEs'].length > 0 ? true : false
+      photoLink: map['photoLink'] ?? '',
+      clabe: map['CLABEs'] ?? false
     );
   }
   
@@ -66,11 +72,13 @@ extension UserXModel on UserModel {
     return UserEntity(
       userId: userId,
       firstName: firstName,
-      lastName: lastName, 
+      lastName: lastName,
+      displayName: displayName, 
       email: email, 
       image: image, 
       gender: gender,
       phone: "$phoneExt $phone",
+      photoLink: photoLink,
       clabe: clabe,
     );
   }

@@ -1,15 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
-import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
 import 'package:paklan/domain/auth/usecases/signin.dart';
 import 'package:paklan/presentation/auth/pages/forgot_password.dart';
@@ -63,10 +59,10 @@ class EnterPasswordPage extends StatelessWidget {
                     _signinText(context),
                     const SizedBox(height: 15,),
                     _passwordField(context),
-                    const SizedBox(height: 15,),
-                    _continueButton(context),
-                    const SizedBox(height: 10,),
                     _forgotPassword(context),
+                    const SizedBox(height: 10,),
+                    _continueButton(context),
+                    
                   ],
                 ),
               ),
@@ -94,9 +90,9 @@ class EnterPasswordPage extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: ShowHidePassword(
         hidePassword: true,
-        iconSize: 30,
-        visibleOffIcon: Icons.visibility_off_sharp,
-        visibleOnIcon: Icons.visibility_sharp,
+        iconSize: 23,
+        visibleOffIcon: Icons.visibility_sharp,
+        visibleOnIcon: Icons.visibility_off_sharp,
         passwordField: (bool hidePassword){
         return TextFormField(
           validator: (value){
@@ -149,7 +145,10 @@ class EnterPasswordPage extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: "¿Olvidaste tu contraseña? "
+              text: "¿Olvidaste tu contraseña? ",
+              style: TextStyle(
+                color: Colors.black54
+              )
             ),
             TextSpan(
               text: '¡Recupérala!',
@@ -157,7 +156,8 @@ class EnterPasswordPage extends StatelessWidget {
                 AppNavigator.push(context, ForgotPasswordPage());
               },
               style: TextStyle(
-                fontWeight: FontWeight.bold
+                fontWeight: FontWeight.bold,
+                color: Colors.black87
               )
             )
           ]

@@ -22,7 +22,7 @@ class Header extends StatelessWidget {
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 120,
+                  height: 150,
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
@@ -69,45 +69,53 @@ class Header extends StatelessWidget {
         AppNavigator.push(context, ProfileHome());
       },
       child: Container(
-        height: 40,
-        width: 40,
+        height: 45,
+        width: 45,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: user.image.isEmpty ? 
+            image: user.photoLink.isEmpty ? 
             const AssetImage(
               AppImages.userLogo
             ) : NetworkImage(
-              user.image
+              user.photoLink
             )
           ),
           color: Colors.white,
-          shape: BoxShape.circle
+          shape: BoxShape.circle,
+          border: BoxBorder.all(
+            color: Colors.white,
+            width: 1
+          )
         ),
       ),
     );
   }
 
   Widget _name(UserEntity user, BuildContext context) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16
-      ),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(100)
-      ),
-      child: Center(
-        child: 
-        Text(
-            '¡Bienvienid${user.gender == 1 ? 'o' : 'a'} ${user.firstName}!',
-            style: const TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-              color: Colors.white
+    return Flexible(
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 13
+        ),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(100)
+        ),
+        child: Center(
+          child: 
+          Text(
+              '¡Bienvienid${user.gender == 1 ? 'o' : 'a'} ${user.displayName}!',
+              overflow: TextOverflow.clip,
+              maxLines: 1,
+              style: const TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 18,
+                color: Colors.white
+              ),
             ),
           ),
-        ),
+      ),
     );
   }
 
@@ -117,8 +125,8 @@ class Header extends StatelessWidget {
         //AppNavigator.push(context, HomePage());
       },
       child: Container(
-        height: 40,
-        width: 40,
+        height: 45,
+        width: 45,
         decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle

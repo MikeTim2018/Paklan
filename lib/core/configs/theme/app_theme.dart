@@ -12,7 +12,7 @@ class AppTheme {
     fontFamily: 'CircularStd',
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: AppColors.background,
-      contentTextStyle: TextStyle(color: Colors.white),
+      contentTextStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
     ),
     inputDecorationTheme: InputDecorationTheme(   
         filled: true,

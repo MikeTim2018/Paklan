@@ -25,6 +25,8 @@ class AppVectors{
   static const clock = '${basePath}alarm-clock-svgrepo-com$format';
   static const eye = '${basePath}eye-svgrepo-com$format';
   static const eyeClosed = '${basePath}eye-off-svgrepo-com$format';
+  static const googleIcon = '${basePath}google$format';
+  static const facebookIcon = '${basePath}facebookIcon$format';
 
 
   

@@ -22,6 +22,11 @@ class AuthRepositoryImpl extends AuthRepository{
   Future<Either> signin(UserSigninReq user) async{
     return await sl<AuthFirebaseService>().signin(user);
   }
+
+  @override
+  Future<Either> signInWithGoogle() async{
+    return await sl<AuthFirebaseService>().signInWithGoogle();
+  }
   
   @override
   Future<Either> sendPasswordResetEmail(String email) async{
@@ -49,8 +54,8 @@ class AuthRepositoryImpl extends AuthRepository{
   
   @override
   Future<Either> signout() async{
-    var logout_status = await sl<AuthFirebaseService>().logout();
-    return logout_status.fold(
+    var logoutStatus = await sl<AuthFirebaseService>().logout();
+    return logoutStatus.fold(
       (error){
         return Left(error);
       }
@@ -58,6 +63,11 @@ class AuthRepositoryImpl extends AuthRepository{
         return Right(data);
       }
     );
+  }
+  
+  @override
+  Future<Either<dynamic, dynamic>> signInWithFacebook() async{
+    return await sl<AuthFirebaseService>().signInWithFacebook();
   }
   
 }

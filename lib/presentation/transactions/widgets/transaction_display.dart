@@ -87,20 +87,18 @@ class TransactionDisplay extends StatelessWidget{
                                     itemsDecoration: MultiSelectDecorations(
                                      decoration: BoxDecoration(
                                          gradient: LinearGradient(colors: [
-                                           Colors.blue.withValues(alpha: 0.1),
-                                           Colors.yellow.withValues(alpha: 0.1),
-                                           
+                                           Colors.white30,
+                                           AppColors.primary,
                                          ]),
-                                         border: Border.all(color: Colors.green[200]!),
+                                         border: Border.all(color: Colors.black26),
                                          borderRadius: BorderRadius.circular(20)),
                                     
                                      selectedDecoration: BoxDecoration(
                                          gradient: LinearGradient(colors: [
-                                           Colors.white70,
-                                           Colors.white60,
-                                           Colors.white54,
+                                           const Color.fromARGB(255, 32, 68, 117).withValues(alpha: 0.6),
+                                           Colors.white38.withValues(alpha: 0.1),
                                          ]),
-                                         border: Border.all(color: Colors.green[700]!),
+                                         border: Border.all(color: Colors.black38),
                                          borderRadius: BorderRadius.circular(13)),
                                      disabledDecoration: BoxDecoration(
                                          color: Colors.grey,
@@ -120,7 +118,7 @@ class TransactionDisplay extends StatelessWidget{
                                       padding: EdgeInsets.only(right: 5),
                                       child: Icon(
                                         Icons.disabled_visible,
-                                        color: Colors.white,
+                                        color: Colors.black38,
                                         size: 14,
                                       ),
                                     ),
@@ -271,12 +269,12 @@ Widget listNoTransaction(BuildContext context) {
             // ),
           Card(
             shadowColor: Colors.amber,
-            elevation: 11,
+            elevation: 9,
             shape: StadiumBorder(),
             child: ListTile(
               shape: StadiumBorder(side: BorderSide(
-                width: 2,
-                color: const Color.fromARGB(216, 71, 145, 50)
+                width: 1.2,
+                color: const Color.fromARGB(215, 0, 0, 0)
                 // color: switch (status[index].timeLimit!.difference(DateTime.parse(serverTime)).inHours) {
                 //                <= 12 && >= 6 => const Color.fromARGB(255, 225, 179, 14),
                 //                <= 5 && >= 0 => const Color.fromARGB(255, 225, 70, 14),
@@ -292,14 +290,14 @@ Widget listNoTransaction(BuildContext context) {
                   height: 105,
                   width: 80,
                   child: SvgPicture.asset(
-                      AppVectors.cash,
+                      AppVectors.user,
                       fit: BoxFit.fitHeight,
                     ),
                 ),
               title: Text(
                 '${toBeginningOfSentenceCase(status[index].name)}',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontWeight: FontWeight.bold,
                   fontSize: 17
                 ),
@@ -307,7 +305,7 @@ Widget listNoTransaction(BuildContext context) {
                 subtitle: Text(
                   user == status[index].sellerId ? '${status[index].buyerFirstName}':'${status[index].sellerFirstName}',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black54,
                     fontSize: 13
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -320,7 +318,7 @@ Widget listNoTransaction(BuildContext context) {
                               .truncateToDouble().
                               toStringAsFixed(2).
                               replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} '
-                              ,style: TextStyle(fontSize: 16, color: Colors.white),
+                              ,style: TextStyle(fontSize: 15, color: Colors.black54),
                               overflow: TextOverflow.ellipsis,
                               ),
                           ),
@@ -351,9 +349,12 @@ Widget listNoTransaction(BuildContext context) {
                                           onTap: (){
                                             Navigator.of(context).push(
                                             CupertinoSheetRoute<void>(
-                                             builder: (BuildContext context) => TransactionDetail(
+                                             scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => TransactionDetail(
                                               transaction: status[index]
-                                              ),
+                                              );
+      return widgetBuilder(context);
+    },
                                             ),
                                             );
                                           },

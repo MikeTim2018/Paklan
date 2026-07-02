@@ -2,7 +2,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconly/iconly.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
@@ -18,7 +17,7 @@ import 'package:paklan/service_locator.dart';
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
 
-  get pageController => null;
+  Null get pageController => null;
 
   @override
   State<MainWrapper> createState() => _MainWrapperState();
@@ -78,24 +77,24 @@ class _MainWrapperState extends State<MainWrapper> {
               children: [
                 _bottomAppBarItem(
                   context,
-                  defaultIcon: IconlyLight.home,
+                  defaultIcon: Icons.home,
                   page: 0,
                   label: "Inicio",
-                  filledIcon: IconlyBold.home,
+                  filledIcon: Icons.home_filled,
                 ),
                 _bottomAppBarItem(
                   context,
-                  defaultIcon: IconlyLight.time_circle,
+                  defaultIcon: Icons.timelapse,
                   page: 1,
                   label: "Historial",
-                  filledIcon: IconlyBold.time_circle,
+                  filledIcon: Icons.timelapse_sharp,
                 ),
                 _bottomAppBarItem(
                   context,
-                  defaultIcon: IconlyLight.wallet,
+                  defaultIcon: Icons.wallet,
                   page: 2,
                   label: "Cuentas",
-                  filledIcon: IconlyBold.wallet,
+                  filledIcon: Icons.wallet_sharp,
                 ),
               ],
             ),
@@ -131,7 +130,10 @@ class _MainWrapperState extends State<MainWrapper> {
               Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
               return FloatingActionButton.extended(
                 heroTag: 'addDeal',
-                label: Text("Nuevo trato"),
+                label: Text("Nuevo trato",
+                style: TextStyle(
+                  color: Colors.white70
+                ),),
                 onPressed: () {
                   if (!userData.keys.contains("CLABEs") || userData['CLABEs'].length == 0){
                   var snackbar = SnackBar(
@@ -153,8 +155,8 @@ class _MainWrapperState extends State<MainWrapper> {
                   }
                 },
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                backgroundColor: const Color.fromARGB(255, 92, 144, 212),
-                icon: const Icon(Icons.handshake_outlined),
+                backgroundColor: const Color.fromARGB(255, 32, 68, 117),
+                icon: const Icon(Icons.handshake_outlined, color: Colors.white54,),
 
       );
         }
@@ -200,8 +202,8 @@ class _MainWrapperState extends State<MainWrapper> {
                   ? filledIcon
                   : defaultIcon,
               color: context.watch<BottomNavCubit>().state == page
-                  ? AppColors.background
-                  : Colors.black38,
+                  ? Colors.black87
+                  : Colors.black26,
               size: 26,
             ),
             const SizedBox(
@@ -211,8 +213,8 @@ class _MainWrapperState extends State<MainWrapper> {
               label,
               style: TextStyle(
                 color: context.watch<BottomNavCubit>().state == page
-                    ? AppColors.background
-                    : Colors.black38,
+                    ? Colors.black87
+                    : Colors.black26,
                 fontSize: 13,
                 fontWeight: context.watch<BottomNavCubit>().state == page
                     ? FontWeight.w600

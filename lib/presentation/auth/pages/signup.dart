@@ -1,19 +1,20 @@
 import 'package:fancy_password_field/fancy_password_field.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:paklan/common/bloc/button/button_state.dart';
+import 'package:paklan/common/bloc/button/button_state_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
-import 'package:paklan/common/widgets/button/basic_app_button.dart';
+import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
-import 'package:paklan/presentation/auth/pages/gender_and_age_selection.dart';
-import 'package:paklan/presentation/auth/pages/signin.dart';
+import 'package:paklan/domain/auth/usecases/signup.dart';
+import 'package:paklan/presentation/home/pages/home.dart';
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _firstNameCon = TextEditingController();
-  final TextEditingController _lastNameCon = TextEditingController();
+  final TextEditingController _displayNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
   final FancyPasswordController _passwordCon = FancyPasswordController();
   final TextEditingController _passwordEditCon = TextEditingController();
@@ -23,34 +24,53 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: BasicAppbar(),
-      body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 40,
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50,),
-                _signinText(context),
-                const SizedBox(height: 15,),
-                _emailField(context),
-                const SizedBox(height: 15,),
-                _firstName(context),
-                const SizedBox(height: 15,),
-                _lastName(context),
-                const SizedBox(height: 15,),
-                _password(context),
-                const SizedBox(height: 15,),
-                _continueButton(context),
-                const SizedBox(height: 10,),
-                _createAccount(context),
-              ],
+      body: BlocProvider(
+        create: (context) => ButtonStateCubit(),
+        child: BlocListener<ButtonStateCubit, ButtonState>(
+          listener: (context, state) {
+              if (state is ButtonFailureState){
+                var snackbar = SnackBar(
+                  content: Text(
+                    state.errorMessage,
+                    style: TextStyle(
+                      color: Colors.white70
+                    ),),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.black87,
+                  showCloseIcon: true,
+                  closeIconColor: Colors.white70,
+                  );
+                ScaffoldMessenger.of(context).showSnackBar(snackbar);
+              }else if (state is ButtonSuccessState){
+                AppNavigator.pushAndRemove(context, HomePage());
+              }
+            },
+          child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 40,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 50,),
+                    _signinText(context),
+                    const SizedBox(height: 15,),
+                    _emailField(context),
+                    const SizedBox(height: 15,),
+                    _displayName(context),
+                    const SizedBox(height: 15,),
+                    _password(context),
+                    const SizedBox(height: 15,),
+                    _continueButton(context),
+                  ],
+                ),
+              ),
             ),
-          ),
         ),
+      ),
       );
   }
   Widget _signinText(BuildContext context){
@@ -66,7 +86,7 @@ class SignupPage extends StatelessWidget {
     );
   }
 
-  Widget _firstName(BuildContext context){
+  Widget _displayName(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
@@ -78,29 +98,9 @@ class SignupPage extends StatelessWidget {
             return null;
           }
         },
-        controller: _firstNameCon,
+        controller: _displayNameCon,
         decoration: InputDecoration(
-          hintText: "Nombre(s)",
-        ),
-      ),
-    );
-  }
-
-  Widget _lastName(BuildContext context){
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        validator: (value){
-          if (value!.isEmpty || !RegExp(r'[a-z A-Z]+').hasMatch(value)){
-            return 'Intenta de nuevo con apellidos válidos';
-          }
-          else{
-            return null;
-          }
-        },
-        controller: _lastNameCon,
-        decoration: InputDecoration(
-          hintText: "Apellidos"
+          hintText: "Nombre de usuario",
         ),
       ),
     );
@@ -166,7 +166,8 @@ class SignupPage extends StatelessWidget {
                   );
                 },
           validator: (value){
-            return _passwordCon.areAllRulesValidated ? null : 'Contraseña incompleta';
+            return value!.isEmpty ? '¡No puede estar vacío este campo!' : null;
+            //return _passwordCon.areAllRulesValidated ? null : 'Contraseña incompleta';
           },
           decoration: InputDecoration(
             hintText: "Contraseña"
@@ -198,46 +199,23 @@ class SignupPage extends StatelessWidget {
   Widget _continueButton(context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: BasicAppButton(onPressed: (){
-        if (_formKey.currentState!.validate() && _passwordCon.areAllRulesValidated){
-          AppNavigator.push(
-            context, 
-            GenderAndAgeSelectionPage(
-              userCreationReq: UserCreationReq(
-              firstName: _firstNameCon.text,
-              email: _emailCon.text,
-              lastName: _lastNameCon.text,
-              password: _passwordEditCon.text,
-            )
-            )
-            );
-      }
-      },
-      title: 'Continuar',),
-    );
-  }
-
-  Widget _createAccount(BuildContext context){
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: "¿Ya tienes una cuenta? "
-            ),
-            TextSpan(
-              text: 'Ingresa aqui',
-              recognizer: TapGestureRecognizer()..onTap = (){
-                AppNavigator.push(context, SigninPage());
-              },
-              style: TextStyle(
-                fontWeight: FontWeight.bold
-              )
-            )
-          ]
-        )
-        ),
+      child: Builder(
+        builder: (context) {
+          return BasicReactiveButton(onPressed: (){
+            if (_formKey.currentState!.validate() && _passwordCon.areAllRulesValidated){
+              context.read<ButtonStateCubit>().execute(
+                usecase: SignupUseCase(),
+                params: UserCreationReq(
+                  displayName: _displayNameCon.text,
+                  email: _emailCon.text,
+                  password: _passwordEditCon.text,
+                )
+              );
+          }
+          },
+          title: 'Crear',);
+        }
+      ),
     );
   }
 }

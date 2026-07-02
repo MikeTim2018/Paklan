@@ -81,21 +81,18 @@ class TransactionHistory extends StatelessWidget {
                               itemsDecoration: MultiSelectDecorations(
                                decoration: BoxDecoration(
                                    gradient: LinearGradient(colors: [
-                                     Colors.blue.withValues(alpha: 0.1),
-                                     Colors.yellow.withValues(alpha: 0.1),
-                                     
-                                   ]),
-                                   border: Border.all(color: Colors.green[200]!),
+                                           Colors.white30,
+                                           AppColors.primary,
+                                         ]),
+                                   border: Border.all(color: Colors.black26),
                                    borderRadius: BorderRadius.circular(20)),
                               
                                selectedDecoration: BoxDecoration(
-                                   gradient: const LinearGradient(colors: [
-                                    Colors.white70,
-                                    Colors.white60,
-                                    Colors.white54,
-                                     
-                                   ]),
-                                   border: Border.all(color: Colors.green[700]!),
+                                   gradient: LinearGradient(colors: [
+                                           const Color.fromARGB(255, 32, 68, 117).withValues(alpha: 0.6),
+                                           Colors.white38.withValues(alpha: 0.1),
+                                         ]),
+                                   border: Border.all(color: Colors.black38),
                                    borderRadius: BorderRadius.circular(13)),
                                disabledDecoration: BoxDecoration(
                                    color: Colors.grey,
@@ -107,7 +104,7 @@ class TransactionHistory extends StatelessWidget {
                                 padding: EdgeInsets.only(right: 5),
                                 child: Icon(
                                   Icons.visibility,
-                                  color: Colors.white,
+                                  color: Colors.black87,
                                   size: 14,
                                 ),
                               ),
@@ -115,7 +112,7 @@ class TransactionHistory extends StatelessWidget {
                                 padding: EdgeInsets.only(right: 5),
                                 child: Icon(
                                   Icons.disabled_visible,
-                                  color: Colors.white,
+                                  color: Colors.black38,
                                   size: 14,
                                 ),
                               ),
@@ -156,7 +153,6 @@ class TransactionHistory extends StatelessWidget {
                               ],
                               onChange: (allSelectedItems, selectedItem) {
                                 _multicontroller2.select(selectedItem);
-                                allSelectedItems = [selectedItem];
                                 context.read<StatusFilterHistorySelectionCubit>().selectFilters(allSelectedItems.toSet().toList());
                               }
                               ),
@@ -235,9 +231,12 @@ Widget listNoDeal(BuildContext context) {
                                   onTap: (){
                                     Navigator.of(context).push(
                                     CupertinoSheetRoute<void>(
-                                     builder: (BuildContext context) => TransactionDetail(
+                                     scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => TransactionDetail(
                                       transaction: state[index]
-                                      ),
+                                      );
+      return widgetBuilder(context);
+    },
                                     ),
                                     );
                                   },

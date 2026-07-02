@@ -58,6 +58,8 @@ dependencies:
   flutter_multi_select_items: ^0.4.3
   flutter_rating: ^2.0.2
   firebase_storage: ^12.4.10
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^7.1.7
 
 dev_dependencies:
   flutter_test:

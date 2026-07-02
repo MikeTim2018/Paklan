@@ -217,9 +217,9 @@ class GenderAndAgeSelectionPage extends StatelessWidget {
             return BasicReactiveButton(
               onPressed: (){
                 if (_phoneCon.text.length==10){
-                userCreationReq.gender = context.read<GenderSelectionCubit>().selectedIndex;
-                userCreationReq.age = context.read<AgeSelectionCubit>().selectedAge;
-                userCreationReq.phone = "$_countryCodeText${_phoneCon.text}";
+                //userCreationReq.gender = context.read<GenderSelectionCubit>().selectedIndex;
+                //userCreationReq.age = context.read<AgeSelectionCubit>().selectedAge;
+                //userCreationReq.phone = "$_countryCodeText${_phoneCon.text}";
                 context.read<ButtonStateCubit>().execute(
                   usecase: SignupUseCase(),
                   params: userCreationReq

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
 
@@ -15,6 +17,8 @@ abstract class AuthFirebaseService {
   Future <void> saveTokenToDatabase(String token);
   Future <void> setupToken();
   Future <Either> logout();
+  Future <Either> signInWithGoogle();
+  Future <Either> signInWithFacebook();
 }
 
 class AuthFirebaseServiceImpl extends AuthFirebaseService{
@@ -30,13 +34,8 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
           returnedData.user!.uid
         ).set(
           {
-            'firstName': user.firstName,
-            'lastName': user.lastName,
+            'displayName': user.displayName,
             'email': user.email,
-            'gender': user.gender,
-            'age': user.age,
-            'phone': user.phone!.substring(3),
-            'phoneExt': user.phone!.substring(0, 3),
             'userId': returnedData.user!.uid
           }
         );
@@ -95,6 +94,43 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
       return Left(message);
     }
   }
+  @override
+  Future<Either> signInWithGoogle() async {
+    try {
+      // 1. Trigger the native Google account picker
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return Left("Se canceló el inicio de sesión con Google.");
+
+      // 2. Fetch authentication tokens from the account
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // 3. Create a brand new credential for Firebase
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      var displayName = googleUser.displayName;
+      var email = googleUser.email;
+      var photoUrl = googleUser.photoUrl;
+      // 4. Sign into Firebase with the credential
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseFirestore.instance.collection('users').doc(
+          userCredential.user!.uid
+        ).set(
+          {
+            'displayName': displayName,
+            'email': email,
+            'userId': userCredential.user!.uid,
+            'photoLink': photoUrl
+          }
+        );
+      await setupToken();
+      return Right("Google Sign-In successful!");
+    } catch (e) {
+      return Left("Error during Google Sign-In: $e");
+    }
+  }
+
   
   @override
   Future<Either> sendPasswordResetEmail(String email) async{
@@ -172,11 +208,40 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   @override
   Future<Either> logout() async{
     try{
-      FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+      await FacebookAuth.instance.logOut();
+      await FirebaseAuth.instance.signOut();
       return Right("Éxito");
     }catch(e){
       return Left(
         "Porfavor intenta más tarde"
+      );
+    }
+  }
+  
+  @override
+  Future<Either> signInWithFacebook() async{
+    try{
+    final LoginResult fbLogin = await FacebookAuth.instance.login(permissions: ['email', 'public_profile'],);
+    if (fbLogin.status != LoginStatus.success) return Left("Se canceló el inició con Facebook login");
+    
+    final OAuthCredential fbAuthCred = FacebookAuthProvider.credential(fbLogin.accessToken!.tokenString);
+    final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(fbAuthCred);
+    await FirebaseFirestore.instance.collection('users').doc(
+          userCredential.user!.uid
+        ).set(
+          {
+            'displayName': userCredential.user!.displayName,
+            'email': userCredential.user!.email,
+            'userId': userCredential.user!.uid,
+            'photoLink': userCredential.user!.photoURL
+          }
+        );
+      await setupToken();
+    return Right("Éxito");
+    }catch(e){
+      return Left(
+        "Porfavor intenta más tarde $e"
       );
     }
   }
