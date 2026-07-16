@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
@@ -22,19 +23,20 @@ class Header extends StatelessWidget {
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 150,
-                  padding: EdgeInsets.all(20),
+                  height: 110,
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(image: const AssetImage(
-                            AppImages.retroHome,
-                          )
-                          ,
-                          fit: BoxFit.fitWidth,
+                    color: AppColors.primary,
+                    //image: DecorationImage(image: const AssetImage(
+                    //        AppImages.retroHome,
+                    //      )
+                    //      ,
+                    //      fit: BoxFit.fitWidth,
                           
-                          )),
+                    //      )
+                    ),
                   child: TweenAnimationBuilder(
-                      curve: Curves.easeIn,
+                      curve: Curves.easeInCirc,
                       tween: Tween<double>(begin: 0, end: 1),
                       duration: Duration(milliseconds: 1000),
                       builder: (BuildContext context, double value, Widget ? child){
@@ -48,11 +50,10 @@ class Header extends StatelessWidget {
                       },
                       child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _profileImage(state.user,context),
                         _name(state.user, context),
-                        _card(context)
                       ],
                     ),
                   ),
@@ -69,8 +70,8 @@ class Header extends StatelessWidget {
         AppNavigator.push(context, ProfileHome());
       },
       child: Container(
-        height: 45,
-        width: 45,
+        height: 55,
+        width: 55,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: user.photoLink.isEmpty ? 
@@ -83,10 +84,31 @@ class Header extends StatelessWidget {
           color: Colors.white,
           shape: BoxShape.circle,
           border: BoxBorder.all(
-            color: Colors.white,
-            width: 1
+            color: user.notificationNumber > 0 ? 
+            Colors.red[400]!
+            :AppColors.primaryButton,
+            width: 1.5
           )
         ),
+        child: user.notificationNumber > 0 ?
+        Align(
+          alignment: Alignment.topRight,
+          child: Container(
+            height: 15,
+            width: 15,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent[400],
+              shape: BoxShape.circle
+            ),
+            child: Text("${user.notificationNumber}",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black87
+              ),
+            ),
+          ),
+        ) : null
       ),
     );
   }
@@ -94,7 +116,7 @@ class Header extends StatelessWidget {
   Widget _name(UserEntity user, BuildContext context) {
     return Flexible(
       child: Container(
-        height: 50,
+        height: 60,
         padding: const EdgeInsets.symmetric(
           horizontal: 13
         ),
@@ -106,35 +128,16 @@ class Header extends StatelessWidget {
           child: 
           Text(
               '¡Bienvienid${user.gender == 1 ? 'o' : 'a'} ${user.displayName}!',
-              overflow: TextOverflow.clip,
-              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              maxLines: 2,
               style: const TextStyle(
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w700,
                 fontSize: 18,
-                color: Colors.white
+                color: Colors.black87
               ),
             ),
           ),
-      ),
-    );
-  }
-
-  Widget _card(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
-        //AppNavigator.push(context, HomePage());
-      },
-      child: Container(
-        height: 45,
-        width: 45,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle
-        ),
-        child: SvgPicture.asset(
-          AppVectors.bell,
-          fit: BoxFit.none,
-        ),
       ),
     );
   }

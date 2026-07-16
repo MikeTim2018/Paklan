@@ -214,10 +214,10 @@ Widget listNoTransaction(BuildContext context) {
                   ),
                   SizedBox(height: 10,),
                   Text(
-                    "Sin Tratos Activos",
+                    "Aún no tienes tratos",
                     style: TextStyle(
                       fontSize: 23,
-                      color: Colors.white70
+                      color: Colors.black87
                     ),
                   ),
                   SizedBox(height: 15,),
@@ -225,7 +225,7 @@ Widget listNoTransaction(BuildContext context) {
                     "¡Comienza ahora!",
                     style: TextStyle(
                       fontSize: 18,
-                      color: AppColors.primary
+                      color: Colors.black
                     ),
                   ),
                   ]

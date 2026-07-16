@@ -9,6 +9,7 @@ class UserEntity {
   final String phone;
   final String photoLink;
   final bool clabe;
+  final int notificationNumber;
 
   UserEntity({
     required this.userId,
@@ -20,6 +21,7 @@ class UserEntity {
     required this.gender,
     required this.photoLink,
     required this.phone,
-    required this.clabe
+    required this.clabe,
+    required this.notificationNumber
   });
 }

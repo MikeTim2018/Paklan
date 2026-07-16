@@ -15,6 +15,7 @@ class UserModel {
   final String phone;
   final String phoneExt;
   final String photoLink;
+  final int notificationNumber;
   final bool clabe;
 
   UserModel({
@@ -29,6 +30,7 @@ class UserModel {
     required this.phoneExt,
     required this.photoLink,
     required this.clabe,
+    required this.notificationNumber
   });
 
   Map<String, dynamic> toMap() {
@@ -42,6 +44,9 @@ class UserModel {
       'phone': phone,
       'phoneExt': phoneExt,
       'clabe': clabe,
+      'displayName': displayName,
+      'photoLink': photoLink,
+      'notificationNumber': notificationNumber,
     };
   }
 
@@ -57,7 +62,8 @@ class UserModel {
       phone: map['phone'] ?? '',
       phoneExt: map['phoneExt'] ?? '+52',
       photoLink: map['photoLink'] ?? '',
-      clabe: map['CLABEs'] ?? false
+      clabe: map['CLABEs'] ?? false,
+      notificationNumber: map['notificationNumber'] ?? 0,
     );
   }
   
@@ -80,6 +86,7 @@ extension UserXModel on UserModel {
       phone: "$phoneExt $phone",
       photoLink: photoLink,
       clabe: clabe,
+      notificationNumber: notificationNumber
     );
   }
 }

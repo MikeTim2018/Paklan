@@ -84,22 +84,36 @@ class _MainWrapperState extends State<MainWrapper> {
                 ),
                 _bottomAppBarItem(
                   context,
-                  defaultIcon: Icons.timelapse,
+                  defaultIcon: Icons.price_change_outlined,
                   page: 1,
-                  label: "Historial",
-                  filledIcon: Icons.timelapse_sharp,
+                  label: "Comprar",
+                  filledIcon: Icons.price_change_rounded,
                 ),
                 _bottomAppBarItem(
                   context,
-                  defaultIcon: Icons.wallet,
-                  page: 2,
-                  label: "Cuentas",
-                  filledIcon: Icons.wallet_sharp,
+                  defaultIcon: Icons.sell_outlined,
+                  page: 1,
+                  label: "Vender",
+                  filledIcon: Icons.sell,
                 ),
-              ],
+                _bottomAppBarItem(
+                  context,
+                  defaultIcon: Icons.compare_arrows,
+                  page: 2,
+                  label: "Trueque",
+                  filledIcon: Icons.compare_arrows_outlined,
+                ),
+                _bottomAppBarItem(
+                  context,
+                  defaultIcon: Icons.menu,
+                  page: 2,
+                  label: "Menu",
+                  filledIcon: Icons.menu_outlined,
+                ),
+              ], 
             ),
+            
           ),
-          
         ],
       ),
     );
@@ -130,33 +144,16 @@ class _MainWrapperState extends State<MainWrapper> {
               Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
               return FloatingActionButton.extended(
                 heroTag: 'addDeal',
-                label: Text("Nuevo trato",
+                label: Text("Trato Flash",
                 style: TextStyle(
                   color: Colors.white70
                 ),),
                 onPressed: () {
-                  if (!userData.keys.contains("CLABEs") || userData['CLABEs'].length == 0){
-                  var snackbar = SnackBar(
-                  content: Text(
-                    "¡Debes primero registrar una cuenta clabe!",
-                    style: TextStyle(
-                      color: Colors.white70
-                    ),),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.black87,
-                  showCloseIcon: true,
-                  closeIconColor: Colors.white70,
-                  );
-                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                  
-                  }
-                  else{
                   AppNavigator.push(context, TransactionSearch());
-                  }
                 },
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                backgroundColor: const Color.fromARGB(255, 32, 68, 117),
-                icon: const Icon(Icons.handshake_outlined, color: Colors.white54,),
+                backgroundColor: AppColors.primaryButton,
+                icon: Icon(Icons.flash_on_outlined, color: Colors.yellow[200],),
 
       );
         }
