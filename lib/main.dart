@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:paklan/common/helper/messaging_api/api.dart';
 import 'package:paklan/core/configs/theme/app_theme.dart';
 import 'package:paklan/firebase_options.dart';
@@ -14,6 +15,7 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform
   );
   await FirebaseMsgApi.instance.initialize();
+  await GoogleSignIn.instance.initialize();
   await initializeDependencies();
   runApp(const MyApp());
 }

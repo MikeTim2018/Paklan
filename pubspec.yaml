@@ -43,13 +43,13 @@ dependencies:
   get_it:
   intl_phone_field:
   algoliasearch: ^1.32.0
-  firebase_messaging: ^15.2.6
-  flutter_local_notifications: ^19.2.1
-  easy_stepper: ^0.8.5+1
+  firebase_messaging: ^16.4.3
+  flutter_local_notifications: ^22.0.1
+  easy_stepper: ^1.1.0
   u_credit_card: ^1.4.0
   slide_countdown: ^2.0.2
   intl: ^0.20.2
-  cloud_functions: ^5.5.2
+  cloud_functions: ^6.3.5
   show_hide_password: ^0.0.2
   checkout_screen_ui: ^1.0.1
   iconsax_flutter: ^1.0.1
@@ -57,9 +57,9 @@ dependencies:
   fancy_password_field: ^2.0.8
   flutter_multi_select_items: ^0.4.3
   flutter_rating: ^2.0.2
-  firebase_storage: ^12.4.10
-  google_sign_in: ^6.2.1
-  flutter_facebook_auth: ^7.1.7
+  firebase_storage: ^13.4.5
+  google_sign_in: ^7.2.0
+  flutter_facebook_auth: ^7.1.8
 
 dev_dependencies:
   flutter_test:

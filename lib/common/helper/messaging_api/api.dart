@@ -56,7 +56,7 @@ class FirebaseMsgApi{
     );
 
     await _localNotifications.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (details){
 
       }
@@ -69,10 +69,10 @@ class FirebaseMsgApi{
     AndroidNotification? android = message.notification?.android;
     if (notification != null && android != null){
       await _localNotifications.show(
-        notification.hashCode,
-        notification.title, 
-        notification.body, 
-        NotificationDetails(
+        id: notification.hashCode,
+        title: notification.title, 
+        body: notification.body, 
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'high_importance_channel', 
             'High Importance Notifications',

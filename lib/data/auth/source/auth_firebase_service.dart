@@ -98,15 +98,15 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   Future<Either> signInWithGoogle() async {
     try {
       // 1. Trigger the native Google account picker
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) return Left("Se canceló el inicio de sesión con Google.");
 
       // 2. Fetch authentication tokens from the account
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       // 3. Create a brand new credential for Firebase
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+      final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
       var displayName = googleUser.displayName;
@@ -208,7 +208,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   @override
   Future<Either> logout() async{
     try{
-      await GoogleSignIn().signOut();
+      await GoogleSignIn.instance.signOut();
       await FacebookAuth.instance.logOut();
       await FirebaseAuth.instance.signOut();
       return Right("Éxito");
