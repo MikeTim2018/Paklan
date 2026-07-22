@@ -283,7 +283,7 @@ Widget listNoDeal(BuildContext context) {
               ),
               ),
               subtitle: Text(
-                  currentUserId == state[index].sellerId ? '${state[index].buyerFirstName}':'${state[index].sellerFirstName}',
+                  currentUserId == state[index].sellerId ? '${state[index].buyerDisplayName}':'${state[index].sellerDisplayName}',
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 13

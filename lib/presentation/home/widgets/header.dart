@@ -1,10 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
-import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
@@ -27,13 +25,6 @@ class Header extends StatelessWidget {
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    //image: DecorationImage(image: const AssetImage(
-                    //        AppImages.retroHome,
-                    //      )
-                    //      ,
-                    //      fit: BoxFit.fitWidth,
-                          
-                    //      )
                     ),
                   child: TweenAnimationBuilder(
                       curve: Curves.easeInCirc,

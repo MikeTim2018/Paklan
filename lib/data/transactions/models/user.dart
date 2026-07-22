@@ -11,7 +11,7 @@ class UserModel {
   final String firstName;
   final String lastName;
   final String email;
-  final String image;
+  final String photoLink;
   final String phone;
   final String phoneExt;
   final int notificationNumber;
@@ -23,7 +23,7 @@ class UserModel {
     required this.firstName,
     required this.lastName,
     required this.email,
-    required this.image,
+    required this.photoLink,
     required this.phone,
     required this.phoneExt,
     required this.notificationNumber,
@@ -35,7 +35,7 @@ class UserModel {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
-      'image': image,
+      'photoLink': photoLink,
       'phone': phone,
       'phoneExt': phoneExt,
       'displayName': displayName,
@@ -50,7 +50,7 @@ class UserModel {
       lastName: map['lastName'] ??  '',
       displayName: map['displayName'] as String,
       email: map['email'] as String,
-      image: map['image'] ?? '',
+      photoLink: map['photoLink'] ?? '',
       phone: map['phone'] ?? '',
       phoneExt: map['phoneExt'] ?? '+52',
       notificationNumber: map['notificationNumber'] ?? 0
@@ -71,7 +71,7 @@ extension UserXModel on UserModel {
       firstName: firstName,
       lastName: lastName, 
       email: email, 
-      image: image,
+      photoLink: photoLink,
       phone: "$phoneExt $phone",
       notificationNumber: notificationNumber
     );

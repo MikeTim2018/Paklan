@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
+import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/presentation/transactions/bloc/person_info_display_cubit.dart';
 
 class SearchField extends StatelessWidget {
@@ -15,11 +16,12 @@ class SearchField extends StatelessWidget {
        ),
       child: TextField(
         onChanged: (value){
-          if (value.length > 3){
+          if (value.length > 2){
           context.read<PersonInfoDisplayCubit>().findPerson(searchVal: value);
           } 
         },
         decoration: InputDecoration(
+          fillColor: AppColors.secondBackground,
           contentPadding: const EdgeInsets.all(12),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50)
@@ -30,8 +32,9 @@ class SearchField extends StatelessWidget {
           prefixIcon: SvgPicture.asset(
             AppVectors.search,
             fit: BoxFit.none,
+            colorFilter: ColorFilter.mode(Colors.black87, BlendMode.srcIn),
           ),
-          hintText: 'Buscar por Email, Teléfono o Apellidos'
+          hintText: 'Buscar por nombre o email'
         ),
       ),
     );

@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:algoliasearch/algoliasearch_lite.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
 import 'package:paklan/data/transactions/models/status.dart';
@@ -67,7 +69,32 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       );
     }
 }
+  /// Uploads files concurrently and returns the final download URLs.
+  Future<List<String>> uploadImages({
+    required List<File> images,
+    required List<String> storagePaths,
+  }) async {
+    final FirebaseStorage storage = FirebaseStorage.instance;
+    final List<UploadTask> uploadTasks = [];
 
+    // Start all batch uploads simultaneously
+    for (int i = 0; i < images.length; i++) {
+      final ref = storage.ref().child(storagePaths[i]);
+      final task = ref.putFile(
+        images[i], 
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      uploadTasks.add(task);
+    }
+
+    // Wait for all concurrent uploads to resolve
+    final List<TaskSnapshot> snapshots = await Future.wait(uploadTasks);
+
+    // Resolve final cloud access download URLs
+    return Future.wait(
+      snapshots.map((snapshot) => snapshot.ref.getDownloadURL()),
+    );
+  }
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
     HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
@@ -75,19 +102,27 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     double transactionAmount = double.parse(newTransaction.amount!);
     String fee;
     if (transactionAmount < 220){
-      fee = '15';
+      fee = '30';
     }
     else{
       fee = (transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2);
     }
+    final List<String> generatedPaths = List.generate(newTransaction.images!.length, (index) {
+      return 'uploads/${newTransaction.sellerId}/${DateTime.now().millisecondsSinceEpoch}_img_$index.jpg';
+    });
+    List<String> urls = await uploadImages(images: newTransaction.images!, storagePaths: generatedPaths);
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
       {"name": newTransaction.name,
         "amount": newTransaction.amount,
         "fee": fee,
        "status": newTransaction.status,
+       "creationDate": DateTime.parse(serverTime.data['server_datetime']),
+       "images": urls,
+       "dealDetails": newTransaction.dealDetails,
+       "typeOfProduct": newTransaction.typeOfProduct,
        "members":{
-         "sellerFirstName": newTransaction.sellerFirstName,
-         "buyerFirstName": newTransaction.buyerFirstName,
+         "sellerDisplayName": newTransaction.sellerDisplayName,
+         "buyerDisplayName": newTransaction.buyerDisplayName,
          "sellerId": newTransaction.sellerId,
          "buyerId": newTransaction.buyerId,
        },
@@ -99,9 +134,9 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "transactionId": transactionDoc.id,
         "buyerConfirmation": newTransaction.buyerConfirmation ?? false,
         "sellerConfirmation": newTransaction.sellerConfirmation ?? false,
-        "details": newTransaction.details,
         "status": newTransaction.status,
         "sellerId": newTransaction.sellerId,
+        "details": newTransaction.details,
         "buyerId": newTransaction.buyerId,
         "cancelled": false,
         "reimbursementDone": false,

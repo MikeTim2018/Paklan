@@ -49,12 +49,12 @@ def send_reminder(_) -> None:
             msg = messaging.send_each_for_multicast(
                 multicast_message=messaging.MulticastMessage(
                     notification=messaging.Notification(
-                        title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("buyerConfirmation") else "Concretar"} un Trato con {seller.get("firstName")}",
+                        title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("buyerConfirmation") else "Concretar"} un Trato con {seller.get("displayName")}",
                         body=f"Estatus: {transaction_dict.get("status")}, Monto: ${transaction_dict.get("amount")} mxn.\n{status_dict.get("details")}"
                     ),
                     tokens=buyer.get("tokens"),
                     data={
-                        "message": f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
+                        "message": f"Tienes una nueva actualización de un Trato con {seller.get("displayName")}",
                         "status": transaction_dict.get("status"),
                         "transaction": json.dumps({
                             "transactionId": transaction_dict.get("transactionId"),
@@ -85,11 +85,11 @@ def send_reminder(_) -> None:
             multicast_message=messaging.MulticastMessage(
                 tokens=seller.get("tokens"),
                 notification=messaging.Notification(
-                    title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("sellerConfirmation") else "Concretar"} un Trato con {buyer.get("firstName")}",
+                    title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("sellerConfirmation") else "Concretar"} un Trato con {buyer.get("displayName")}",
                     body=f"Estatus: {status_dict.get("status")}, Monto: ${transaction_dict.get("amount")} mxn.\n{status_dict.get("details")}"
                 ),
                 data={
-                    "message": f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
+                    "message": f"Tienes una nueva actualización de un Trato con {buyer.get("displayName")}",
                     "status": status_dict.get("status"),
                     "transaction": json.dumps({
                         "transactionId": transaction_dict.get("transactionId"),
@@ -146,12 +146,12 @@ def send_reminder_days(_) -> None:
             msg = messaging.send_each_for_multicast(
                 multicast_message=messaging.MulticastMessage(
                     notification=messaging.Notification(
-                        title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("buyerConfirmation") else "Concretar"} un Trato con {seller.get("firstName")}",
+                        title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("buyerConfirmation") else "Concretar"} un Trato con {seller.get("displayName")}",
                         body=f"Estatus: {transaction_dict.get("status")}, Monto: ${transaction_dict.get("amount")} mxn.\n{status_dict.get("details")}"
                     ),
                     tokens=buyer.get("tokens"),
                     data={
-                        "message": f"Tienes una nueva actualización de un Trato con {seller.get("firstName")}",
+                        "message": f"Tienes una nueva actualización de un Trato con {seller.get("displayName")}",
                         "status": transaction_dict.get("status"),
                         "transaction": json.dumps({
                             "transactionId": transaction_dict.get("transactionId"),
@@ -182,11 +182,11 @@ def send_reminder_days(_) -> None:
             multicast_message=messaging.MulticastMessage(
                 tokens=seller.get("tokens"),
                 notification=messaging.Notification(
-                    title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("sellerConfirmation") else "Concretar"} un Trato con {buyer.get("firstName")}",
+                    title=f"Te quedan {time_result} para {"Aceptar" if not status_dict.get("sellerConfirmation") else "Concretar"} un Trato con {buyer.get("displayName")}",
                     body=f"Estatus: {status_dict.get("status")}, Monto: ${transaction_dict.get("amount")} mxn.\n{status_dict.get("details")}"
                 ),
                 data={
-                    "message": f"Tienes una nueva actualización de un Trato con {buyer.get("firstName")}",
+                    "message": f"Tienes una nueva actualización de un Trato con {buyer.get("displayName")}",
                     "status": status_dict.get("status"),
                     "transaction": json.dumps({
                         "transactionId": transaction_dict.get("transactionId"),
@@ -306,43 +306,43 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     body_seller = ""
     if status == 'Enviado' and not buyer_confirmation:
         title_buyer = "🚨 ¡Nueva propuesta esperándote!"
-        body_buyer = f"{seller.get("firstName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
+        body_buyer = f"{seller.get("displayName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
         title_seller = "✅ ¡Listo! Tu oferta fue enviada"
-        body_seller = f"Tu propuesta ya está en manos de {buyer.get("firstName")}. Espera su respuesta."
+        body_seller = f"Tu propuesta ya está en manos de {buyer.get("displayName")}. Espera su respuesta."
     if status == "Enviado" and not seller_confirmation:
         title_buyer = "✅ ¡Listo! Tu oferta fue enviada"
-        body_buyer = f"Tu propuesta ya está en manos de {seller.get("firstName")}. Espera su respuesta."
+        body_buyer = f"Tu propuesta ya está en manos de {seller.get("displayName")}. Espera su respuesta."
         title_seller = "🚨 ¡Nueva propuesta esperándote!"
-        body_seller = f"{buyer.get("firstName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
+        body_seller = f"{buyer.get("displayName")} quiere hacer trato contigo. Revisa los detalles y decide si aceptarla o no."
     if status == 'Aceptado':
         print("validating previous state...")
         print(previous_state.get("buyerConfirmation"))
         if previous_state.get("buyerConfirmation"):
-            title_buyer = f"🎉 ¡{seller.get("firstName")} aceptó tu propuesta!"
+            title_buyer = f"🎉 ¡{seller.get("displayName")} aceptó tu propuesta!"
             body_buyer = "Recuerda que tienen 8 días para completar su trato"
             title_seller = "✅ ¡Aceptaste la propuesta!"
-            body_seller = f"Ahora tienes un trato con {buyer.get('firstName')}. Espera el siguiente paso."
+            body_seller = f"Ahora tienes un trato con {buyer.get('displayName')}. Espera el siguiente paso."
             
         if previous_state.get("sellerConfirmation"):
-            title_seller = f"🎉 ¡{buyer.get("firstName")} aceptó tu propuesta!"
+            title_seller = f"🎉 ¡{buyer.get("displayName")} aceptó tu propuesta!"
             body_seller = "Recuerda que tienen 8 días para completar su trato"
             title_buyer = "✅ ¡Aceptaste la propuesta!"
-            body_buyer = f"Ahora tienes un trato con {seller.get('firstName')}. Espera el siguiente paso."
+            body_buyer = f"Ahora tienes un trato con {seller.get('displayName')}. Espera el siguiente paso."
     if status == 'Depositado':
-        title_seller = f'💰 {buyer.get("firstName")} realizó el pago'
+        title_seller = f'💰 {buyer.get("displayName")} realizó el pago'
         title_buyer = '✅ Pago exitoso'
-        body_buyer = f'Se realizó el pago, ahora solo queda liberar los fondos a {seller.get("firstName")} para finalizar el trato'
-        body_seller = f'{buyer.get("firstName")} realizó el pago, espera a que libere los fondos para cerrar el trato.'
+        body_buyer = f'Se realizó el pago, ahora solo queda liberar los fondos a {seller.get("displayName")} para finalizar el trato'
+        body_seller = f'{buyer.get("displayName")} realizó el pago, espera a que libere los fondos para cerrar el trato.'
     if status == 'Completado':
         title_seller = '🤝¡Trato finalizado con éxito!'
         title_buyer = '🤝¡Trato finalizado con éxito!'
-        body_buyer = f'Marcaste el trato con {seller.get("firstName")} como completado. ¡Gracias por formar parte!'
-        body_seller = f'Marcaste el trato con {buyer.get("firstName")} como completado. ¡Gracias por formar parte!'
+        body_buyer = f'Marcaste el trato con {seller.get("displayName")} como completado. ¡Gracias por formar parte!'
+        body_seller = f'Marcaste el trato con {buyer.get("displayName")} como completado. ¡Gracias por formar parte!'
     if status == 'Cancelado':
         title_seller = '🚫 El trato ha sido cancelado'
         title_buyer = '🚫 El trato ha sido cancelado'
-        body_buyer = f'El trato con {seller.get("firstName")} ha sido cancelado.'
-        body_seller = f'El trato con {buyer.get("firstName")} ha sido cancelado.'
+        body_buyer = f'El trato con {seller.get("displayName")} ha sido cancelado.'
+        body_seller = f'El trato con {buyer.get("displayName")} ha sido cancelado.'
     if buyer.get("tokens"):
         print("sending multicast message to buyer")
         msg = messaging.send_each_for_multicast(

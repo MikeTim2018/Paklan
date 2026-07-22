@@ -27,8 +27,8 @@ class TransactionSuccessWoConfirmation extends StatelessWidget {
               ),
               SizedBox(height: 20,),
               Container(
-                height: 250,
-                width: 250,
+                height: 200,
+                width: 200,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: const AssetImage(
@@ -51,7 +51,7 @@ class TransactionSuccessWoConfirmation extends StatelessWidget {
                   ),
               ),
               
-              SizedBox(height: 50,),
+              SizedBox(height: 30,),
               Padding(
                 padding: const EdgeInsets.all(13.0),
                 child: BasicAppButton(

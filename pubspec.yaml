@@ -40,6 +40,9 @@ dependencies:
   flutter_svg:
   flutter_bloc:
   dartz:
+  image_picker:
+  flutter_image_compress:
+  path_provider:
   get_it:
   intl_phone_field:
   algoliasearch: ^1.32.0

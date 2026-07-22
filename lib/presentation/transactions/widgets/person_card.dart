@@ -16,7 +16,7 @@ class PersonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
                  children: [
-                  SizedBox(height: 50,),
+                  SizedBox(height: 30,),
                   Text(
                     "Personas Encontradas",
                     style: TextStyle(
@@ -25,7 +25,7 @@ class PersonCard extends StatelessWidget {
                     ),
                   SizedBox(height: 20,),
                   SizedBox(
-                    height: 420,
+                    height: 350,
                     child: ListView.separated(
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
@@ -48,27 +48,33 @@ class PersonCard extends StatelessWidget {
   }
   Widget _buildPersonTile(user){
     return Card(
+      color: Colors.transparent,
+      shadowColor: Colors.transparent,
+      elevation: 0.0,
       child: ListTile(
         shape: StadiumBorder(side: BorderSide(width: 1)),
         tileColor: AppColors.secondBackground,
         leading: CircleAvatar(
           backgroundColor: AppColors.secondBackground,
           radius: 30,
-          backgroundImage: const AssetImage(
-                AppImages.userLogo
-              ),
+          backgroundImage: user.photoLink.isEmpty ? 
+            const AssetImage(
+              AppImages.userLogo
+            ) : NetworkImage(
+              user.photoLink
+            ),
         ),
         title: Text(
-          user.firstName,
+          user.displayName,
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black87,
             fontWeight: FontWeight.bold
           ),
           ),
           subtitle: Text(
             user.email,
             style: TextStyle(
-              color: Colors.grey
+              color: Colors.black54
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -76,11 +82,12 @@ class PersonCard extends StatelessWidget {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: Colors.white70,
+              color: AppColors.primaryButton,
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
               AppVectors.rightArrow,
+              colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
               fit: BoxFit.none,
             ),
           ),

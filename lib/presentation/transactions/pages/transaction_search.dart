@@ -21,10 +21,12 @@ class TransactionSearch extends StatelessWidget {
       create: (context) => PersonInfoDisplayCubit(),
       child: Scaffold(
         appBar: BasicAppbar(
+          backgroundColor: AppColors.primary,
           title: 
               SearchField(),
         ),
         bottomNavigationBar: BottomAppBar(
+          color: AppColors.primary,
           child: Column(
             children: [
               Text(
@@ -39,7 +41,7 @@ class TransactionSearch extends StatelessWidget {
                       decoration: BoxDecoration(
                     
                         borderRadius: BorderRadius.circular(40),
-                        color: Colors.blueGrey, 
+                        color: AppColors.primaryButton, 
                       ),
                     ),
                     
@@ -65,7 +67,7 @@ class TransactionSearch extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(17.0),
                         child: Text(
-                          "Busca a Tu Comprador o Vendedor para hacer un trato",
+                          "Busca a tu comprador o vendedor para hacer un trato",
                           style: TextStyle(
                             fontSize: 23
                           ),
@@ -73,8 +75,8 @@ class TransactionSearch extends StatelessWidget {
                       ),
                         SizedBox(height: 20,),
                 Container(
-                  width: 350,
-                  height: 350,
+                  width: MediaQuery.sizeOf(context).width * 0.8,
+                  height: 100,
                   decoration: BoxDecoration(
                     color: AppColors.background,
                     shape: BoxShape.circle,

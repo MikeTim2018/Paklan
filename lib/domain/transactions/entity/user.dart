@@ -3,7 +3,7 @@ class UserEntityTransaction {
   final String firstName;
   final String lastName;
   final String email;
-  final String image;
+  final String photoLink;
   final String phone;
   final String displayName;
   final int notificationNumber;
@@ -12,7 +12,7 @@ class UserEntityTransaction {
     required this.userId,
     required this.displayName,
     required this.email,
-    required this.image,
+    required this.photoLink,
     required this.firstName,
     required this.lastName,
     required this.phone,
