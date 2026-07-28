@@ -13,6 +13,7 @@ class TransactionEntity {
   DateTime ? timeLimit;
   String ? fee;
   String ? sellerId;
+  String ? typeOfDeal;
 
   TransactionEntity({
     required this.name,
@@ -25,6 +26,7 @@ class TransactionEntity {
     required this.images,
     required this.dealDetails,
     required this.typeOfProduct,
+    required this.typeOfDeal,
     this.timeLimit,
     this.fee,
     this.sellerId

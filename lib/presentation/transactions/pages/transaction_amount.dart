@@ -1,11 +1,7 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
 import 'package:paklan/common/bloc/button/button_state_cubit.dart';
-import 'package:paklan/common/helper/bottomsheet/app_bottomsheet.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
@@ -15,7 +11,7 @@ import 'package:paklan/domain/transactions/entity/user.dart';
 import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
-import 'package:paklan/presentation/transactions/bloc/clabe_selection_cubit.dart';
+import 'package:paklan/presentation/transactions/bloc/deal_type_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/photo_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/bloc/photo_selection_state.dart';
 import 'package:paklan/presentation/transactions/bloc/user_type_selection_cubit.dart';
@@ -39,8 +35,8 @@ class TransactionAmount extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => UserTypeSelectionCubit()),
+        BlocProvider(create: (context) => DealTypeSelectionCubit()),
         BlocProvider(create: (context) => ButtonStateCubit()),
-        BlocProvider(create: (context) => UserInfoDisplayCubit()..displayUserInfo()),
         BlocProvider(create: (context) => ImagePickerCubit()),
         ],
       child: MultiBlocListener(
@@ -88,7 +84,7 @@ class TransactionAmount extends StatelessWidget {
                     children: [
                       Container(
                         height: 20,
-                        width: MediaQuery.sizeOf(context).width * 0.9,
+                        width: MediaQuery.sizeOf(context).width * 0.853,
                         alignment: Alignment.bottomLeft,
                         decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
@@ -117,6 +113,10 @@ class TransactionAmount extends StatelessWidget {
                   _typeOfProduct(context),
                   SizedBox(height: 10,),
                   _users(context),
+                  SizedBox(height: 10,),
+                  _typeOfDealText(context),
+                  SizedBox(height: 10,),
+                  _typeOfDeal(context),
                   SizedBox(height: 10,),
                   _photosRequest(context),
                   SizedBox(height: 10,),
@@ -331,6 +331,18 @@ class TransactionAmount extends StatelessWidget {
       ),
     );
   }
+  Widget _typeOfDealText(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(13.0),
+      child: Text(
+        '¿Qué tipo de trato deseas hacer?',
+        style: TextStyle(
+          fontSize: 21,
+          fontWeight: FontWeight.bold
+        ),
+      ),
+    );
+  }
 
   Widget _amountField(BuildContext context){
     return Padding(
@@ -407,7 +419,55 @@ class TransactionAmount extends StatelessWidget {
 
     );
   }
+
+  Widget _typeOfDeal(BuildContext context) {
+    return BlocBuilder<DealTypeSelectionCubit,int>(
+      builder: (context,state) {
+        return Padding(
+          padding: const EdgeInsets.all(13.0),
+          child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            dealTile(context,1,'Envío'),
+            const SizedBox(width: 20,),
+            dealTile(context,2,'En persona'),
+          ],
+                ),
+        );
+      }
+
+    );
+  }
   
+  Expanded dealTile(BuildContext context,int userIndex,String gender) {
+    return Expanded(
+        flex: 1,
+        child: GestureDetector(
+          onTap: (){
+            context.read<DealTypeSelectionCubit>().selectUser(userIndex);
+          },
+          child: Container(
+            height: 60,
+            decoration: BoxDecoration(
+              color: context.read<DealTypeSelectionCubit>().selectedIndex == userIndex ?
+               AppColors.primaryButton : AppColors.secondBackground,
+              borderRadius: BorderRadius.circular(30)
+            ),
+            child: Center(
+              child: Text(
+                gender,
+                style: TextStyle(
+                  color: context.read<DealTypeSelectionCubit>().selectedIndex == userIndex ?
+                  AppColors.primary : Colors.black87,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+  }
 
   Expanded userTile(BuildContext context,int userIndex,String gender) {
     return Expanded(
@@ -451,6 +511,7 @@ class TransactionAmount extends StatelessWidget {
                 int image_count = context.read<ImagePickerCubit>().getCurrentImageCount();
                 if (_formKey.currentState!.validate() && image_count>0){
                 int userType = context.read<UserTypeSelectionCubit>().selectedIndex;
+                int dealType = context.read<DealTypeSelectionCubit>().selectedIndex;
                 NewTransactionModel newTransaction = NewTransactionModel(
                   name: _nameCon.text.trim(),
                   amount: '${_amountCon.text}.00',
@@ -465,6 +526,7 @@ class TransactionAmount extends StatelessWidget {
                   dealDetails: _descriptionCon.text.trim(),
                   images: context.read<ImagePickerCubit>().getCurrentImages(),
                   typeOfProduct: userType == 1 ? "Original" : "Reproducción",
+                  typeOfDeal: dealType == 1 ? "Envío" : "En persona",
 
                 );
                 context.read<ButtonStateCubit>().execute(

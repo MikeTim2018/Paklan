@@ -7,9 +7,9 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 
 class ImagePickerCubit extends Cubit<ImagePickerState> {
   final ImagePicker _picker = ImagePicker();
-  static const int maxImageLimit = 6;
+  final int maxImageLimit;
 
-  ImagePickerCubit() : super(ImagePickerInitialState());
+  ImagePickerCubit({this.maxImageLimit = 6}) : super(ImagePickerInitialState());
   
   Future<File?> _compressImage(File file) async {
     try {
@@ -29,17 +29,41 @@ class ImagePickerCubit extends Cubit<ImagePickerState> {
     }
   }
 
+  /// Selects a single image from the gallery
+  Future<void> pickSingleGalleryImage() async {
+    List<File> currentImages = getCurrentImages();
+    
+    if (currentImages.length >= maxImageLimit) {
+      emit(ImagePickerErrorState("Solo puedes seleccionar hasta $maxImageLimit imágen(es)."));
+      emit(ImagePickerLoadedState(currentImages));
+      return;
+    }
+
+    try {
+      final XFile? galleryImage = await _picker.pickImage(source: ImageSource.gallery);
+      if (galleryImage == null) return; // User canceled selection
+
+      emit(ImagePickerLoadingState());
+
+      File? compressed = await _compressImage(File(galleryImage.path));
+      File finalImage = compressed ?? File(galleryImage.path);
+
+      List<File> combinedImages = [...currentImages, finalImage];
+      emit(ImagePickerLoadedState(combinedImages));
+    } catch (e) {
+      emit(ImagePickerErrorState("Error al seleccionar la imagen: ${e.toString()}"));
+      if (currentImages.isNotEmpty) emit(ImagePickerLoadedState(currentImages));
+    }
+  }
+
   Future<void> pickMultipleImages() async {
-    // Get existing images if we are already in the loaded state
     List<File> currentImages = getCurrentImages();
     if (state is ImagePickerLoadedState) {
       currentImages = List.from((state as ImagePickerLoadedState).images);
     }
 
-    // Stop early if the limit is already reached
     if (currentImages.length >= maxImageLimit) {
-      emit(ImagePickerErrorState("Solo puedes seleccionar hasta $maxImageLimit imágenes."));
-      // Restore the loaded state so images don't disappear from UI
+      emit(ImagePickerErrorState("Solo puedes seleccionar hasta $maxImageLimit imágen(es)."));
       emit(ImagePickerLoadedState(currentImages.sublist(0, maxImageLimit)));
       return;
     }
@@ -49,21 +73,22 @@ class ImagePickerCubit extends Cubit<ImagePickerState> {
       final List<XFile> selectedImages = await _picker.pickMultiImage();
 
       if (selectedImages.isNotEmpty) {
-        // Convert XFile list to standard File list
         final List<File> imageFiles = selectedImages.map((xFile) => File(xFile.path)).toList();
         List<File> combinedImages = [...currentImages, ...imageFiles];
-        // Enforce the strict maximum limit of 6
+
         if (combinedImages.length > maxImageLimit) {
           combinedImages = combinedImages.sublist(0, maxImageLimit);
           emit(ImagePickerErrorState("Sólo las primeras $maxImageLimit imágenes fueron añadidas"));
           emit(ImagePickerLoadedState(combinedImages));
-        }
-        else {
+        } else {
           emit(ImagePickerLoadedState(combinedImages));
         }
       } else {
-        // User canceled the picker without selecting anything
-        emit(ImagePickerInitialState());
+        if (currentImages.isNotEmpty) {
+          emit(ImagePickerLoadedState(currentImages));
+        } else {
+          emit(ImagePickerInitialState());
+        }
       }
     } catch (e) {
       emit(ImagePickerErrorState("Error al cargar las imágenes: ${e.toString()}"));
@@ -72,7 +97,11 @@ class ImagePickerCubit extends Cubit<ImagePickerState> {
   
   Future<void> pickCameraImage() async {
     List<File> currentImages = getCurrentImages();
-    if (currentImages.length >= maxImageLimit) return;
+    if (currentImages.length >= maxImageLimit){
+      emit(ImagePickerErrorState("Solo puedes seleccionar hasta $maxImageLimit imágen(es)."));
+      emit(ImagePickerLoadedState(currentImages));
+      return;
+    }
 
     try {
       final XFile? cameraImage = await _picker.pickImage(source: ImageSource.camera);
@@ -99,12 +128,14 @@ class ImagePickerCubit extends Cubit<ImagePickerState> {
     }
     return [];
   }
+
   int getCurrentImageCount() {
     if (state is ImagePickerLoadedState) {
       return (state as ImagePickerLoadedState).images.length;
     }
     return 0;
   }
+
   void deleteImage(int index) {
     if (state is ImagePickerLoadedState) {
       final currentImages = List.from((state as ImagePickerLoadedState).images);

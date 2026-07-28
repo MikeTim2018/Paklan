@@ -4,8 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:paklan/data/auth/models/user.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
+import 'package:paklan/domain/auth/entity/user.dart';
 
 abstract class AuthFirebaseService {
   Future<Either> signup(UserCreationReq user);
@@ -13,7 +15,7 @@ abstract class AuthFirebaseService {
   Future<Either> signin(UserSigninReq user);
   Future<Either> sendPasswordResetEmail(String email);
   Future<bool> isLoggedIn();
-  Future<Either> getUser();
+  Stream<Either<dynamic, UserEntity>> getUser();
   Future <void> saveTokenToDatabase(String token);
   Future <void> setupToken();
   Future <Either> logout();
@@ -100,30 +102,39 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
       // 1. Trigger the native Google account picker
       final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) return Left("Se canceló el inicio de sesión con Google.");
-
+  
       // 2. Fetch authentication tokens from the account
-
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
+  
       // 3. Create a brand new credential for Firebase
       final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
+  
       var displayName = googleUser.displayName;
       var email = googleUser.email;
       var photoUrl = googleUser.photoUrl;
+  
       // 4. Sign into Firebase with the credential
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      await FirebaseFirestore.instance.collection('users').doc(
-          userCredential.user!.uid
-        ).set(
-          {
-            'displayName': displayName,
-            'email': email,
-            'userId': userCredential.user!.uid,
-            'photoLink': photoUrl
-          }
-        );
+      final UserCredential userCredential = 
+          await FirebaseAuth.instance.signInWithCredential(credential);
+  
+      // 5. Check if this is their first time signing in
+      final bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+  
+      if (isNewUser) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+              'displayName': displayName,
+              'email': email,
+              'userId': userCredential.user!.uid,
+              'photoLink': photoUrl,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+      }
+  
       await setupToken();
       return Right("Google Sign-In successful!");
     } catch (e) {
@@ -162,18 +173,25 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   }
   
   @override
-  Future<Either> getUser() async{
-    try{
-      var currentUser = FirebaseAuth.instance.currentUser;
-      var userData = await FirebaseFirestore.instance.collection("users").doc(
-        currentUser?.uid
-      ).get().then((value) => value.data());
-      return Right(userData);
-    }catch(e){
-      return Left(
-        "Porfavor intenta más tarde"
-      );
-    }
+  Stream<Either<dynamic, UserEntity>> getUser() {
+    return FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
+      if (user == null) {
+        // Unauthenticated state
+        return Stream.value(Left("El usuario no ha iniciado sesión"));
+      }
+  
+      // 2. Automatically listen to Firestore when a user logs in
+      return FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots()
+          .map((doc) {
+            if (doc. exists && doc.data() != null) {
+              return Right(UserModel.fromMap(doc.data()!).toEntity());
+            }
+            return Left("No se encontró el usuario");
+          });
+    });
   }
   
   @override
@@ -220,30 +238,42 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   }
   
   @override
-  Future<Either> signInWithFacebook() async{
-    try{
-    final LoginResult fbLogin = await FacebookAuth.instance.login(permissions: ['email', 'public_profile'],);
-    if (fbLogin.status != LoginStatus.success) return Left("Se canceló el inició con Facebook login");
-    
-    final OAuthCredential fbAuthCred = FacebookAuthProvider.credential(fbLogin.accessToken!.tokenString);
-    final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(fbAuthCred);
-    await FirebaseFirestore.instance.collection('users').doc(
-          userCredential.user!.uid
-        ).set(
-          {
-            'displayName': userCredential.user!.displayName,
-            'email': userCredential.user!.email,
-            'userId': userCredential.user!.uid,
-            'photoLink': userCredential.user!.photoURL
-          }
-        );
-      await setupToken();
-    return Right("Éxito");
-    }catch(e){
-      return Left(
-        "Porfavor intenta más tarde $e"
+  Future<Either> signInWithFacebook() async {
+    try {
+      final LoginResult fbLogin = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
       );
+      if (fbLogin.status != LoginStatus.success) {
+        return Left("Se canceló el inició con Facebook login");
+      }
+  
+      final OAuthCredential fbAuthCred = FacebookAuthProvider.credential(
+        fbLogin.accessToken!.tokenString,
+      );
+      final UserCredential userCredential = 
+          await FirebaseAuth.instance.signInWithCredential(fbAuthCred);
+  
+      // Check if this is the user's very first sign-in
+      final bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+  
+      if (isNewUser) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+              'displayName': userCredential.user!.displayName,
+              'email': userCredential.user!.email,
+              'userId': userCredential.user!.uid,
+              'photoLink': userCredential.user!.photoURL,
+              'createdAt': FieldValue.serverTimestamp(), // Optional: great for tracking new accounts
+            });
+      }
+  
+      await setupToken();
+      return Right("Éxito");
+    } catch (e) {
+      return Left("Porfavor intenta más tarde $e");
     }
-  }
+}
 
 }

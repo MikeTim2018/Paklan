@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:paklan/data/auth/repository/auth_repository_impl.dart';
 import 'package:paklan/data/auth/source/auth_firebase_service.dart';
+import 'package:paklan/data/profile/repository/profile_repository_impl.dart';
+import 'package:paklan/data/profile/source/profile_firebase_service.dart';
 import 'package:paklan/data/transactions/repository/transactions_repository_impl.dart';
 import 'package:paklan/data/transactions/source/transaction_firebase_service.dart';
 import 'package:paklan/domain/auth/repository/auth.dart';
@@ -13,6 +15,8 @@ import 'package:paklan/domain/auth/usecases/signin_with_facebook.dart';
 import 'package:paklan/domain/auth/usecases/signin_with_google.dart';
 import 'package:paklan/domain/auth/usecases/signout.dart';
 import 'package:paklan/domain/auth/usecases/signup.dart';
+import 'package:paklan/domain/profile/repository/profile.dart';
+import 'package:paklan/domain/profile/usecases/upload_profile_picture.dart';
 import 'package:paklan/domain/transactions/repository/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/create_clabe.dart';
 import 'package:paklan/domain/transactions/usecases/delete_clabe.dart';
@@ -36,16 +40,26 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<TransactionFirebaseService>(
     TransactionFirebaseServiceImpl()
     );
+  sl.registerSingleton<ProfileFirebaseService>(
+    ProfileFirebaseServiceImpl()
+    );
   //Repositories
 
   sl.registerSingleton<AuthRepository>(
   AuthRepositoryImpl()
 );
 
-sl.registerSingleton<TransactionRepository>(
-  TransactionsRepositoryImpl()
-);
+  sl.registerSingleton<TransactionRepository>(
+    TransactionsRepositoryImpl()
+  );
+  
+  sl.registerSingleton<ProfileRepository>(
+  ProfileRepositoryImpl()
+  );
   //Usecases
+  sl.registerSingleton<UploadProfilePictureUseCase>(
+    UploadProfilePictureUseCase()
+  );
   sl.registerSingleton<SignupUseCase>(
   SignupUseCase()
 );

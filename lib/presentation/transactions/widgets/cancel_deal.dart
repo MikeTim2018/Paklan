@@ -130,12 +130,12 @@ class CancelDeal extends StatelessWidget {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                                  minimumSize: Size(50, 50),
-                                 backgroundColor: AppColors.primary,
+                                 backgroundColor: AppColors.primaryButton,
                                   ),
                           child: Text(
                             "Regresar",
                             style: TextStyle(
-                              color: Colors.white
+                              color: AppColors.primary
                             ),
                             ),
                           onPressed: () => Navigator.pop(context),

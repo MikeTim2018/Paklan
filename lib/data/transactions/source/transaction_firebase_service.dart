@@ -108,7 +108,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       fee = (transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2);
     }
     final List<String> generatedPaths = List.generate(newTransaction.images!.length, (index) {
-      return 'uploads/${newTransaction.sellerId}/${DateTime.now().millisecondsSinceEpoch}_img_$index.jpg';
+      return 'uploads/${newTransaction.sellerId}/${DateTime.now().millisecondsSinceEpoch}_img_400x400.jpg';
     });
     List<String> urls = await uploadImages(images: newTransaction.images!, storagePaths: generatedPaths);
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
@@ -120,6 +120,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
        "images": urls,
        "dealDetails": newTransaction.dealDetails,
        "typeOfProduct": newTransaction.typeOfProduct,
+       "typeOfDeal": newTransaction.typeOfDeal,
        "members":{
          "sellerDisplayName": newTransaction.sellerDisplayName,
          "buyerDisplayName": newTransaction.buyerDisplayName,

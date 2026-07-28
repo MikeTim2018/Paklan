@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:paklan/common/helper/messaging_api/api.dart';
 import 'package:paklan/core/configs/theme/app_theme.dart';
 import 'package:paklan/firebase_options.dart';
+import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/splash/bloc/splash_cubit.dart';
 import 'package:paklan/presentation/splash/pages/splash.dart';
 import 'package:paklan/service_locator.dart';
@@ -26,13 +27,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SplashCubit()..appStarted(),
-      child: MaterialApp(
-        theme: AppTheme.appTheme,
-        debugShowCheckedModeBanner: false,
-        home: const SplashPage()
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => SplashCubit()..appStarted()),
+        BlocProvider<UserInfoDisplayCubit>(create: (context) => UserInfoDisplayCubit()..displayUserInfo(),),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.appTheme,
+          debugShowCheckedModeBanner: false,
+          home: const SplashPage()
+        ),
     );
   }
 }

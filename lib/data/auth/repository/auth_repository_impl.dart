@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:paklan/data/auth/models/user.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
 import 'package:paklan/data/auth/source/auth_firebase_service.dart';
+import 'package:paklan/domain/auth/entity/user.dart';
 import 'package:paklan/domain/auth/repository/auth.dart';
 import 'package:paklan/service_locator.dart';
 
@@ -39,17 +39,8 @@ class AuthRepositoryImpl extends AuthRepository{
   }
   
   @override
-  Future<Either> getUser() async{
-    var user = await sl<AuthFirebaseService>().getUser();
-    return user.fold(
-      (error){
-        return Left(error);
-      }
-      , (data){
-        return Right(
-          UserModel.fromMap(data).toEntity()
-          );
-      });
+  Stream<Either<dynamic, UserEntity>> getUser(){
+    return sl<AuthFirebaseService>().getUser();
   }
   
   @override

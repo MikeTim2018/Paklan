@@ -69,15 +69,16 @@ class Header extends StatelessWidget {
             const AssetImage(
               AppImages.userLogo
             ) : NetworkImage(
-              user.photoLink
-            )
+              user.photoLink,
+            ),
+            fit: BoxFit.cover
           ),
           color: Colors.white,
           shape: BoxShape.circle,
           border: BoxBorder.all(
             color: user.notificationNumber > 0 ? 
-            Colors.red[400]!
-            :AppColors.primaryButton,
+            Colors.yellowAccent[400]!
+            :Colors.greenAccent[200]!,
             width: 1.5
           )
         ),

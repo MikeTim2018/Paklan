@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => BottomNavCubit()),
-        BlocProvider(create: (context) => UserInfoDisplayCubit()..displayUserInfo()),
+        BlocProvider<UserInfoDisplayCubit>(create: (context) => UserInfoDisplayCubit()..displayUserInfo(),),
                 ],
         child: MainWrapper(),
     );

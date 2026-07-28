@@ -15,6 +15,7 @@ class NewTransactionModel {
   bool ? sellerConfirmation;
   String ? typeOfProduct;
   String ? dealDetails;
+  String ? typeOfDeal;
 
   NewTransactionModel({
     required this.name,
@@ -29,7 +30,8 @@ class NewTransactionModel {
     required this.sellerConfirmation,
     required this.typeOfProduct,
     required this.images,
-    required this.dealDetails
+    required this.dealDetails,
+    required this.typeOfDeal
   });
 
 }

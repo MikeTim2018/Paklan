@@ -45,6 +45,7 @@ class TransactionDetail extends StatelessWidget {
             statusId: transaction.statusId,
             typeOfProduct: transaction.typeOfProduct,
             dealDetails: transaction.dealDetails,
+            typeOfDeal: transaction.typeOfDeal,
             ));
     final String currenUserId = transactionStream['currentUserId'];
     return CupertinoPageScaffold(
@@ -387,9 +388,13 @@ class TransactionDetail extends StatelessWidget {
                     // Deal Counterparty Status Metric
                     Text(
                       'Trato con: ${currenUserId == statusEntity.buyerId ? toBeginningOfSentenceCase(transaction.buyerDisplayName) : toBeginningOfSentenceCase(transaction.sellerDisplayName)}',
-                      style: const TextStyle(fontSize: 17),
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
+                    ),
+                    const SizedBox(height: 12,),
+                    Text("Modo: ${transaction.typeOfDeal}",
+                      style: const TextStyle(fontSize: 17),
                     ),
                     
                     const SizedBox(height: 12),
