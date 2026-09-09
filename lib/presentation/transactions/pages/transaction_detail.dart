@@ -26,91 +26,128 @@ import 'package:paklan/presentation/transactions/widgets/rating.dart';
 import 'package:paklan/presentation/transactions/widgets/rating_buyer.dart';
 import 'package:paklan/service_locator.dart';
 
-class TransactionDetail extends StatelessWidget {
+class TransactionDetail extends StatefulWidget {
   final TransactionEntity transaction;
-  final TextEditingController _cancelCon1 = TextEditingController();
-  TransactionDetail({super.key, required this.transaction});
-  final GlobalKey<FormState> _formKeyCancel = GlobalKey<FormState>();
   
+  const TransactionDetail({super.key, required this.transaction});
+
+  @override
+  State<TransactionDetail> createState() => _TransactionDetailState();
+}
+
+class _TransactionDetailState extends State<TransactionDetail> {
+  // 1. Declare variables to hold the cached stream and user ID
+  late final String _currentUserId;
+  late final Stream<QuerySnapshot> _transactionStream;
+  
+  // 2. Keep controllers here so they survive rebuilds
+  final TextEditingController _cancelCon1 = TextEditingController();
+  final GlobalKey<FormState> _formKeyCancel = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // 3. Call the use case exactly ONCE here
+    final Map<String, dynamic> transactionStreamMap = sl<GetTransactionUseCase>().call(
+      params: TransactionModel(
+        name: widget.transaction.name,
+        amount: widget.transaction.amount, 
+        status: widget.transaction.status, 
+        sellerDisplayName: widget.transaction.sellerDisplayName, 
+        buyerDisplayName: widget.transaction.buyerDisplayName, 
+        transactionId: widget.transaction.transactionId,
+        statusId: widget.transaction.statusId,
+        typeOfProduct: widget.transaction.typeOfProduct,
+        dealDetails: widget.transaction.dealDetails,
+        typeOfDeal: widget.transaction.typeOfDeal,
+      ),
+    );
+    
+    // 4. Extract and safely store the results
+    _currentUserId = transactionStreamMap['currentUserId'];
+    _transactionStream = transactionStreamMap['transactionStream'];
+  }
+
+  @override
+  void dispose() {
+    // 5. Always dispose controllers to prevent memory leaks
+    _cancelCon1.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> transactionStream = sl<GetTransactionUseCase>().call(
-      params: TransactionModel(
-            name: transaction.name,
-            amount: transaction.amount, 
-            status: transaction.status, 
-            sellerDisplayName: transaction.sellerDisplayName, 
-            buyerDisplayName: transaction.buyerDisplayName, 
-            transactionId: transaction.transactionId,
-            statusId: transaction.statusId,
-            typeOfProduct: transaction.typeOfProduct,
-            dealDetails: transaction.dealDetails,
-            typeOfDeal: transaction.typeOfDeal,
-            ));
-    final String currenUserId = transactionStream['currentUserId'];
+    // The build method is now clean and only handles UI rendering
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Icon(Icons.horizontal_rule, size: 45),),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Icon(Icons.horizontal_rule, size: 45),
+      ),
       resizeToAvoidBottomInset: true,
       child: MultiBlocProvider(
         providers: [
-        BlocProvider(create: (context) => StepperSelectionCubit(),),
-        BlocProvider(create: (context) => ButtonStateCubit()),
-            ],
+          BlocProvider(create: (context) => StepperSelectionCubit()),
+          BlocProvider(create: (context) => ButtonStateCubit()),
+        ],
         child: BlocListener<ButtonStateCubit, ButtonState>(
           listener: (context, state) {
-          if (state is ButtonFailureState){
-                var snackbar = SnackBar(
-                  content: Text(
-                    state.errorMessage,
-                    style: TextStyle(
-                      color: Colors.white70
-                    ),),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.black87,
-                  showCloseIcon: true,
-                  closeIconColor: Colors.white70,
-                  );
-                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-              }
-          if (state is ButtonSuccessState){
-            var snackbar = SnackBar(
-                  content: Text(
-                    "¡Trato Actualizado!",
-                    style: TextStyle(
-                      color: Colors.white70
-                    ),),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.black87,
-                  showCloseIcon: true,
-                  closeIconColor: Colors.white70,
-                  );
-                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-          }
-        },
+            if (state is ButtonFailureState) {
+              var snackbar = SnackBar(
+                content: Text(
+                  state.errorMessage,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.black87,
+                showCloseIcon: true,
+                closeIconColor: Colors.white70,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackbar);
+            }
+            if (state is ButtonSuccessState) {
+              var snackbar = const SnackBar(
+                content: Text(
+                  "¡Trato Actualizado!",
+                  style: TextStyle(color: Colors.white70),
+                ),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.black87,
+                showCloseIcon: true,
+                closeIconColor: Colors.white70,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackbar);
+            }
+          },
           child: Scaffold(
             appBar: BasicAppbar(
               height: 50,
               hideBack: true,
-              title: 
-                  Text(toBeginningOfSentenceCase(transaction.name!),),
+              // 6. Use widget.transaction to access the entity
+              title: Text(toBeginningOfSentenceCase(widget.transaction.name!) ?? ''),
+            ),
+            bottomNavigationBar: const BottomAppBar(
+              height: 20,
+              color: Colors.transparent,
+              child: SizedBox(height: 5),
             ),
             body: SingleChildScrollView(
               child: StreamBuilder<QuerySnapshot>(
-                stream: transactionStream['transactionStream'],
-                builder: (context, AsyncSnapshot<QuerySnapshot> state){
-                  if (state.connectionState == ConnectionState.waiting){
-                    return const Center(child: CircularProgressIndicator(),);
+                // 7. Pass the cached stream directly
+                stream: _transactionStream,
+                builder: (context, AsyncSnapshot<QuerySnapshot> state) {
+                  if (state.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
                   }
-                  if(state.hasError){
-                    return Center(
-                      child: Text(
-                        "Ha ocurrido un Error, porfavor intenta de nuevo."
-                      ),
+                  if (state.hasError) {
+                    return const Center(
+                      child: Text("Ha ocurrido un Error, porfavor intenta de nuevo."),
                     );
                   }
+                  
                   StatusEntity statusEntity = state.data!.docs.map(
-                      (element) => StatusModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
-                      ).toList()[0];
+                    (element) => StatusModel.fromMap(
+                      element.data() as Map<String, dynamic>
+                    ).toEntity()
+                  ).toList()[0];
                   return BlocBuilder<StepperSelectionCubit, int>(
                       builder: (context, stepperState){
                       if(statusEntity.paymentDone!){
@@ -125,14 +162,14 @@ class TransactionDetail extends StatelessWidget {
                       else{
                         context.read<StepperSelectionCubit>().selectStep(1);
                       }
-                      double transactionAmount = double.parse(transaction.amount!);
+                      double transactionAmount = double.parse(widget.transaction.amount!);
                       return SingleChildScrollView(
                         child: Column(
                           children: [
                             Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: SizedBox(
-                      height: 220, // Taller display canvas optimized for detailed product views
+                      height: MediaQuery.sizeOf(context).height*0.3, // Taller display canvas optimized for detailed product views
                       width: double.infinity,
                       child: Card(
                         elevation: 6,
@@ -144,7 +181,7 @@ class TransactionDetail extends StatelessWidget {
                               // Gallery Viewer Layer
                               GestureDetector(
                                 onTap: () {
-                   if (transaction.images != null && transaction.images!.isNotEmpty) {
+                   if (widget.transaction.images != null && widget.transaction.images!.isNotEmpty) {
                      showDialog(
         context: context,
         barrierDismissible: true, 
@@ -167,7 +204,7 @@ class TransactionDetail extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(24),
                           child: PageView.builder(
-                            itemCount: transaction.images!.length,
+                            itemCount: widget.transaction.images!.length,
                             controller: PageController(viewportFraction: 1.0),
                             itemBuilder: (context, imageIndex) {
                               return InteractiveViewer(
@@ -175,7 +212,7 @@ class TransactionDetail extends StatelessWidget {
                                 minScale: 1.0,
                                 maxScale: 4.0, 
                                 child: Image(
-                                  image: NetworkImage(transaction.images![imageIndex]),
+                                  image: NetworkImage(widget.transaction.images![imageIndex]),
                                   fit: BoxFit.contain, 
                                 ),
                               );
@@ -228,17 +265,17 @@ class TransactionDetail extends StatelessWidget {
                 child:SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                child: (transaction.images == null || transaction.images!.isEmpty)
+                child: (widget.transaction.images == null || widget.transaction.images!.isEmpty)
                     ? const Image(
                         image: AssetImage(AppImages.userLogo),
                         fit: BoxFit.cover,
                       )
                     : PageView.builder(
-                        itemCount: transaction.images!.length,
+                        itemCount: widget.transaction.images!.length,
                         controller: PageController(viewportFraction: 1.0),
                         itemBuilder: (context, imageIndex) {
                           return Image(
-                            image: NetworkImage(transaction.images![imageIndex]),
+                            image: NetworkImage(widget.transaction.images![imageIndex]),
                             fit: BoxFit.cover,
                           );
                         },
@@ -256,7 +293,7 @@ class TransactionDetail extends StatelessWidget {
                                     width: 100,
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: (transaction.typeOfProduct == 'Original')
+                                      color: (widget.transaction.typeOfProduct == 'Original')
                                           ? Colors.green.withValues(alpha: 0.95)
                                           : Colors.orange.withValues(alpha: 0.95),
                                       boxShadow: const [
@@ -264,7 +301,7 @@ class TransactionDetail extends StatelessWidget {
                                       ],
                                     ),
                                     child: Text(
-                                      transaction.typeOfProduct == 'Reproducción' ? 'Repro' : 'Original',
+                                      widget.transaction.typeOfProduct == 'Reproducción' ? 'Repro' : 'Original',
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
@@ -278,7 +315,7 @@ class TransactionDetail extends StatelessWidget {
                               ),
 
                               // Swipe Navigation Indicator (Only visible if multi-image array populates)
-                              if (transaction.images != null && transaction.images!.length > 1)
+                              if (widget.transaction.images != null && widget.transaction.images!.length > 1)
                                 Positioned(
                                   bottom: 12,
                                   right: 12,
@@ -307,10 +344,6 @@ class TransactionDetail extends StatelessWidget {
 
                   const SizedBox(height: 5),
                             StepperDeal(),
-                            const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Divider(),
-        ),
                             SizedBox(height: 15,),
                             ClipRRect(
         borderRadius: BorderRadius.circular(23),
@@ -327,7 +360,7 @@ class TransactionDetail extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(13.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Text(
                       "Detalle del trato",
                       style: const TextStyle(
@@ -336,8 +369,6 @@ class TransactionDetail extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 2),
-    
                  // Interactive Info Icon
                  GestureDetector(
                    onTap: () {
@@ -367,7 +398,7 @@ class TransactionDetail extends StatelessWidget {
                                          padding: const EdgeInsets.all(4), // Increases tap target size slightly
                                          decoration: BoxDecoration(
                                            shape: BoxShape.circle,
-                                           color: Colors.grey.withValues(alpha: 0.15), // Subtle background bubble
+                                           color: Colors.transparent, // Subtle background bubble
                                          ),
                                          child: const Icon(
                                            Icons.info_outline,
@@ -387,13 +418,13 @@ class TransactionDetail extends StatelessWidget {
                   children: [
                     // Deal Counterparty Status Metric
                     Text(
-                      'Trato con: ${currenUserId == statusEntity.buyerId ? toBeginningOfSentenceCase(transaction.buyerDisplayName) : toBeginningOfSentenceCase(transaction.sellerDisplayName)}',
+                      'Trato con: ${_currentUserId == statusEntity.buyerId ? toBeginningOfSentenceCase(widget.transaction.buyerDisplayName) : toBeginningOfSentenceCase(widget.transaction.sellerDisplayName)}',
                       style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                     ),
                     const SizedBox(height: 12,),
-                    Text("Modo: ${transaction.typeOfDeal}",
+                    Text("Modo: ${widget.transaction.typeOfDeal}",
                       style: const TextStyle(fontSize: 17),
                     ),
                     
@@ -401,7 +432,7 @@ class TransactionDetail extends StatelessWidget {
                     Text("Descripción del producto\n",
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    Text("${transaction.dealDetails}",
+                    Text("${widget.transaction.dealDetails}",
                       style: const TextStyle(fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 5,
@@ -410,7 +441,7 @@ class TransactionDetail extends StatelessWidget {
                     Row(
                      children: [
                        Text(
-                         "Total a pagar: \$${(transactionAmount + double.parse(transaction.fee!)).truncateToDouble().toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn",
+                         "Total a pagar: \$${(transactionAmount + double.parse(widget.transaction.fee!)).truncateToDouble().toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn",
                          style: const TextStyle(
                            fontSize: 18,
                            fontWeight: FontWeight.bold,
@@ -433,14 +464,14 @@ class TransactionDetail extends StatelessWidget {
                                    children: [
                                      // Breakdown 1: Agreed Amount
                                      Text(
-                                       "• Monto acordado: \$${transaction.amount!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn",
+                                       "• Monto acordado: \$${widget.transaction.amount!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn",
                                        style: const TextStyle(fontSize: 16, color: Colors.black87),
                                      ),
                                      const SizedBox(height: 12),
                                      
                                      // Breakdown 2: Commission Fee
                                      Text(
-                                       "• Comisión Paklan: \$${transaction.fee!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn\n  (IVA incluido)",
+                                       "• Comisión Paklan: \$${widget.transaction.fee!.replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} mxn\n  (IVA incluido)",
                                        style: const TextStyle(fontSize: 16, color: Colors.black87),
                                      ),
                                    ],
@@ -460,7 +491,7 @@ class TransactionDetail extends StatelessWidget {
                                                padding: const EdgeInsets.all(4), // Increases tap target size slightly
                                                decoration: BoxDecoration(
                                                  shape: BoxShape.circle,
-                                                 color: Colors.grey.withValues(alpha: 0.15), // Subtle background bubble
+                                                 color: Colors.transparent, // Subtle background bubble
                                                ),
                                                child: const Icon(
                                                  Icons.info_outline,
@@ -491,13 +522,13 @@ class TransactionDetail extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 20.0),
-          child: actions(context, statusEntity, currenUserId, transaction),
+          child: actions(context, statusEntity, _currentUserId, widget.transaction),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 25),
+        
                           ],
                         ),
                       );
@@ -859,7 +890,7 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                               CupertinoSheetRoute<void>(
                               scrollableBuilder: (BuildContext context, ScrollController controller) {
       WidgetBuilder widgetBuilder = (BuildContext context) => Rating(
-                              transaction: transaction,
+                              transaction: widget.transaction,
                               status: state,
                               currentUserId: "Comprador",
                               );
@@ -899,7 +930,7 @@ Builder liberarPago(BuildContext mainContext, StatusEntity state) {
                               CupertinoSheetRoute<void>(
                               scrollableBuilder: (BuildContext context, ScrollController controller) {
       WidgetBuilder widgetBuilder = (BuildContext context) => RatingBuyer(
-                              transaction: transaction,
+                              transaction: widget.transaction,
                               status: state,
                               currentUserId: "Comprador",
                               );

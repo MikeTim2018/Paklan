@@ -17,5 +17,7 @@ class AppImages{
   static const santander = '${basePath}Banco_Santander_Logotipo.svg$format';
   static const background = '${basePath}pexels-umkreisel-app-956999$format2';
   static const retroHome = '${basePath}retro-home$format3';
+  static const paklanLogo = '${basePath}paklan_logo$format2';
+  static const paklanLogoVector= '${basePath}paklanLogo_vector$format';
 
 }

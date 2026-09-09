@@ -12,8 +12,8 @@ import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
 import 'package:paklan/presentation/transactions/bloc/deal_type_selection_cubit.dart';
-import 'package:paklan/presentation/transactions/bloc/photo_selection_cubit.dart';
-import 'package:paklan/presentation/transactions/bloc/photo_selection_state.dart';
+import 'package:paklan/common/bloc/photo_selection/photo_selection_cubit.dart';
+import 'package:paklan/common/bloc/photo_selection/photo_selection_state.dart';
 import 'package:paklan/presentation/transactions/bloc/user_type_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_success_wo_confirmation.dart';
 

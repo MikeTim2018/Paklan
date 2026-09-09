@@ -33,4 +33,7 @@ class PersonInfoDisplayCubit extends Cubit<PersonInfoDisplayState> {
       }
   );
   }
+  void resetSearch(){
+    emit (PersonInitialState());
+  }
 }

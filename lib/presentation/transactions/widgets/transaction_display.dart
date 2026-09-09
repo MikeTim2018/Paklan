@@ -5,33 +5,68 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
+import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
+import 'package:paklan/data/in_search_of/models/in_search_of.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
+import 'package:paklan/domain/in_search_of/entity/in_search_of.dart';
+import 'package:paklan/domain/in_search_of/usecases/get_iso_posts.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
+import 'package:paklan/presentation/in_search_of/pages/in_search_of_detail.dart';
+import 'package:paklan/presentation/in_search_of/pages/in_search_of_home.dart';
 import 'package:paklan/presentation/transactions/bloc/status_filter_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
 import 'package:paklan/service_locator.dart';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
+import 'package:rxdart/rxdart.dart';
 
+class TransactionDisplay extends StatefulWidget {
+  const TransactionDisplay({super.key});
 
-class TransactionDisplay extends StatelessWidget{
-  TransactionDisplay({super.key});
-  final Stream<QuerySnapshot> _transactionsStream =  sl<GetTransactionsUseCase>().call();
-  final ScrollController _scrollController = ScrollController();
-  final MultiSelectController<String> _multicontroller = MultiSelectController<String>();
+  @override
+  State<TransactionDisplay> createState() => _TransactionDisplayState();
+}
+
+class _TransactionDisplayState extends State<TransactionDisplay> {
+  // 1. Declare late variables
+  late final Stream<QuerySnapshot> _transactionsStream;
+  late final Stream<QuerySnapshot> _isoPostsStream;
+  late final ScrollController _scrollController;
+  late final MultiSelectController<String> _multicontroller;
+  late final String currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. Initialize ONCE when the widget enters the tree
+    _transactionsStream = sl<GetTransactionsUseCase>().call();
+    _isoPostsStream = sl<GetIsoPostsUseCase>().call();
+    _scrollController = ScrollController();
+    _multicontroller = MultiSelectController<String>();
+    currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  }
+
+  @override
+  void dispose() {
+    // 3. Clean up the controller to prevent memory leaks
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    var _combinedStreams = CombineLatestStream.combine2(_transactionsStream, 
+    _isoPostsStream, 
+    (QuerySnapshot transactionStreamData, QuerySnapshot isoStreamData) => [transactionStreamData, isoStreamData],);
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => StatusFilterSelectionCubit()),
           ],
-          child: StreamBuilder<QuerySnapshot>(
-                stream: _transactionsStream,
-                builder: (context, AsyncSnapshot<QuerySnapshot> state){
+          child: StreamBuilder<List<QuerySnapshot<Object?>>>(
+                stream: _combinedStreams,
+                builder: (context, state){
                 if (state.connectionState == ConnectionState.waiting){
                   return SizedBox(
                     height: 400,
@@ -55,12 +90,16 @@ class TransactionDisplay extends StatelessWidget{
                     ),
                   );
                 }
-                if (state.data == null || state.data!.docs.isEmpty){
-                  return listNoTransaction(context);
+                List<InSearchOfEntity> listISOPosts = state.data![1].docs.map(
+                          (element) => InSearchOfModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
+                          ).toList();
+                if (state.data == null || state.data![0].docs.isEmpty){
+                  return  SectionIsoPosts(isoPosts: listISOPosts, currentUserId: currentUserId); 
                 }
-                List<TransactionEntity> listEntities = state.data!.docs.map(
+                List<TransactionEntity> listEntities = state.data![0].docs.map(
                           (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
                           ).toList();
+                
                 return Column(
                       children: [
                         SizedBox(height: 20,),
@@ -93,8 +132,8 @@ class TransactionDisplay extends StatelessWidget{
                                     
                                      selectedDecoration: BoxDecoration(
                                          gradient: LinearGradient(colors: [
-                                           const Color.fromARGB(255, 32, 68, 117).withValues(alpha: 0.6),
-                                           Colors.white38.withValues(alpha: 0.1),
+                                           const Color.fromARGB(255, 32, 68, 117).withValues(alpha: 0.8),
+                                           Colors.white38.withValues(alpha: 0.3),
                                          ]),
                                          border: Border.all(color: Colors.black38),
                                          borderRadius: BorderRadius.circular(13)),
@@ -103,24 +142,7 @@ class TransactionDisplay extends StatelessWidget{
                                          border: Border.all(color: Colors.grey[500]!),
                                          borderRadius: BorderRadius.circular(10)),
                                    ),
-                                  prefix: MultiSelectPrefix(
-                                    selectedPrefix: const Padding(
-                                      padding: EdgeInsets.only(right: 5),
-                                      child: Icon(
-                                        Icons.visibility,
-                                        color: Colors.black87,
-                                        size: 14,
-                                      ),
-                                    ),
-                                    enabledPrefix: const Padding(
-                                      padding: EdgeInsets.only(right: 5),
-                                      child: Icon(
-                                        Icons.disabled_visible,
-                                        color: Colors.black38,
-                                        size: 14,
-                                      ),
-                                    ),
-                                    ),
+                                  
                                     showInListView: true,
                                     listViewSettings: ListViewSettings(
                                         scrollDirection: Axis.horizontal,
@@ -185,7 +207,12 @@ class TransactionDisplay extends StatelessWidget{
                               _scrollController, currentUserId
                               );
                           }
-                        )
+                        ),
+                        SectionIsoPosts(isoPosts: listISOPosts, currentUserId: currentUserId),
+                        //_buildCategoryCarousel("Venta", listEntities, context, onTapSeeMore: () {
+                        //  context.read<BottomNavCubit>().changeSelectedIndex(2);
+                        //}),
+                        
                       ],
                   );
                 }
@@ -230,13 +257,12 @@ Widget listNoTransaction(BuildContext context) {
                   ),
     );
   }
-
-  Widget transactionTile(List<TransactionEntity> status, int index, String user, context) {
+    
+}
+Widget transactionTile(List<dynamic> status, int index, String user, context) {
     return SizedBox(
-             width: MediaQuery.sizeOf(context).width * 0.6,
+             width: MediaQuery.sizeOf(context).width * 0.45,
              child: Card(
-               shadowColor: Colors.amber,
-               elevation: 9,
                shape: RoundedRectangleBorder(
                  borderRadius: BorderRadius.circular(20),
                ),
@@ -246,10 +272,6 @@ Widget listNoTransaction(BuildContext context) {
                    decoration: BoxDecoration(
                      color: AppColors.secondBackground,
                      borderRadius: BorderRadius.circular(20),
-                     border: Border.all(
-                       width: 1.2,
-                       color: const Color.fromARGB(215, 0, 0, 0),
-                     ),
                    ),
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,7 +324,7 @@ Widget listNoTransaction(BuildContext context) {
                                    textAlign: TextAlign.center,
                                    style: const TextStyle(
                                      color: Colors.white,
-                                     fontSize: 11,
+                                     fontSize: 10,
                                      fontWeight: FontWeight.bold,
                                      letterSpacing: 1.0,
                                    ),
@@ -324,7 +346,7 @@ Widget listNoTransaction(BuildContext context) {
                                  ),
                                  child: const Icon(
                                    Icons.swipe_right_alt,
-                                   size: 16,
+                                   size: 15,
                                    color: Colors.white70,
                                  ),
                                ),
@@ -347,7 +369,7 @@ Widget listNoTransaction(BuildContext context) {
                                  style: const TextStyle(
                                    color: Colors.black87,
                                    fontWeight: FontWeight.bold,
-                                   fontSize: 18,
+                                   fontSize: 14,
                                    overflow: TextOverflow.ellipsis,
                                  ),
                                ),
@@ -362,7 +384,7 @@ Widget listNoTransaction(BuildContext context) {
                                      : '${status[index].sellerDisplayName}',
                                  style: const TextStyle(
                                    color: Colors.black54,
-                                   fontSize: 13,
+                                   fontSize: 9,
                                    overflow: TextOverflow.ellipsis,
                                  ),
                                  maxLines: 1,
@@ -378,7 +400,7 @@ Widget listNoTransaction(BuildContext context) {
                                      .toStringAsFixed(2)
                                      .replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} ',
                                  style: const TextStyle(
-                                   fontSize: 15, 
+                                   fontSize: 11, 
                                    color: Colors.black54,
                                    fontWeight: FontWeight.bold,
                                  ),
@@ -398,8 +420,7 @@ Widget listNoTransaction(BuildContext context) {
 
 
    }
-
-    Widget listTransactions(BuildContext context, List<TransactionEntity> status, ScrollController scrollController, String user) {
+Widget listTransactions(BuildContext context, List<dynamic> status, ScrollController scrollController, String user) {
     return SizedBox(
           height: 250,
           width: MediaQuery.sizeOf(context).width * 0.95,
@@ -436,8 +457,127 @@ Widget listNoTransaction(BuildContext context) {
               ),
             );
   }
-}
 
+
+class SectionIsoPosts extends StatelessWidget {
+  const SectionIsoPosts({
+    super.key,
+    required List<InSearchOfEntity> isoPosts,
+    required this.currentUserId,
+  }) : _isoPosts = isoPosts;
+
+  final List<InSearchOfEntity> _isoPosts;
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildCategoryCarouselIso("Se busca", _isoPosts, context, currentUserId,
+    onTapSeeMore: () {
+                          context.read<BottomNavCubit>().changeSelectedIndex(1);
+                           });
+    }
+  }
+
+  Widget _buildCategoryCarouselIso(
+  String categoryTitle, 
+  List<InSearchOfEntity> items, 
+  BuildContext context,
+  String currentUserId,
+  {VoidCallback? onTapSeeMore}
+) {
+  if (items.isEmpty) return const SizedBox.shrink();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(height: 10,),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              categoryTitle,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            
+            GestureDetector(
+              onTap: onTapSeeMore,
+              child: Row(
+                children: [
+                  RichText(
+                    text: const TextSpan(
+                      text: 'Ver más',
+                      style: TextStyle(
+                        color: AppColors.primaryButton,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: AppColors.primaryButton, 
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      
+      const SizedBox(height: 12), // Space between header and list
+      
+      // 3. Your horizontal carousel
+      listISOPosts(context, items, ScrollController(), currentUserId),
+    ],
+  );
+}
+Widget listISOPosts(BuildContext context, List<InSearchOfEntity> status, ScrollController scrollController, String user) {
+    return SizedBox(
+          height: 250,
+          width: MediaQuery.sizeOf(context).width * 0.95,
+          child: RawScrollbar(
+          controller: scrollController,
+          thumbVisibility: true,
+          thumbColor: Colors.black12,
+          timeToFade: Duration(seconds: 1),
+          thickness: 3.5,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            controller: scrollController,
+            padding: EdgeInsets.all(9),
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) {
+                                        return GestureDetector(
+                                          onTap: (){
+              Navigator.of(context).push(
+                CupertinoSheetRoute<void>(
+                  scrollableBuilder: (BuildContext context, ScrollController controller) {
+                    WidgetBuilder widgetBuilder = (BuildContext context) => InSearchOfDetail(
+                      isoEntity: status[index]
+                    );
+                    return widgetBuilder(context);
+                  },
+                ),
+              );
+            },
+                                          child: isoTile(status, index, user, context),
+                                        );
+                                      },
+                                       separatorBuilder: (context, index) => const SizedBox(width: 5,),
+                                       itemCount: status.length
+                                    ),
+              ),
+            );
+  }
 
 
 

@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:algoliasearch/algoliasearch_lite.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:paklan/common/helper/photo_upload/photo_helper_functions.dart';
 import 'package:paklan/core/configs/algolia_configs.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
 import 'package:paklan/data/transactions/models/status.dart';
@@ -21,7 +19,6 @@ abstract class TransactionFirebaseService{
   Stream<DocumentSnapshot<Map<String, dynamic>>> getClabes();
   Future<Either> deleteClabe(String clabe);
   Future<Either> createClabe(String clabe);
-  Future<Either> getServerDateTime();
 }
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
@@ -69,35 +66,8 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
       );
     }
 }
-  /// Uploads files concurrently and returns the final download URLs.
-  Future<List<String>> uploadImages({
-    required List<File> images,
-    required List<String> storagePaths,
-  }) async {
-    final FirebaseStorage storage = FirebaseStorage.instance;
-    final List<UploadTask> uploadTasks = [];
-
-    // Start all batch uploads simultaneously
-    for (int i = 0; i < images.length; i++) {
-      final ref = storage.ref().child(storagePaths[i]);
-      final task = ref.putFile(
-        images[i], 
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-      uploadTasks.add(task);
-    }
-
-    // Wait for all concurrent uploads to resolve
-    final List<TaskSnapshot> snapshots = await Future.wait(uploadTasks);
-
-    // Resolve final cloud access download URLs
-    return Future.wait(
-      snapshots.map((snapshot) => snapshot.ref.getDownloadURL()),
-    );
-  }
   @override
   Future<Either> createTransaction(NewTransactionModel newTransaction) async{
-    HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
     try{
     double transactionAmount = double.parse(newTransaction.amount!);
     String fee;
@@ -107,16 +77,19 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     else{
       fee = (transactionAmount * 0.07).truncateToDouble().toStringAsFixed(2);
     }
-    final List<String> generatedPaths = List.generate(newTransaction.images!.length, (index) {
-      return 'uploads/${newTransaction.sellerId}/${DateTime.now().millisecondsSinceEpoch}_img_400x400.jpg';
-    });
-    List<String> urls = await uploadImages(images: newTransaction.images!, storagePaths: generatedPaths);
+    dynamic photoHelper = PhotoHelperFunctions();
+    String currUser = FirebaseAuth.instance.currentUser!.uid;
+    final List<String> generatedPaths = photoHelper.generatePaths(newTransaction, currUser);
+    List<String> urls = await photoHelper.uploadImagesAndWaitForResize(
+      images: newTransaction.images!, 
+      originalPaths: generatedPaths,
+      resizeSuffix: '_700x700',
+    );
     DocumentReference<Map<String, dynamic>> transactionDoc = await FirebaseFirestore.instance.collection("transactions").add(
       {"name": newTransaction.name,
         "amount": newTransaction.amount,
         "fee": fee,
        "status": newTransaction.status,
-       "creationDate": DateTime.parse(serverTime.data['server_datetime']),
        "images": urls,
        "dealDetails": newTransaction.dealDetails,
        "typeOfProduct": newTransaction.typeOfProduct,
@@ -127,7 +100,6 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
          "sellerId": newTransaction.sellerId,
          "buyerId": newTransaction.buyerId,
        },
-       "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(hours: 24)),
       }
     );
     DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").add(
@@ -143,14 +115,12 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
         "reimbursementDone": false,
         "paymentDone": false,
         "paymentTransferred": false,
-        "creationDate": DateTime.parse(serverTime.data['server_datetime'])
       }
     );
     await transactionDoc.update(
       {
         "transactionId": transactionDoc.id,
         "statusId": statusRef.id,
-        "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
       }
         );
     await statusRef.update({"statusId": statusRef.id});
@@ -179,7 +149,6 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
   @override
   Future<Either> updateDeal(StatusModel transactionState) async{
     try{
-      HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
       DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionState.transactionId}/status").add(
         {
           "transactionId": transactionState.transactionId,
@@ -194,7 +163,7 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "paymentDone": transactionState.paymentDone,
           "paymentTransferred": transactionState.paymentTransferred,
           "cancelledBy": transactionState.cancelledBy,
-          "creationDate": DateTime.parse(serverTime.data['server_datetime']),
+          //"creationDate": DateTime.parse(serverTime.data['server_datetime']),
           "cancelMessage": transactionState.cancelMessage,
           "previousStateId": transactionState.statusId,
           "completedRatingMessageForSeller": transactionState.completedRatingMessageForSeller,
@@ -209,25 +178,13 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           }
           );
       DocumentReference<Map<String, dynamic>> transactionRef = FirebaseFirestore.instance.collection("transactions").doc(transactionState.transactionId);
-      if (transactionState.status == 'Aceptado' && transactionState.details!.contains("Trato aceptado")){
-          await transactionRef.update(
-            {
-              "status": transactionState.status,
-              "timeLimit": DateTime.parse(serverTime.data['server_datetime']).add(Duration(days: 8)),
-              "statusId": statusRef.id,
-              "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
-            }
-          );
-      }
-      else{
         await transactionRef.update(
           {
         "status": transactionState.status,
         "statusId": statusRef.id,
-        "updatedDate": DateTime.parse(serverTime.data['server_datetime'])
+        //"updatedDate": DateTime.parse(serverTime.data['server_datetime'])
         }
         );
-      }
       return Right("Deal Updated!");
     }catch(e){
       return Left(e);
@@ -288,13 +245,4 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
     }
   }
   
-  @override
-  Future<Either> getServerDateTime() async{
-    try{
-      HttpsCallableResult serverTime = await FirebaseFunctions.instance.httpsCallable('get_time_from_server').call();
-      return Right(serverTime);
-    } catch(error){
-      return Left(error);
-    }
-  }
 }

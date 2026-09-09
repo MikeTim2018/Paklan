@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
+import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
 import 'package:paklan/presentation/home/pages/home.dart';
@@ -24,21 +25,16 @@ class SplashPage extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.primary,
-        body: Center(
-          child: Column(
+        body:Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 190,),
-              Text("Paklan",style: TextStyle(
-                fontSize: 35
-              ),),
               Padding(
-                padding: const EdgeInsets.all(65.0),
+                padding: const EdgeInsets.all(5.0),
                 child: Image.asset(
-                  AppImages.appLogo
+                  AppImages.paklanLogoVector,
                 ),
               ),
             ],
-          ),
         ),
       ),
     );

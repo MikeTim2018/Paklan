@@ -21,8 +21,8 @@ class Header extends StatelessWidget {
               }
               if (state is UserInfoLoaded) {
                 return Container(
-                  height: 110,
-                  padding: EdgeInsets.all(10),
+                  height: 115,
+                  padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     ),
@@ -61,8 +61,8 @@ class Header extends StatelessWidget {
         AppNavigator.push(context, ProfileHome());
       },
       child: Container(
-        height: 55,
-        width: 55,
+        height: 60,
+        width: 60,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: user.photoLink.isEmpty ? 

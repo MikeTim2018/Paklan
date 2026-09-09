@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserEntity {
   final String userId;
   final String firstName;
@@ -10,6 +12,8 @@ class UserEntity {
   final String photoLink;
   final bool clabe;
   final int notificationNumber;
+  final bool active;
+  final Timestamp lastActive;
 
   UserEntity({
     required this.userId,
@@ -22,6 +26,8 @@ class UserEntity {
     required this.photoLink,
     required this.phone,
     required this.clabe,
-    required this.notificationNumber
+    required this.notificationNumber,
+    required this.active,
+    required this.lastActive
   });
 }

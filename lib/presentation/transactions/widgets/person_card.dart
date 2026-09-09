@@ -52,10 +52,10 @@ class PersonCard extends StatelessWidget {
       shadowColor: Colors.transparent,
       elevation: 0.0,
       child: ListTile(
-        shape: StadiumBorder(side: BorderSide(width: 1)),
-        tileColor: AppColors.secondBackground,
+        shape: StadiumBorder(),
+        tileColor: AppColors.background,
         leading: CircleAvatar(
-          backgroundColor: AppColors.secondBackground,
+          backgroundColor: AppColors.background,
           radius: 30,
           backgroundImage: user.photoLink.isEmpty ? 
             const AssetImage(

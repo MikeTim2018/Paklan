@@ -8,6 +8,7 @@ import 'package:paklan/data/auth/models/user.dart';
 import 'package:paklan/data/auth/models/user_creation_req.dart';
 import 'package:paklan/data/auth/models/user_signin.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
+import 'package:rxdart/rxdart.dart';
 
 abstract class AuthFirebaseService {
   Future<Either> signup(UserCreationReq user);
@@ -174,7 +175,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService{
   
   @override
   Stream<Either<dynamic, UserEntity>> getUser() {
-    return FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
+    return FirebaseAuth.instance.authStateChanges().switchMap((user) {
       if (user == null) {
         // Unauthenticated state
         return Stream.value(Left("El usuario no ha iniciado sesión"));

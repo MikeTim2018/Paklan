@@ -16,8 +16,8 @@ import 'package:paklan/domain/profile/usecases/upload_profile_picture.dart';
 import 'package:paklan/presentation/auth/pages/signin.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
-import 'package:paklan/presentation/transactions/bloc/photo_selection_cubit.dart';
-import 'package:paklan/presentation/transactions/bloc/photo_selection_state.dart';
+import 'package:paklan/common/bloc/photo_selection/photo_selection_cubit.dart';
+import 'package:paklan/common/bloc/photo_selection/photo_selection_state.dart';
 
 class ProfileHome extends StatelessWidget {
   const ProfileHome({super.key});
@@ -42,8 +42,9 @@ class ProfileHome extends StatelessWidget {
               closeIconColor: Colors.white70,
             );
             ScaffoldMessenger.of(context).showSnackBar(snackbar);
-          } else if (state is ButtonSuccessState) {
-            AppNavigator.pushAndRemove(context, SigninPage());
+          } 
+          if (state is ButtonLoadingState){
+          AppNavigator.pushAndRemove(context, SigninPage());
           }
         },
         child: Scaffold(
@@ -143,8 +144,11 @@ class ProfileHome extends StatelessWidget {
                                                         ],
                                                         
                                                         child: BlocListener<ButtonStateCubit, ButtonState>(
-                                                            listener: (context, state) {
+                                                            listener: (sheetContext, state) {
                                                               if (state is ButtonFailureState) {
+                                                                // 1. Verify context is still valid after the long Firebase delay
+                                                                if (context.mounted) return;
+                                                                
                                                                 var snackbar = SnackBar(
                                                                   content: Text(
                                                                     state.errorMessage,
@@ -155,10 +159,16 @@ class ProfileHome extends StatelessWidget {
                                                                   showCloseIcon: true,
                                                                   closeIconColor: Colors.white70,
                                                                 );
-                                                                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                                                              } else if (state is ButtonSuccessState) {
-                                                                Navigator.of(modalContext).pop();
-                                                                context.read<UserInfoDisplayCubit>().displayUserInfo();
+                                                                ScaffoldMessenger.of(sheetContext).showSnackBar(snackbar);
+                                                              } 
+                                                              else if (state is ButtonSuccessState) {
+                                                                // 2. Pop the modal securely
+                                                                if (Navigator.of(modalContext).canPop()) {
+                                                                  Navigator.of(modalContext).pop();
+                                                                }
+                                                                if (context.mounted) {
+                                                                  context.read<UserInfoDisplayCubit>().displayUserInfo();
+                                                                }
                                                               }
                                                             },
                                                             child: Container(
@@ -206,7 +216,6 @@ class ProfileHome extends StatelessWidget {
                                                                           style: TextStyle(color: Colors.black87),
                                                                         );
                                                                       }
-                                                                      List<dynamic> imagesToDisplay = [];
                                                                       if (state is ImagePickerLoadingState){
                                                                         return const CircularProgressIndicator();
                                                                       }

@@ -19,6 +19,9 @@ class SearchField extends StatelessWidget {
           if (value.length > 2){
           context.read<PersonInfoDisplayCubit>().findPerson(searchVal: value);
           } 
+          else if (value.length<3){
+            context.read<PersonInfoDisplayCubit>().resetSearch();
+          } 
         },
         decoration: InputDecoration(
           fillColor: AppColors.secondBackground,

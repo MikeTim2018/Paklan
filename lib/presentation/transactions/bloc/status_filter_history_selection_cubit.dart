@@ -4,7 +4,7 @@ class StatusFilterHistorySelectionCubit extends Cubit<List<String>>{
 
   StatusFilterHistorySelectionCubit(): super ([]);
 
-  List<String> selectedFilters = ["Completado", "Cancelado"];
+  List<String> selectedFilters = ["Todos"];
 
   void selectFilters(List<String> filters) {
     selectedFilters = filters;

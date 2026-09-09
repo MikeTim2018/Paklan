@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:paklan/domain/auth/entity/user.dart';
 
 
@@ -16,6 +17,8 @@ class UserModel {
   final String phoneExt;
   final String photoLink;
   final int notificationNumber;
+  final bool active;
+  final Timestamp lastActive;
   final bool clabe;
 
   UserModel({
@@ -30,7 +33,9 @@ class UserModel {
     required this.phoneExt,
     required this.photoLink,
     required this.clabe,
-    required this.notificationNumber
+    required this.notificationNumber,
+    required this.active,
+    required this.lastActive
   });
 
   Map<String, dynamic> toMap() {
@@ -47,6 +52,8 @@ class UserModel {
       'displayName': displayName,
       'photoLink': photoLink,
       'notificationNumber': notificationNumber,
+      'active': active,
+      'lastActive': lastActive
     };
   }
 
@@ -64,6 +71,8 @@ class UserModel {
       photoLink: map['photoLink'] ?? '',
       clabe: map['CLABEs'] ?? false,
       notificationNumber: map['notificationNumber'] ?? 0,
+      active: map['active'] ?? false,
+      lastActive: map['lastActive'] ?? Timestamp.now()
     );
   }
   
@@ -86,7 +95,9 @@ extension UserXModel on UserModel {
       phone: "$phoneExt $phone",
       photoLink: photoLink,
       clabe: clabe,
-      notificationNumber: notificationNumber
+      notificationNumber: notificationNumber,
+      active: active,
+      lastActive: lastActive
     );
   }
 }

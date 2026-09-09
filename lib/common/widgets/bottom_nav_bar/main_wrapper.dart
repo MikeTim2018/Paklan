@@ -1,16 +1,14 @@
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
-import 'package:paklan/domain/transactions/usecases/get_clabes.dart';
 import 'package:paklan/presentation/home/pages/settings.dart' as home_settings;
+import 'package:paklan/presentation/in_search_of/pages/in_search_of_home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
-import 'package:paklan/service_locator.dart';
 
 
 
@@ -25,7 +23,6 @@ class MainWrapper extends StatefulWidget {
 
 class _MainWrapperState extends State<MainWrapper> {
   late PageController pageController;
-  final Stream<DocumentSnapshot<Map<String, dynamic>>> _clabeStream = sl<GetClabesUseCase>().call();
 
   @override
   void initState() {
@@ -42,6 +39,7 @@ class _MainWrapperState extends State<MainWrapper> {
   /// Top Level Pages
   final List<Widget> topLevelPages =  [
     TransactionHome(),
+    InSearchOfHome(),
     TransactionHistory(),
     home_settings.Settings(),
   ];
@@ -86,27 +84,27 @@ class _MainWrapperState extends State<MainWrapper> {
                   context,
                   defaultIcon: Icons.price_change_outlined,
                   page: 1,
-                  label: "Comprar",
+                  label: "Se busca",
                   filledIcon: Icons.price_change_rounded,
                 ),
                 _bottomAppBarItem(
                   context,
                   defaultIcon: Icons.sell_outlined,
-                  page: 1,
-                  label: "Vender",
+                  page: 2,
+                  label: "Comprar",
                   filledIcon: Icons.sell,
                 ),
                 _bottomAppBarItem(
                   context,
                   defaultIcon: Icons.compare_arrows,
-                  page: 2,
+                  page: 3,
                   label: "Trueque",
                   filledIcon: Icons.compare_arrows_outlined,
                 ),
                 _bottomAppBarItem(
                   context,
                   defaultIcon: Icons.menu,
-                  page: 2,
+                  page: 3,
                   label: "Menu",
                   filledIcon: Icons.menu_outlined,
                 ),
@@ -121,27 +119,6 @@ class _MainWrapperState extends State<MainWrapper> {
 
   // Floating Action Button - MainWrapper Widget
   Widget _mainWrapperFab() {
-    return StreamBuilder<DocumentSnapshot>(
-              stream: _clabeStream,
-              builder: (context, AsyncSnapshot<DocumentSnapshot> state){
-              if(state.hasError){
-                return SizedBox(
-                  height: 400,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Ha ocurrido un error, por favor intenta más tarde",
-                      style: TextStyle(
-                        fontSize: 24
-                      ),
-                    ),
-                  ),
-                );
-              }
-              if(state.connectionState == ConnectionState.waiting){
-                return const Center(child: CircularProgressIndicator());
-              }
-              Map<String, dynamic> userData = state.data!.data() as Map<String, dynamic>;
               return FloatingActionButton.extended(
                 heroTag: 'addDeal',
                 label: Text("Trato Flash",
@@ -156,19 +133,29 @@ class _MainWrapperState extends State<MainWrapper> {
                 icon: Icon(Icons.flash_on_outlined, color: Colors.yellow[200],),
 
       );
-        }
-    );
-  }
+    }
 
 
   // Body - MainWrapper Widget
-  PageView _mainWrapperBody() {
-    return PageView(
+Widget _mainWrapperBody() {
+  return BlocListener<BottomNavCubit, int>(
+    listener: (context, state) {
+      // Sync the PageController whenever BottomNavCubit changes
+      if (pageController.hasClients && pageController.page?.round() != state) {
+        pageController.animateToPage(
+          state,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeIn,
+        );
+      }
+    },
+    child: PageView(
       onPageChanged: (int page) => onPageChanged(page),
       controller: pageController,
       children: topLevelPages,
-    );
-  }
+    ),
+  );
+}
 
   // Bottom Navigation Bar Single item - MainWrapper Widget
   Widget _bottomAppBarItem(

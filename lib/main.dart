@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:paklan/common/bloc/app_lifecycle/app_lifecycle_cubit.dart';
 import 'package:paklan/common/helper/messaging_api/api.dart';
 import 'package:paklan/core/configs/theme/app_theme.dart';
 import 'package:paklan/firebase_options.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => SplashCubit()..appStarted()),
         BlocProvider<UserInfoDisplayCubit>(create: (context) => UserInfoDisplayCubit()..displayUserInfo(),),
+        BlocProvider(create: (context) => AppLifecycleCubit(),),
         ],
         child: MaterialApp(
           theme: AppTheme.appTheme,

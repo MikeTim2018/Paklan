@@ -14,6 +14,8 @@ class UserModel {
   final String photoLink;
   final String phone;
   final String phoneExt;
+  final bool active;
+  final String? lastActive;
   final int notificationNumber;
 
 
@@ -27,6 +29,8 @@ class UserModel {
     required this.phone,
     required this.phoneExt,
     required this.notificationNumber,
+    required this.active,
+    required this.lastActive,
   });
 
   Map<String, dynamic> toMap() {
@@ -40,6 +44,8 @@ class UserModel {
       'phoneExt': phoneExt,
       'displayName': displayName,
       'notificationNumber': notificationNumber,
+      'active': active,
+      'lastActive': lastActive,
     };
   }
 
@@ -53,7 +59,9 @@ class UserModel {
       photoLink: map['photoLink'] ?? '',
       phone: map['phone'] ?? '',
       phoneExt: map['phoneExt'] ?? '+52',
-      notificationNumber: map['notificationNumber'] ?? 0
+      notificationNumber: map['notificationNumber'] ?? 0,
+      active: map['active'] ?? false,
+      lastActive: map['lastActive'] ?? ''
     );
   }
   
