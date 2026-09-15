@@ -25,6 +25,7 @@ import 'package:paklan/domain/common/repository/common_repository.dart';
 import 'package:paklan/domain/common/usecases/get_buyer_profile.dart';
 import 'package:paklan/domain/common/usecases/get_chat.dart';
 import 'package:paklan/domain/common/usecases/get_messages.dart';
+import 'package:paklan/domain/common/usecases/get_seller_profile.dart';
 import 'package:paklan/domain/common/usecases/get_user_info.dart';
 import 'package:paklan/domain/common/usecases/mark_chat_read.dart';
 import 'package:paklan/domain/common/usecases/register_app_state.dart';
@@ -119,6 +120,9 @@ Future<void> initializeDependencies() async {
   );
   sl.registerSingleton<GetBuyerProfileUseCase>(
     GetBuyerProfileUseCase()
+  );
+    sl.registerSingleton<GetSellerProfileUseCase>(
+    GetSellerProfileUseCase()
   );
   sl.registerSingleton<GetUserInfoUseCase>(
     GetUserInfoUseCase()

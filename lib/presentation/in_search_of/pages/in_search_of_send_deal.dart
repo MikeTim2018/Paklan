@@ -7,7 +7,8 @@ import 'package:paklan/common/widgets/appbar/app_bar.dart';
 import 'package:paklan/common/widgets/button/basic_reactive_button.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/transactions/models/new_transaction.dart';
-import 'package:paklan/domain/transactions/entity/user.dart';
+import 'package:paklan/domain/auth/entity/user.dart';
+import 'package:paklan/domain/in_search_of/entity/in_search_of.dart';
 import 'package:paklan/domain/transactions/usecases/create_transaction.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_cubit.dart';
 import 'package:paklan/presentation/home/bloc/user_info_display_state.dart';
@@ -24,11 +25,11 @@ class InSearchOfSendDeal extends StatelessWidget {
   final TextEditingController _amountCon = TextEditingController();
   final TextEditingController _descriptionCon = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameCon = TextEditingController();
-  final UserEntityTransaction userEntity;
+  final UserEntity userEntity;
+  final InSearchOfEntity isoEntity;
   String userId = '';
   String userFirstName = '';
-  InSearchOfSendDeal({super.key, required this.userEntity});
+  InSearchOfSendDeal({super.key, required this.userEntity, required this.isoEntity});
 
   @override
   Widget build(BuildContext context) {
@@ -62,77 +63,61 @@ class InSearchOfSendDeal extends StatelessWidget {
           }
         },
         ),
-        BlocListener<UserInfoDisplayCubit, UserInfoDisplayState>(listener: (context, state){
-              if (state is UserInfoLoaded) {
-                 userId = state.user.userId;
-                 userFirstName = state.user.displayName;
-              }
-        }
-        )
         ],
-        child: Scaffold(
-          appBar: BasicAppbar(
-            height: 60,
-          ),
-          bottomNavigationBar: BottomAppBar(
-            child: Column(
-              children: [
-                Text(
-                  "Paso 2 de 2", 
-                  textAlign: TextAlign.center,),
-                  Row(
-                    children: [
-                      Container(
-                        height: 20,
-                        width: MediaQuery.sizeOf(context).width * 0.853,
-                        alignment: Alignment.bottomLeft,
-                        decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
-                        color: AppColors.primaryButton, 
-                        ),
-                      ),
-                      
-                    ],
-                  )
-              ],
-            ),
-            ),
-          body: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _name(context),
-                  SizedBox(height: 10,),
-                  _nameField(context),
-                  SizedBox(height: 10,),
-                  _description(context),
-                  SizedBox(height: 10,),
-                  _descriptionField(context),
-                  SizedBox(height: 10,),
-                  _typeOfProduct(context),
-                  SizedBox(height: 10,),
-                  _users(context),
-                  SizedBox(height: 10,),
-                  _typeOfDealText(context),
-                  SizedBox(height: 10,),
-                  _typeOfDeal(context),
-                  SizedBox(height: 10,),
-                  _photosRequest(context),
-                  SizedBox(height: 10,),
-                  _photoUpload(context),
-                  SizedBox(height: 10,),
-                  _amount(context),
-                  SizedBox(height: 10,),
-                  _amountField(context),
-                  SizedBox(height: 10,),
-                  _sendDeal(context),
-                      
-                ],
+        child: BlocBuilder<UserInfoDisplayCubit, UserInfoDisplayState>(
+          builder: (context, state) {
+            if (state is UserInfoLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is UserInfoLoaded) {
+              userId = state.user.userId;
+              userFirstName = state.user.displayName;
+            }
+            return Scaffold(
+              appBar: BasicAppbar(
+                height: 60,
               ),
-            ),
-          )
-          ),
+              bottomNavigationBar: const BottomAppBar(
+                  height: 20,
+                  color: Colors.transparent,
+                  child: SizedBox(height: 5),
+                ),
+              body: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _name(context),
+                      SizedBox(height: 10,),
+                      _description(context),
+                      SizedBox(height: 10,),
+                      _descriptionField(context),
+                      SizedBox(height: 10,),
+                      _typeOfProduct(context),
+                      SizedBox(height: 10,),
+                      _users(context),
+                      SizedBox(height: 10,),
+                      _typeOfDealText(context),
+                      SizedBox(height: 10,),
+                      _typeOfDeal(context),
+                      SizedBox(height: 10,),
+                      _photosRequest(context),
+                      SizedBox(height: 10,),
+                      _photoUpload(context),
+                      SizedBox(height: 10,),
+                      _amount(context),
+                      SizedBox(height: 10,),
+                      _amountField(context),
+                      SizedBox(height: 10,),
+                      _sendDeal(context),
+                          
+                    ],
+                  ),
+                ),
+              )
+              );
+          }
+        ),
         )
     );
     }
@@ -154,7 +139,7 @@ class InSearchOfSendDeal extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(13.0),
       child: Text(
-        '¿Qué producto estás ofreciendo?',
+        isoEntity.name!,
         style: TextStyle(
           fontSize: 21,
           fontWeight: FontWeight.bold
@@ -364,29 +349,6 @@ class InSearchOfSendDeal extends StatelessWidget {
     );
   }
 
-  Widget _nameField(BuildContext context){
-    return Padding(
-      padding: const EdgeInsets.all(13.0),
-      child: TextFormField(
-        validator: (value){
-          if (value!.isEmpty || value.length<3){
-            return 'El campo debe tener al menos 3 caracteres';
-          }
-          if(value.length>24){
-            return 'El campo debe tener menos de 25 caracteres';
-          }
-          else{
-            return null;
-          }
-        },
-        controller: _nameCon,
-        decoration: InputDecoration(
-          hintText: "Nombre del producto"
-        ),
-      ),
-    );
-  }
-
 
   Widget _description(BuildContext context){
     return Padding(
@@ -513,7 +475,7 @@ class InSearchOfSendDeal extends StatelessWidget {
                 int userType = context.read<UserTypeSelectionCubit>().selectedIndex;
                 int dealType = context.read<DealTypeSelectionCubit>().selectedIndex;
                 NewTransactionModel newTransaction = NewTransactionModel(
-                  name: _nameCon.text.trim(),
+                  name: isoEntity.name!,
                   amount: '${_amountCon.text}.00',
                   sellerDisplayName: userFirstName,
                   sellerId: userId,
@@ -527,7 +489,7 @@ class InSearchOfSendDeal extends StatelessWidget {
                   images: context.read<ImagePickerCubit>().getCurrentImages(),
                   typeOfProduct: userType == 1 ? "Original" : "Reproducción",
                   typeOfDeal: dealType == 1 ? "Envío" : "En persona",
-
+                  isoId: isoEntity.transactionId
                 );
                 context.read<ButtonStateCubit>().execute(
                   usecase: CreateTransactionUseCase(),

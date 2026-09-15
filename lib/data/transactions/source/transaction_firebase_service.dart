@@ -23,25 +23,23 @@ abstract class TransactionFirebaseService{
 
 class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
 
-  @override
-  Stream<QuerySnapshot<Map<String, dynamic>>> getTransactions() {
-    var currentUser = FirebaseAuth.instance.currentUser;
-    return FirebaseFirestore.instance.collection('transactions').where(
-           Filter.and(
-           Filter.or(
-           Filter("status", isEqualTo: "Enviado"),
-           Filter("status", isEqualTo: "Depositado"),
-           Filter("status", isEqualTo: "Aceptado"),
-           ),
-           Filter.or(
-           Filter("members.buyerId", isEqualTo: currentUser?.uid),
-           Filter("members.sellerId", isEqualTo: currentUser?.uid),
+
+@override
+Stream<QuerySnapshot<Map<String, dynamic>>> getTransactions() {
+  var currentUser = FirebaseAuth.instance.currentUser;
+  
+  return FirebaseFirestore.instance
+    .collection('transactions')
+    .where("status", whereIn: ["Enviado", "Depositado", "Aceptado"])  // ✅ Simpler
+    .where(
+      Filter.or(
+        Filter("members.buyerId", isEqualTo: currentUser?.uid),
+        Filter("members.sellerId", isEqualTo: currentUser?.uid),
       )
-    ),
     )
     .orderBy("timeLimit", descending: false)
     .snapshots();
-  }
+}
   
   @override
   Future<Either> getPerson(String searchVal) async{
@@ -100,6 +98,8 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
          "sellerId": newTransaction.sellerId,
          "buyerId": newTransaction.buyerId,
        },
+       "isoId": newTransaction.isoId,
+       "sellId": newTransaction.sellId,
       }
     );
     DocumentReference<Map<String, dynamic>> statusRef = await FirebaseFirestore.instance.collection("transactions/${transactionDoc.id}/status").add(
@@ -163,7 +163,6 @@ class TransactionFirebaseServiceImpl extends TransactionFirebaseService{
           "paymentDone": transactionState.paymentDone,
           "paymentTransferred": transactionState.paymentTransferred,
           "cancelledBy": transactionState.cancelledBy,
-          //"creationDate": DateTime.parse(serverTime.data['server_datetime']),
           "cancelMessage": transactionState.cancelMessage,
           "previousStateId": transactionState.statusId,
           "completedRatingMessageForSeller": transactionState.completedRatingMessageForSeller,

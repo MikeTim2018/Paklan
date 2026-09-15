@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,55 +10,64 @@ import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/in_search_of/models/in_search_of.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
 import 'package:paklan/domain/in_search_of/entity/in_search_of.dart';
-import 'package:paklan/domain/in_search_of/usecases/get_iso_posts.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
-import 'package:paklan/domain/transactions/usecases/get_transactions.dart';
 import 'package:paklan/presentation/in_search_of/pages/in_search_of_detail.dart';
 import 'package:paklan/presentation/in_search_of/pages/in_search_of_home.dart';
 import 'package:paklan/presentation/transactions/bloc/status_filter_selection_cubit.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_detail.dart';
-import 'package:paklan/service_locator.dart';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 import 'package:rxdart/rxdart.dart';
 
 class TransactionDisplay extends StatefulWidget {
-  const TransactionDisplay({super.key});
+  final Stream<QuerySnapshot> transactionsStream;
+  final Stream<QuerySnapshot> isoPostsStream;
+  final String currentUserId;
+  
+  const TransactionDisplay({
+    super.key,
+    required this.transactionsStream,
+    required this.isoPostsStream,
+    required this.currentUserId,
+  });
 
   @override
   State<TransactionDisplay> createState() => _TransactionDisplayState();
 }
 
-class _TransactionDisplayState extends State<TransactionDisplay> {
-  // 1. Declare late variables
-  late final Stream<QuerySnapshot> _transactionsStream;
-  late final Stream<QuerySnapshot> _isoPostsStream;
+class _TransactionDisplayState extends State<TransactionDisplay> 
+    with AutomaticKeepAliveClientMixin {
   late final ScrollController _scrollController;
+  late final ScrollController _isoScrollController;
   late final MultiSelectController<String> _multicontroller;
-  late final String currentUserId;
+  late final Stream<List<QuerySnapshot>> _combinedStreams;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    // 2. Initialize ONCE when the widget enters the tree
-    _transactionsStream = sl<GetTransactionsUseCase>().call();
-    _isoPostsStream = sl<GetIsoPostsUseCase>().call();
     _scrollController = ScrollController();
     _multicontroller = MultiSelectController<String>();
-    currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    _isoScrollController = ScrollController();
+    _combinedStreams = CombineLatestStream.combine2(
+      widget.transactionsStream,
+      widget.isoPostsStream,
+      (QuerySnapshot transactionStreamData, QuerySnapshot isoStreamData) => 
+        [transactionStreamData, isoStreamData],
+    );
   }
 
   @override
   void dispose() {
-    // 3. Clean up the controller to prevent memory leaks
     _scrollController.dispose();
+    _isoScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var _combinedStreams = CombineLatestStream.combine2(_transactionsStream, 
-    _isoPostsStream, 
-    (QuerySnapshot transactionStreamData, QuerySnapshot isoStreamData) => [transactionStreamData, isoStreamData],);
+    super.build(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => StatusFilterSelectionCubit()),
@@ -67,7 +75,7 @@ class _TransactionDisplayState extends State<TransactionDisplay> {
           child: StreamBuilder<List<QuerySnapshot<Object?>>>(
                 stream: _combinedStreams,
                 builder: (context, state){
-                if (state.connectionState == ConnectionState.waiting){
+                if (!state.hasData && state.connectionState == ConnectionState.waiting){
                   return SizedBox(
                     height: 400,
                     child: Container(
@@ -90,11 +98,20 @@ class _TransactionDisplayState extends State<TransactionDisplay> {
                     ),
                   );
                 }
+                if (!state.hasData){
+                  return SizedBox(
+                       height: 400,
+                       child: Container(
+                         alignment: Alignment.center,
+                         child: const CircularProgressIndicator()
+                       ),
+                     );
+                }
                 List<InSearchOfEntity> listISOPosts = state.data![1].docs.map(
                           (element) => InSearchOfModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
                           ).toList();
                 if (state.data == null || state.data![0].docs.isEmpty){
-                  return  SectionIsoPosts(isoPosts: listISOPosts, currentUserId: currentUserId); 
+                  return  SectionIsoPosts(isoPosts: listISOPosts, currentUserId: widget.currentUserId); 
                 }
                 List<TransactionEntity> listEntities = state.data![0].docs.map(
                           (element) => TransactionModel.fromMap(element.data() as Map<String, dynamic>).toEntity()
@@ -199,16 +216,16 @@ class _TransactionDisplayState extends State<TransactionDisplay> {
                         BlocBuilder<StatusFilterSelectionCubit, List<String>>(
                           builder: (context, state) {
                             if (context.read<StatusFilterSelectionCubit>().selectedFilters.contains("Todos")){
-                              return listTransactions(context, listEntities,_scrollController, currentUserId);
+                              return listTransactions(context, listEntities,_scrollController, widget.currentUserId);
                             }
                             return listTransactions(context, listEntities.where((element) {
                                   return context.read<StatusFilterSelectionCubit>().selectedFilters.contains(element.status);
                                 }).toList(),
-                              _scrollController, currentUserId
+                              _scrollController, widget.currentUserId
                               );
                           }
                         ),
-                        SectionIsoPosts(isoPosts: listISOPosts, currentUserId: currentUserId),
+                        SectionIsoPosts(isoPosts: listISOPosts, currentUserId: widget.currentUserId),
                         //_buildCategoryCarousel("Venta", listEntities, context, onTapSeeMore: () {
                         //  context.read<BottomNavCubit>().changeSelectedIndex(2);
                         //}),
@@ -262,157 +279,152 @@ Widget listNoTransaction(BuildContext context) {
 Widget transactionTile(List<dynamic> status, int index, String user, context) {
     return SizedBox(
              width: MediaQuery.sizeOf(context).width * 0.45,
-             child: Card(
-               shape: RoundedRectangleBorder(
-                 borderRadius: BorderRadius.circular(20),
-               ),
-               child: ClipRRect(
-                 borderRadius: BorderRadius.circular(20),
-                 child: Container(
-                   decoration: BoxDecoration(
-                     color: AppColors.secondBackground,
-                     borderRadius: BorderRadius.circular(20),
-                   ),
-                   child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       // 1. Interactive Image Gallery (Top Area)
-            SizedBox(
-              height: 120, 
-              width: double.infinity,
-              child: Stack(
-                children: [
-                  // Base Layer: Photos (either fallback or full multi-page stream)
-                  Positioned.fill(
-                    child: status[index].images!.isEmpty
-                        ? const Image(
-                            image: AssetImage(AppImages.userLogo),
-                            fit: BoxFit.cover,
-                          )
-                        : PageView.builder(
-                            itemCount: status[index].images!.length,
-                            controller: PageController(viewportFraction: 1.0),
-                            itemBuilder: (context, imageIndex) {
-                              return Image(
-                                image: NetworkImage(status[index].images![imageIndex]),
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
-                  ),
-                           Positioned(
-                             top: 8,  // Slightly offset outward to tuck nicely under borders
-                             left: -20, // Pulled left to create the corner anchor overflow look
-                             child: Transform.rotate(
-                               angle: -0.785398, // Rotates exactly -45 degrees into a diagonal layout
-                               child: Container(
-                                 width: 90, // Strict fixed width to align text perfectly across the corner
-                                 padding: const EdgeInsets.symmetric(vertical: 4), // Vertical padding for text breathing room
-                                 decoration: BoxDecoration(
-                                   // Dynamic conditional color formatting
-                                   color: status[index].typeOfProduct == 'Original' 
-                                       ? Colors.green.withValues(alpha: 0.95) 
-                                       : Colors.orange.withValues(alpha: 0.95),
-                                   boxShadow: const [
-                                     BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
-                                   ],
-                                 ),
-                                 child: Text(
-                                   // Evaluates condition parameter dynamically or defaults to standard fallback
-                                   status[index].typeOfProduct == 'Reproducción' ? 'Repro' : 'Original',
-                                   textAlign: TextAlign.center,
-                                   style: const TextStyle(
-                                     color: Colors.white,
-                                     fontSize: 10,
-                                     fontWeight: FontWeight.bold,
-                                     letterSpacing: 1.0,
-                                   ),
+             child: ClipRRect(
+               borderRadius: BorderRadius.circular(20),
+               child: Container(
+                 decoration: BoxDecoration(
+                   color: AppColors.background,
+                   borderRadius: BorderRadius.circular(20),
+                 ),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     // 1. Interactive Image Gallery (Top Area)
+                         SizedBox(
+                           height: 120, 
+                           width: double.infinity,
+                           child: Stack(
+              children: [
+                // Base Layer: Photos (either fallback or full multi-page stream)
+                Positioned.fill(
+                  child: status[index].images!.isEmpty
+                      ? const Image(
+                          image: AssetImage(AppImages.userLogo),
+                          fit: BoxFit.cover,
+                        )
+                      : PageView.builder(
+                          itemCount: status[index].images!.length,
+                          controller: PageController(viewportFraction: 1.0),
+                          itemBuilder: (context, imageIndex) {
+                            return Image(
+                              image: NetworkImage(status[index].images![imageIndex]),
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                ),
+                         Positioned(
+                           top: 8,  // Slightly offset outward to tuck nicely under borders
+                           left: -20, // Pulled left to create the corner anchor overflow look
+                           child: Transform.rotate(
+                             angle: -0.785398, // Rotates exactly -45 degrees into a diagonal layout
+                             child: Container(
+                               width: 90, // Strict fixed width to align text perfectly across the corner
+                               padding: const EdgeInsets.symmetric(vertical: 4), // Vertical padding for text breathing room
+                               decoration: BoxDecoration(
+                                 // Dynamic conditional color formatting
+                                 color: status[index].typeOfProduct == 'Original' 
+                                     ? Colors.green.withValues(alpha: 0.95) 
+                                     : Colors.orange.withValues(alpha: 0.95),
+                                 boxShadow: const [
+                                   BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+                                 ],
+                               ),
+                               child: Text(
+                                 // Evaluates condition parameter dynamically or defaults to standard fallback
+                                 status[index].typeOfProduct == 'Reproducción' ? 'Repro' : 'Original',
+                                 textAlign: TextAlign.center,
+                                 style: const TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 10,
+                                   fontWeight: FontWeight.bold,
+                                   letterSpacing: 1.0,
                                  ),
                                ),
                              ),
                            ),
-         
-                           // Floating Indicator (Only shows if there are multiple images to navigate)
-                           if (status[index].images!.length > 1)
-                             Positioned(
-                               bottom: 8,
-                               right: 8,
-                               child: Container(
-                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                 decoration: BoxDecoration(
-                                   color: Colors.black54,
-                                   borderRadius: BorderRadius.circular(12),
-                                 ),
-                                 child: const Icon(
-                                   Icons.swipe_right_alt,
-                                   size: 15,
-                                   color: Colors.white70,
-                                 ),
+                         ),
+                      
+                         // Floating Indicator (Only shows if there are multiple images to navigate)
+                         if (status[index].images!.length > 1)
+                           Positioned(
+                             bottom: 8,
+                             right: 8,
+                             child: Container(
+                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                               decoration: BoxDecoration(
+                                 color: Colors.black54,
+                                 borderRadius: BorderRadius.circular(12),
+                               ),
+                               child: const Icon(
+                                 Icons.swipe_right_alt,
+                                 size: 15,
+                                 color: Colors.white70,
                                ),
                              ),
+                           ),
+                       ],
+                     ),
+                   ),
+                     
+                     // Text padding content block
+                     Padding(
+                       padding: const EdgeInsets.all(12.0),
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           // 2. Name of the product
+                           Center(
+                             child: Text(
+                               '${toBeginningOfSentenceCase(status[index].name)}',
+                               maxLines: 2,
+                               style: const TextStyle(
+                                 color: Colors.black87,
+                                 fontWeight: FontWeight.bold,
+                                 fontSize: 14,
+                                 overflow: TextOverflow.ellipsis,
+                               ),
+                             ),
+                           ),
+                           const SizedBox(height: 4),
+                           
+                           // 3. Name of the seller
+                           Center(
+                             child: Text(
+                               user == status[index].sellerId 
+                                   ? '${status[index].buyerDisplayName}'
+                                   : '${status[index].sellerDisplayName}',
+                               style: const TextStyle(
+                                 color: Colors.black54,
+                                 fontSize: 9,
+                                 overflow: TextOverflow.ellipsis,
+                               ),
+                               maxLines: 1,
+                             ),
+                           ),
+                           const SizedBox(height: 8),
+                           
+                           // 4. Price (Bottom)
+                           Center(
+                             child: Text(
+                               '\$${(double.parse(status[index].amount!) + double.parse(status[index].fee!))
+                                   .truncateToDouble()
+                                   .toStringAsFixed(2)
+                                   .replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} ',
+                               style: const TextStyle(
+                                 fontSize: 11, 
+                                 color: Colors.black54,
+                                 fontWeight: FontWeight.bold,
+                               ),
+                               overflow: TextOverflow.ellipsis,
+                               maxLines: 1,
+                             ),
+                           ),
                          ],
                        ),
                      ),
-                       
-                       // Text padding content block
-                       Padding(
-                         padding: const EdgeInsets.all(12.0),
-                         child: Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: [
-                             // 2. Name of the product
-                             Center(
-                               child: Text(
-                                 '${toBeginningOfSentenceCase(status[index].name)}',
-                                 maxLines: 2,
-                                 style: const TextStyle(
-                                   color: Colors.black87,
-                                   fontWeight: FontWeight.bold,
-                                   fontSize: 14,
-                                   overflow: TextOverflow.ellipsis,
-                                 ),
-                               ),
-                             ),
-                             const SizedBox(height: 4),
-                             
-                             // 3. Name of the seller
-                             Center(
-                               child: Text(
-                                 user == status[index].sellerId 
-                                     ? '${status[index].buyerDisplayName}'
-                                     : '${status[index].sellerDisplayName}',
-                                 style: const TextStyle(
-                                   color: Colors.black54,
-                                   fontSize: 9,
-                                   overflow: TextOverflow.ellipsis,
-                                 ),
-                                 maxLines: 1,
-                               ),
-                             ),
-                             const SizedBox(height: 8),
-                             
-                             // 4. Price (Bottom)
-                             Center(
-                               child: Text(
-                                 '\$${(double.parse(status[index].amount!) + double.parse(status[index].fee!))
-                                     .truncateToDouble()
-                                     .toStringAsFixed(2)
-                                     .replaceAllMapped(RegExp(r'(\d{1,2})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} ',
-                                 style: const TextStyle(
-                                   fontSize: 11, 
-                                   color: Colors.black54,
-                                   fontWeight: FontWeight.bold,
-                                 ),
-                                 overflow: TextOverflow.ellipsis,
-                                 maxLines: 1,
-                               ),
-                             ),
-                           ],
-                         ),
-                       ),
-                     ],
-                   ),
+                   ],
                  ),
                ),
              ),
@@ -422,7 +434,7 @@ Widget transactionTile(List<dynamic> status, int index, String user, context) {
    }
 Widget listTransactions(BuildContext context, List<dynamic> status, ScrollController scrollController, String user) {
     return SizedBox(
-          height: 250,
+          height: 230,
           width: MediaQuery.sizeOf(context).width * 0.95,
           child: RawScrollbar(
           controller: scrollController,
@@ -572,7 +584,7 @@ Widget listISOPosts(BuildContext context, List<InSearchOfEntity> status, ScrollC
                                           child: isoTile(status, index, user, context),
                                         );
                                       },
-                                       separatorBuilder: (context, index) => const SizedBox(width: 5,),
+                                       separatorBuilder: (context, index) => const SizedBox(width: 10,),
                                        itemCount: status.length
                                     ),
               ),

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,26 +10,24 @@ import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/data/in_search_of/models/in_search_of.dart';
 import 'package:paklan/domain/in_search_of/entity/in_search_of.dart';
-import 'package:paklan/domain/in_search_of/usecases/get_iso_posts.dart';
 import 'package:paklan/presentation/in_search_of/bloc/search_iso_posts_cubit.dart';
 import 'package:paklan/presentation/in_search_of/bloc/search_iso_posts_state.dart';
 import 'package:paklan/presentation/in_search_of/pages/in_search_of_create_post.dart';
 import 'package:paklan/presentation/in_search_of/pages/in_search_of_detail.dart';
 import 'package:paklan/presentation/in_search_of/widgets/search_field_iso.dart';
-import 'package:paklan/service_locator.dart';
 import 'package:paklan/presentation/transactions/bloc/status_filter_history_selection_cubit.dart';
 import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 
 
-class InSearchOfHome extends StatefulWidget {
-  const InSearchOfHome({super.key});
+class SellHome extends StatefulWidget {
+  const SellHome({super.key});
 
   @override
-  State<InSearchOfHome> createState() => _InSearchOfHomeState();
+  State<SellHome> createState() => _SellHomeState();
 }
 
-class _InSearchOfHomeState extends State<InSearchOfHome> 
+class _SellHomeState extends State<SellHome> 
     with AutomaticKeepAliveClientMixin { 
   
   late final MultiSelectController<String> _multicontroller2;
@@ -62,14 +59,12 @@ class _InSearchOfHomeState extends State<InSearchOfHome>
       ],
       child: Scaffold(
         appBar: BasicAppbar(
-          height: 110,
+          height: 90,
           title: SizedBox(
             width: MediaQuery.sizeOf(context).width * 0.96,
-            height: 100,
+            height: 80,
             child: Column(
               children: [
-                Text("Personas en busca de tu producto"),
-                SizedBox(height: 10,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

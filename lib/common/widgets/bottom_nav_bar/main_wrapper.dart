@@ -1,12 +1,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:paklan/common/bloc/app_lifecycle/app_lifecycle_cubit.dart';
 import 'package:paklan/common/bloc/bottom_nav_bar/bottom_nav_cubit.dart';
 import 'package:paklan/common/helper/navigator/app_navigator.dart';
+import 'package:paklan/common/helper/stream_provider/app_stream_provider.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
 import 'package:paklan/presentation/home/pages/settings.dart' as home_settings;
 import 'package:paklan/presentation/in_search_of/pages/in_search_of_home.dart';
-import 'package:paklan/presentation/transactions/pages/transaction_history.dart';
+import 'package:paklan/presentation/sell/pages/sell_home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_home.dart';
 import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 
@@ -15,34 +17,57 @@ import 'package:paklan/presentation/transactions/pages/transaction_search.dart';
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
 
-  Null get pageController => null;
-
   @override
   State<MainWrapper> createState() => _MainWrapperState();
 }
 
-class _MainWrapperState extends State<MainWrapper> {
-  late PageController pageController;
+class _MainWrapperState extends State<MainWrapper> with WidgetsBindingObserver {
+  late final PageController pageController;
+  AppLifecycleCubit? _appLifecycleCubit;
 
   @override
   void initState() {
     super.initState();
     pageController = PageController();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _appLifecycleCubit ??= context.read<AppLifecycleCubit>();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _appLifecycleCubit?.registerState(active: false);
     pageController.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    final cubit = _appLifecycleCubit;
+    if (cubit == null) return;
+
+    if (state == AppLifecycleState.resumed) {
+      cubit.registerState(active: true);
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      cubit.registerState(active: false);
+    }
+  }
+
   /// Top Level Pages
-  final List<Widget> topLevelPages =  [
-    TransactionHome(),
-    InSearchOfHome(),
-    TransactionHistory(),
-    home_settings.Settings(),
-  ];
+  List<Widget> get topLevelPages => [
+  TransactionHome(),
+  InSearchOfHome(),
+  SellHome(),
+  home_settings.Settings(),
+];
 
   /// on Page Changed
   void onPageChanged(int page) {
@@ -51,12 +76,14 @@ class _MainWrapperState extends State<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: _mainWrapperBody(),
-      bottomNavigationBar: _mainWrapperBottomNavBar(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: _mainWrapperFab(),
+    return AppStreamsProvider(
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
+        body: _mainWrapperBody(),
+        bottomNavigationBar: _mainWrapperBottomNavBar(context),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: _mainWrapperFab(),
+      ),
     );
   }
 

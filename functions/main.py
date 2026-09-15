@@ -364,7 +364,7 @@ def send_reminder_days(_) -> None:
             "tokens": new_tokens
         })
 
-@scheduler_fn.on_schedule(schedule="* * */1 * *")
+@scheduler_fn.on_schedule(schedule="1 */1 * * *")
 def update_remaining_hours(_) -> None:
     """
     updates the remaining time on the firestore database for all in progress transactions
@@ -380,7 +380,7 @@ def update_remaining_hours(_) -> None:
         transaction_dict = transac.to_dict()
         time_rem = transaction_dict.get('timeLimit') - datetime.datetime.now(datetime.timezone.utc)
         minutes, _ = divmod(time_rem.days * 86400 + time_rem.seconds, 60)
-        if minutes <= 0:
+        if minutes <= 59:
             status = db.collection("transactions").document(transaction_dict.get("transactionId")).collection("status").document(
                                                                                         transaction_dict.get("statusId")
                                                                                         ).get()
@@ -415,57 +415,192 @@ def update_remaining_hours(_) -> None:
                 }
             )
 
-
-@firestore_fn.on_document_created(max_instances=40, document="chats/{chatId}/messages/{messageId}", region=SupportedRegion.US_CENTRAL1) #min_instances=5 costs $35.25 dollars monthly to keep warm in production only to fasten responses on deals
+@firestore_fn.on_document_created(
+    max_instances=40,
+    document="chats/{chatId}/messages/{messageId}",
+    region=SupportedRegion.US_CENTRAL1
+)
 def send_message_notifications(event: firestore_fn.Event[firestore_fn.DocumentSnapshot | None]) -> None:
     """
-    Function to update the transaction status and status date when status is created
+    Function to send notifications when a new message is created.
+    Idempotent: if triggered twice for the same message, only processes once.
     """
     if event.data is None:
         print("no event data is provided!")
         return
+
     try:
         print("retrieving data from event")
         chat_id = event.params['chatId']
+        message_id = event.params['messageId']
         sender_id = event.data.get("senderId")
         sender_name = event.data.get("senderName")
         message_text = event.data.get('message')
     except KeyError as ky:
         print(f"an error in event data occurred {ky}")
         return
+
     db = firestore.client()
+
     # --- 1. IDEMPOTENCY & TRANSACTION LOCKING HANDLING ---
-    chat = db.collection("chats").document(chat_id)
-    chat_snapshot = chat.get().to_dict() if chat.exists else {}
-    chat_members = chat_snapshot.get("members", {})
-    chat_members_filtered = [member for member in chat_members if member != sender_id]
-    users = []
-    for member_id in chat_members_filtered:
-        user_doc = db.collection("users").document(member_id).get()
-        if user_doc.exists:
-            user_dict = user_doc.to_dict()
-            users.append(user_dict['tokens'])
-    print("sending multicast message to buyer")
+    chat_ref = db.collection("chats").document(chat_id)
+
+    @firestore.transactional
+    def update_in_transaction(transaction_db, chat_document):
+        """
+        Atomically check if message was processed and update notification counts.
+        Returns: (chat_data, user_token_map) or (None, {}) if already processed
+        """
+        # Get chat data (transaction as keyword argument)
+        chat_snapshot = chat_document.get(transaction=transaction_db)
+        if not chat_snapshot.exists:
+            print(f"Chat {chat_id} does not exist")
+            return None, {}
+
+        chat_data = chat_snapshot.to_dict()
+
+        # Verify if this message was already processed (Idempotency check)
+        processed_messages = chat_data.get("processedMessages", {})
+        if processed_messages.get(message_id):
+            print(f"Message {message_id} already processed. Skipping notification.")
+            return None, {}
+
+        # Get chat members (excluding sender)
+        chat_members = chat_data.get("members", [])
+        chat_members_filtered = [member for member in chat_members if member != sender_id]
+
+        # Update notification count for each recipient and collect tokens
+        # Map tokens to user IDs for cleanup later
+        user_token_map = {}  # {user_id: [tokens]}
+
+        for member_id in chat_members_filtered:
+            user_ref = db.collection("users").document(member_id)
+            user_snapshot = user_ref.get(transaction=transaction_db)
+
+            if user_snapshot.exists:
+                user_dict = user_snapshot.to_dict()
+
+                # Atomically increment notification number
+                transaction_db.update(user_ref, {
+                    "notificationNumber": firestore.Increment(1)
+                })
+
+                # Collect FCM tokens and map to user ID
+                tokens = user_dict.get('tokens', [])
+                if tokens:
+                    user_token_map[member_id] = tokens
+
+        # Mark this message as processed to guarantee idempotency
+        transaction_db.update(chat_document, {
+            f"processedMessages.{message_id}": True
+        })
+
+        return chat_data, user_token_map
+
+    # Execute our database operation safely in a transaction
+    chat_data, user_token_map = update_in_transaction(db.transaction(), chat_ref)
+
+    # If this execution is a duplicate, stop right here before sending double notifications
+    if chat_data is None:
+        return
+
+    # --- 2. SEND NOTIFICATIONS (Outside transaction) ---
+    if not user_token_map:
+        print("No tokens found for recipients")
+        return
+
+    # Flatten tokens and create a mapping for cleanup
+    # token_to_user_map: {token: user_id}
+    all_tokens = []
+    token_to_user_map = {}
+    for user_id, tokens in user_token_map.items():
+        for token in tokens:
+            all_tokens.append(token)
+            token_to_user_map[token] = user_id
+
+    print(f"All tokens are ready: {len(all_tokens)} tokens from {len(user_token_map)} users")
+    print("sending multicast message...")
+
     title = f"Nuevo mensaje de {sender_name} en el chat"
     body = f"{message_text}"
-    msg = messaging.send_each_for_multicast(
-        multicast_message=messaging.MulticastMessage(
-            notification=messaging.Notification(
-                title=title,
-                body=body
-            ),
-            tokens=users,
-            data={
-                "title": title,
-                "message": message_text
-            },
-            android=messaging.AndroidConfig(priority='high')
+
+    try:
+        msg = messaging.send_each_for_multicast(
+            multicast_message=messaging.MulticastMessage(
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                tokens=all_tokens,
+                data={
+                    "title": title,
+                    "message": message_text,
+                    "chatId": chat_id
+                },
+                android=messaging.AndroidConfig(priority='high')
+            )
         )
-    )
+
+        print(f"Notification sent successfully. Success: {msg.success_count}, Failure: {msg.failure_count}")
+
+        # --- 3. CLEAN UP INVALID TOKENS ---
+        if msg.failure_count > 0:
+            print(f"Processing {msg.failure_count} failed notifications...")
+
+            # Track which tokens to remove for each user
+            # user_invalid_tokens: {user_id: [invalid_tokens]}
+            user_invalid_tokens:dict = {}
+
+            for index, response in enumerate(msg.responses):
+                if response.success:
+                    continue
+
+                # Get the token that failed
+                failed_token = all_tokens[index]
+
+                # Check if it's a NOT_FOUND error (invalid/expired token)
+                if response.exception and response.exception.code == 'NOT_FOUND':
+                    print(f"Token no longer valid: {failed_token[:20]}...")
+
+                    # Find which user this token belongs to
+                    user_id = token_to_user_map.get(failed_token)
+                    if user_id:
+                        if user_id not in user_invalid_tokens:
+                            user_invalid_tokens[user_id] = []
+                        user_invalid_tokens[user_id].append(failed_token)
+                else:
+                    # Log other types of errors
+                    print(f"Notification error for token {failed_token[:20]}...: {response.exception}")
+
+            # Remove invalid tokens from each user
+            if user_invalid_tokens:
+                print(f"Removing invalid tokens from {len(user_invalid_tokens)} users...")
+
+                for user_id, invalid_tokens in user_invalid_tokens.items():
+                    try:
+                        user_ref = db.collection("users").document(user_id)
+
+                        # Get current tokens
+                        current_tokens = user_token_map.get(user_id, [])
+
+                        # Filter out invalid tokens
+                        new_tokens = [token for token in current_tokens if token not in invalid_tokens]
+
+                        # Update user document
+                        user_ref.update({
+                            "tokens": new_tokens
+                        })
+
+                        print(f"User {user_id}: Removed {len(invalid_tokens)} invalid tokens. {len(new_tokens)} tokens remaining.")
+                    except Exception as e:
+                        print(f"Error updating tokens for user {user_id}: {e}")
+
+    except Exception as e:
+        print(f"Error sending notifications: {e}")
 
 
 
-@firestore_fn.on_document_created(max_instances=40, document="transactions/{transactionId}/status/{statusId}") #min_instances=5 costs $35.25 dollars monthly to keep warm in production only to fasten responses on deals
+@firestore_fn.on_document_created(max_instances=40, document="transactions/{transactionId}/status/{statusId}", region=SupportedRegion.US_CENTRAL1) #min_instances=5 costs $35.25 dollars monthly to keep warm in production only to fasten responses on deals
 def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot | None]) -> None:
     """
     Function to update the transaction status and status date when status is created
@@ -475,19 +610,19 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
         return
     try:
         print("retrieving data from event")
-        status = event.data.get("status")
+        data = event.data.to_dict()
+        status = data.get("status")
         transaction_id = event.params['transactionId']
         status_id = event.params['statusId']
-        buyer_confirmation = event.data.get("buyerConfirmation")
-        seller_confirmation = event.data.get("sellerConfirmation")
+        buyer_confirmation = data.get("buyerConfirmation")
+        seller_confirmation = data.get("sellerConfirmation")
         
         # Safely extract optional ratings
-        buyer_rating = event.data.get("buyerRating")
-        seller_rating = event.data.get("sellerRating")
-        seller_rating_message = event.data.get("completedRatingMessageForSeller", [])
-        buyer_rating_message = event.data.get("completedRatingMessageForBuyer", [])
-        
-        previous_state_id = event.data.get("previousStateId") if "previousStateId" in event.data.to_dict() else None
+        buyer_rating = data.get("buyerRating")
+        seller_rating = data.get("sellerRating")
+        seller_rating_message = data.get("completedRatingMessageForSeller", [])
+        buyer_rating_message = data.get("completedRatingMessageForBuyer", [])
+        previous_state_id = data.get("previousStateId")
     except KeyError as ky:
         print(f"an error in event data occurred {ky}")
         return
@@ -500,7 +635,7 @@ def update_transactions(event: firestore_fn.Event[firestore_fn.DocumentSnapshot 
     # Using an atomic transaction block to handle state updates and mathematical increments safely
     @firestore.transactional
     def update_in_transaction(transaction_db, tx_ref, status_ref):
-        tx_snapshot = tx_ref.get(transaction_db)
+        tx_snapshot = tx_ref.get(transaction=transaction_db)
         tx_data = tx_snapshot.to_dict() if tx_snapshot.exists else {}
         
         # Verify if this specific status update was already calculated (Idempotency check)

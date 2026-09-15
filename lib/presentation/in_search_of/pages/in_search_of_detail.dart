@@ -552,7 +552,7 @@ class _InSearchOfDetailState extends State<InSearchOfDetail> {
                                             BasicAppButton(
                             width: MediaQuery.sizeOf(context).width*0.85,
                             onPressed: (){
-                              //AppNavigator.push(context, InSearchOfSendDeal(userEntity: buyerEntity));
+                              AppNavigator.push(context, InSearchOfSendDeal(userEntity: buyerEntity, isoEntity: isoEntity));
                             },
                             title: "Mandar trato"
                             ),

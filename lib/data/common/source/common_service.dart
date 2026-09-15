@@ -9,7 +9,8 @@ import 'package:paklan/data/common/models/message.dart';
 abstract class CommonService{
   Future<Either> registerAppState(bool searchVal);
   Stream<DocumentSnapshot<Map<String, dynamic>>> getBuyerProfileStream(String buyerId);
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserProfileStream(String buyerId);
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserProfileStream(String userId);
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getSellerProfileStream(String buyerId);
   Future<Either> registerMessage(MessageModel message);
   Future<Either> registerChat(ChatModel message);
   Stream<QuerySnapshot<Map<String, dynamic>>> getMessages(String chatId);
@@ -39,9 +40,15 @@ class CommonServiceImpl extends CommonService{
     return buyerProfileStream;
   }
 
+  @override
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getSellerProfileStream(String buyerId) {
+    var buyerProfileStream = FirebaseFirestore.instance.collection("buyers").doc(buyerId).snapshots();
+    return buyerProfileStream;
+  }
+
    @override
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserProfileStream(String buyerId) {
-    var buyerProfileStream = FirebaseFirestore.instance.collection("users").doc(buyerId).snapshots();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserProfileStream(String userId) {
+    var buyerProfileStream = FirebaseFirestore.instance.collection("users").doc(userId).snapshots();
     return buyerProfileStream;
   }
   

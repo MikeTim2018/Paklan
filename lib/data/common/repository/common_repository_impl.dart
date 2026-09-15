@@ -17,7 +17,10 @@ class CommonRepositoryImpl extends CommonRepository{
   Stream<DocumentSnapshot<Map<String, dynamic>>> getBuyerProfileStream(String buyerId) {
     return sl<CommonService>().getBuyerProfileStream(buyerId);
   }
-
+  @override
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getSellerProfileStream(String sellerId) {
+    return sl<CommonService>().getSellerProfileStream(sellerId);
+  }
   @override
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserProfileStream(String buyerId) {
     return sl<CommonService>().getUserProfileStream(buyerId);

@@ -16,6 +16,8 @@ class NewTransactionModel {
   String ? typeOfProduct;
   String ? dealDetails;
   String ? typeOfDeal;
+  String ? isoId;
+  String ? sellId;
 
   NewTransactionModel({
     required this.name,
@@ -31,7 +33,9 @@ class NewTransactionModel {
     required this.typeOfProduct,
     required this.images,
     required this.dealDetails,
-    required this.typeOfDeal
+    required this.typeOfDeal,
+    this.isoId,
+    this.sellId
   });
 
 }

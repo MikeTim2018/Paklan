@@ -16,6 +16,7 @@ class TransactionModel {
   DateTime ? timeLimit;
   String ? fee;
   String ? sellerId;
+  String ? buyerId;
   String ? typeOfDeal;
 
   TransactionModel({
@@ -33,6 +34,7 @@ class TransactionModel {
     this.timeLimit,
     this.fee,
     this.sellerId,
+    this.buyerId,
   });
 
 
@@ -52,6 +54,7 @@ Map<String, dynamic> toMap() {
       'fee': fee,
       'sellerId': sellerId,
       'typeOfDeal': typeOfDeal,
+      'buyerId': buyerId,
     };
   }
 
@@ -70,6 +73,7 @@ Map<String, dynamic> toMap() {
       fee: map['fee'] ?? '0.00',
       images: List<String>.from(map['images'] ?? []),
       sellerId: map['members']['sellerId'],
+      buyerId: map['members']['buyerId'],
       typeOfDeal: map['typeOfDeal'] as String,
     );
   }
@@ -97,6 +101,7 @@ extension UserXModel on TransactionModel {
       typeOfDeal: typeOfDeal,
       fee: fee,
       sellerId: sellerId,
+      buyerId: buyerId
     );
   }
 }

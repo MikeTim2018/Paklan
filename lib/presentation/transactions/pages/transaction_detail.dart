@@ -3,6 +3,7 @@ import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:paklan/common/bloc/button/button_state.dart';
@@ -13,8 +14,16 @@ import 'package:paklan/common/widgets/button/custom_reactive_button.dart';
 import 'package:paklan/core/configs/assets/app_images.dart';
 import 'package:paklan/core/configs/assets/app_vectors.dart';
 import 'package:paklan/core/configs/theme/app_colors.dart';
+import 'package:paklan/data/auth/models/user.dart';
+import 'package:paklan/data/common/models/buyer.dart';
+import 'package:paklan/data/common/models/seller.dart';
 import 'package:paklan/data/transactions/models/status.dart';
 import 'package:paklan/data/transactions/models/transaction.dart';
+import 'package:paklan/domain/auth/entity/user.dart';
+import 'package:paklan/domain/common/entity/buyer.dart';
+import 'package:paklan/domain/common/entity/seller.dart';
+import 'package:paklan/domain/common/usecases/get_buyer_profile.dart';
+import 'package:paklan/domain/common/usecases/get_user_info.dart';
 import 'package:paklan/domain/transactions/entity/status.dart';
 import 'package:paklan/domain/transactions/entity/transaction.dart';
 import 'package:paklan/domain/transactions/usecases/update_deal.dart';
@@ -25,6 +34,7 @@ import 'package:paklan/presentation/transactions/widgets/cancel_deal.dart';
 import 'package:paklan/presentation/transactions/widgets/rating.dart';
 import 'package:paklan/presentation/transactions/widgets/rating_buyer.dart';
 import 'package:paklan/service_locator.dart';
+import 'package:rxdart/rxdart.dart';
 
 class TransactionDetail extends StatefulWidget {
   final TransactionEntity transaction;
@@ -39,6 +49,10 @@ class _TransactionDetailState extends State<TransactionDetail> {
   // 1. Declare variables to hold the cached stream and user ID
   late final String _currentUserId;
   late final Stream<QuerySnapshot> _transactionStream;
+  late final Stream<DocumentSnapshot<Map<String, dynamic>>> _buyerSellerProfileStream;
+  late final Stream<DocumentSnapshot<Map<String, dynamic>>> _userProfileStream;
+  late var _combinedStreams;
+  late var isSeller;
   
   // 2. Keep controllers here so they survive rebuilds
   final TextEditingController _cancelCon1 = TextEditingController();
@@ -65,7 +79,33 @@ class _TransactionDetailState extends State<TransactionDetail> {
     
     // 4. Extract and safely store the results
     _currentUserId = transactionStreamMap['currentUserId'];
+
+    isSeller = widget.transaction.sellerId == _currentUserId;
+
     _transactionStream = transactionStreamMap['transactionStream'];
+
+    if (isSeller){
+      _buyerSellerProfileStream = sl<GetBuyerProfileUseCase>().call(
+      params: widget.transaction.buyerId,
+    );
+
+      _userProfileStream = sl<GetUserInfoUseCase>().call(
+      params: widget.transaction.buyerId,
+    );
+    }
+    else {
+     _buyerSellerProfileStream = sl<GetBuyerProfileUseCase>().call(
+      params: widget.transaction.sellerId,
+    );
+
+     _userProfileStream = sl<GetUserInfoUseCase>().call(
+      params: widget.transaction.sellerId,
+    );
+    }
+    _combinedStreams = CombineLatestStream.combine3(_transactionStream, _buyerSellerProfileStream, _userProfileStream, 
+    (QuerySnapshot transactionStreamData, DocumentSnapshot buyerProfileStreamData, DocumentSnapshot userStreamData) => [transactionStreamData, buyerProfileStreamData, userStreamData],);
+
+
   }
 
   @override
@@ -119,10 +159,55 @@ class _TransactionDetailState extends State<TransactionDetail> {
           },
           child: Scaffold(
             appBar: BasicAppbar(
-              height: 50,
+              height: 80,
               hideBack: true,
-              // 6. Use widget.transaction to access the entity
-              title: Text(toBeginningOfSentenceCase(widget.transaction.name!) ?? ''),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 4. Update isoEntity to widget.isoEntity where it sits outside the StreamBuilder
+                  Text(toBeginningOfSentenceCase(widget.transaction.name!) ?? ''),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                            title: const Text("Detalles del producto"),
+                            content: Text(
+                              widget.transaction.dealDetails!,
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(fontSize: 15, height: 1.3),
+                            ),
+                            actions: [
+                              BasicAppButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                content: const Text(
+                                  "Entendido",
+                                  style: TextStyle(color: AppColors.primary),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.background,
+                      ),
+                      child: const Icon(
+                        Icons.info_outline,
+                        size: 20,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             bottomNavigationBar: const BottomAppBar(
               height: 20,
@@ -130,10 +215,10 @@ class _TransactionDetailState extends State<TransactionDetail> {
               child: SizedBox(height: 5),
             ),
             body: SingleChildScrollView(
-              child: StreamBuilder<QuerySnapshot>(
+              child: StreamBuilder<List>(
                 // 7. Pass the cached stream directly
-                stream: _transactionStream,
-                builder: (context, AsyncSnapshot<QuerySnapshot> state) {
+                stream: _combinedStreams,
+                builder: (context, state) {
                   if (state.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -143,11 +228,49 @@ class _TransactionDetailState extends State<TransactionDetail> {
                     );
                   }
                   
-                  StatusEntity statusEntity = state.data!.docs.map(
+                  StatusEntity statusEntity = state.data![0].docs.map(
                     (element) => StatusModel.fromMap(
                       element.data() as Map<String, dynamic>
                     ).toEntity()
                   ).toList()[0];
+                  UserEntity buyerSellerEntityUser = UserModel.fromMap(
+                          state.data![2].data()! as Map<String, dynamic>)
+                      .toEntity();
+                  late var buyerSellerProfileEntity;
+                  if (!state.data![1].exists){
+                    if (!isSeller){
+                      buyerSellerProfileEntity = BuyerEntity(
+                      totalRatingSum: 0, 
+                      transactionId: '', 
+                      totalRatingCount: 0, 
+                      averageRating: 0.0, 
+                      lastRatingMessage: '', 
+                      updatedDate: ''
+                    );
+                    }
+                    else {
+                      buyerSellerProfileEntity = SellerEntity(
+                      totalRatingSum: 0, 
+                      transactionId: '', 
+                      totalRatingCount: 0, 
+                      averageRating: 0.0, 
+                      lastRatingMessage: '', 
+                      updatedDate: ''
+                    );
+                    }
+                  }
+                  else{
+                    if (!isSeller){
+                      buyerSellerProfileEntity = BuyerModel.fromMap(
+                          state.data![1].data()! as Map<String, dynamic>)
+                      .toEntity();
+                    }
+                    else {
+                      buyerSellerProfileEntity = SellerModel.fromMap(
+                          state.data![1].data()! as Map<String, dynamic>)
+                      .toEntity();
+                    }
+                  }
                   return BlocBuilder<StepperSelectionCubit, int>(
                       builder: (context, stepperState){
                       if(statusEntity.paymentDone!){
@@ -166,6 +289,8 @@ class _TransactionDetailState extends State<TransactionDetail> {
                       return SingleChildScrollView(
                         child: Column(
                           children: [
+                            StepperDeal(),
+                              SizedBox(height: 10,),
                             Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: SizedBox(
@@ -343,14 +468,156 @@ class _TransactionDetailState extends State<TransactionDetail> {
                   ),
 
                   const SizedBox(height: 5),
-                            StepperDeal(),
+                  GestureDetector(
+                                       onTap: () {
+                                        showModalBottomSheet(
+                                                        context: context,
+                                                        shape: const RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+                                                        ),
+                                                        builder: (modalContext) {
+                                                          return Container(
+                                                            height: 400,
+                                                            width: double.infinity,
+                                                            padding: const EdgeInsets.all(5.0),
+                                                            child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 5,
+                                            margin: const EdgeInsets.only(bottom: 15),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                          Text(
+                                            buyerSellerEntityUser.displayName,
+                                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(buyerSellerEntityUser.email, style: const TextStyle(fontSize: 15, color: Colors.grey),),
+                                          const SizedBox(height: 10),
+                                          Container(
+                                                                height: 100,
+                                                                width: 100,
+                                                                decoration: BoxDecoration(
+                                                                  image: DecorationImage(
+                                                                    image: buyerSellerEntityUser.photoLink.isEmpty ? 
+                                                                    const AssetImage(
+                                                                      AppImages.userLogo
+                                                                    ) : NetworkImage(
+                                                                      buyerSellerEntityUser.photoLink,
+                                                                    ),
+                                                                    fit: BoxFit.cover
+                                                                  ),
+                                                                  color: Colors.white,
+                                                                  shape: BoxShape.circle,
+                                                                  border: BoxBorder.all(
+                                                                  color: buyerSellerEntityUser.active ? 
+                                                                  Colors.greenAccent[200]!
+                                                                  :Colors.yellowAccent[400]!
+                                                                  ,
+                                                                  width: 1.5
+                                                                )
+                                                                ),
+                                           ),
+                                          const SizedBox(height: 10),
+                                          StarRating(
+                                                    borderColor: Colors.amberAccent,
+                                                    size: 25,
+                                                    rating: buyerSellerProfileEntity.averageRating,
+                                                    allowHalfRating: true,
+                                                    
+                                                   ),
+                                          Text(
+                                            "Rating Promedio: ${buyerSellerProfileEntity.averageRating.toStringAsFixed(1)}",
+                                            maxLines: 2,
+                                            
+                                            ),
+                                          const SizedBox(height: 5),
+                                          Text("Total de Ratings: ${buyerSellerProfileEntity.totalRatingCount}"),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "Último Mensaje de Rating:\n ${buyerSellerProfileEntity.lastRatingMessage}",
+                                            maxLines: 2,),
+                                        ],
+                                      ),
+                                                          );
+                                                        }
+                                        );
+                                       },
+                                       child: Row(
+                                         children: [
+                                          SizedBox(width: 15,),
+                                           Container(
+                                                                height: 60,
+                                                                width: 60,
+                                                                decoration: BoxDecoration(
+                                                                  image: DecorationImage(
+                                                                    image: buyerSellerEntityUser.photoLink.isEmpty ? 
+                                                                    const AssetImage(
+                                                                      AppImages.userLogo
+                                                                    ) : NetworkImage(
+                                                                      buyerSellerEntityUser.photoLink,
+                                                                    ),
+                                                                    fit: BoxFit.cover
+                                                                  ),
+                                                                  color: Colors.white,
+                                                                  shape: BoxShape.circle,
+                                                                  border: BoxBorder.all(
+                                                                  color: buyerSellerEntityUser.active ? 
+                                                                  Colors.greenAccent[200]!
+                                                                  :Colors.yellowAccent[400]!
+                                                                  ,
+                                                                  width: 1.5
+                                                                )
+                                                                ),
+                                           ),
+                                           SizedBox(width: 10,),
+                                           Column(
+                                             children: [
+                                               Row(
+                                                 children: [
+                                                   SizedBox(
+                                                        width: 120,
+                                                        child: Text(
+                                                          buyerSellerEntityUser.displayName,
+                                                          style: TextStyle(fontSize: 15, overflow: TextOverflow.ellipsis, decoration: TextDecoration.underline),
+                                                          ),
+                                                                                         ),
+                                                    Text("(${buyerSellerProfileEntity.totalRatingSum})", style: TextStyle(fontSize: 15, overflow: TextOverflow.ellipsis),),
+                                                 ],
+                                               ),
+                                              SizedBox(height: 5,),
+                                              Row(
+                                                children: [
+                                                  StarRating(
+                                                    borderColor: Colors.amberAccent,
+                                                    size: 15,
+                                                    rating: buyerSellerProfileEntity.averageRating,
+                                                    allowHalfRating: true,
+                                                    
+                                                   ),
+                                                                                         Text(
+                                                    buyerSellerProfileEntity.averageRating.toStringAsFixed(1),
+                                                    style: TextStyle(fontSize: 15, overflow: TextOverflow.ellipsis),
+                                                                                         ),
+                                                ],
+                                              ),
+                                             ],
+                                           ),
+                                         ],
+                                       ),
+                                              ),
+                            
                             SizedBox(height: 15,),
                             ClipRRect(
         borderRadius: BorderRadius.circular(23),
         child: Container(
           width: MediaQuery.sizeOf(context).width/1.1,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(23), // Matches ClipRRect bounds perfectly
           ),
           child: Column(
@@ -416,26 +683,9 @@ class _TransactionDetailState extends State<TransactionDetail> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Deal Counterparty Status Metric
-                    Text(
-                      'Trato con: ${_currentUserId == statusEntity.buyerId ? toBeginningOfSentenceCase(widget.transaction.buyerDisplayName) : toBeginningOfSentenceCase(widget.transaction.sellerDisplayName)}',
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 12,),
+                    
                     Text("Modo: ${widget.transaction.typeOfDeal}",
                       style: const TextStyle(fontSize: 17),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    Text("Descripción del producto\n",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text("${widget.transaction.dealDetails}",
-                      style: const TextStyle(fontSize: 16),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 5,
                     ),
                     const SizedBox(height: 12),
                     Row(

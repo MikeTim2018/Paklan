@@ -60,65 +60,69 @@ class InSearchOfCreatePost extends StatelessWidget {
           }
         },
         ),
-        BlocListener<UserInfoDisplayCubit, UserInfoDisplayState>(listener: (context, state){
-              if (state is UserInfoLoaded) {
-                 userId = state.user.userId;
-                 userFirstName = state.user.displayName;
-              }
-        }
-        )
         ],
-        child: Scaffold(
-          appBar: BasicAppbar(
-            title: Text(
-              "Publicar producto que buscas",
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.bold)
+        child: BlocBuilder<UserInfoDisplayCubit, UserInfoDisplayState>(
+          builder: (context, state) {
+            if (state is UserInfoLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is UserInfoLoaded) {
+              userId = state.user.userId;
+              userFirstName = state.user.displayName;
+            }
+            return Scaffold(
+              appBar: BasicAppbar(
+                title: Text(
+                  "Publicar producto que buscas",
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold)
+                  ),
+                height: 60,
               ),
-            height: 60,
-          ),
-          bottomNavigationBar: BottomAppBar(
-            height: 20,
-            color: Colors.transparent,
-            child: SizedBox(height: 10,)
-            ),
-          body: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _name(context),
-                  SizedBox(height: 10,),
-                  _nameField(context),
-                  SizedBox(height: 10,),
-                  _description(context),
-                  SizedBox(height: 10,),
-                  _descriptionField(context),
-                  SizedBox(height: 10,),
-                  _typeOfProduct(context),
-                  SizedBox(height: 10,),
-                  _users(context),
-                  SizedBox(height: 10,),
-                  _typeOfDealText(context),
-                  SizedBox(height: 10,),
-                  _typeOfDeal(context),
-                  SizedBox(height: 10,),
-                  _photosRequest(context),
-                  SizedBox(height: 10,),
-                  _photoUpload(context),
-                  SizedBox(height: 10,),
-                  _amount(context),
-                  SizedBox(height: 10,),
-                  _amountField(context),
-                  SizedBox(height: 10,),
-                  _sendDeal(context),
-                      
-                ],
-              ),
-            ),
-          )
-          ),
+              bottomNavigationBar: BottomAppBar(
+                height: 20,
+                color: Colors.transparent,
+                child: SizedBox(height: 10,)
+                ),
+              body: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _name(context),
+                      SizedBox(height: 10,),
+                      _nameField(context),
+                      SizedBox(height: 10,),
+                      _description(context),
+                      SizedBox(height: 10,),
+                      _descriptionField(context),
+                      SizedBox(height: 10,),
+                      _typeOfProduct(context),
+                      SizedBox(height: 10,),
+                      _users(context),
+                      SizedBox(height: 10,),
+                      _typeOfDealText(context),
+                      SizedBox(height: 10,),
+                      _typeOfDeal(context),
+                      SizedBox(height: 10,),
+                      _photosRequest(context),
+                      SizedBox(height: 10,),
+                      _photoUpload(context),
+                      SizedBox(height: 10,),
+                      _amount(context),
+                      SizedBox(height: 10,),
+                      _amountField(context),
+                      SizedBox(height: 10,),
+                      _sendDeal(context),
+                          
+                    ],
+                  ),
+                ),
+              )
+              );
+          }
+        ),
         )
     );
     }

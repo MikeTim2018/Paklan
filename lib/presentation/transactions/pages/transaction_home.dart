@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:paklan/common/bloc/app_lifecycle/app_lifecycle_cubit.dart';
+import 'package:paklan/common/helper/stream_provider/app_stream_provider.dart';
 import 'package:paklan/presentation/home/widgets/header.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:paklan/presentation/transactions/widgets/transaction_display.dart';
 
 class TransactionHome extends StatefulWidget {
@@ -11,55 +10,30 @@ class TransactionHome extends StatefulWidget {
   State<TransactionHome> createState() => _TransactionHomeState();
 }
 
-class _TransactionHomeState extends State<TransactionHome> with WidgetsBindingObserver {
-  
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    context.read<AppLifecycleCubit>().registerState(active: true);
-  }
+class _TransactionHomeState extends State<TransactionHome> 
+    with AutomaticKeepAliveClientMixin {
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    try{
-      context.read<AppLifecycleCubit>().registerState(active: false);
-    } catch(e){
-      print(e);
-    }
-    finally{
-    super.dispose();
-  }
-  }
-
-  // 4. Override the lifecycle method to call your Cubit
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.resumed) {
-      context.read<AppLifecycleCubit>().registerState(active: true);
-      
-    } else if (state == AppLifecycleState.inactive || state == AppLifecycleState.detached) {
-      context.read<AppLifecycleCubit>().registerState(active: false);
-    }
-  }
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    final streams = AppStreamsProvider.of(context);
+    
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              children: const [ 
-                Header(),
-                TransactionDisplay(),
-              ],
-            ),
-          ],
+                      const Header(),
+                      TransactionDisplay(
+                        transactionsStream: streams.transactionsStream,
+                        isoPostsStream: streams.isoPostsStream,
+                        currentUserId: streams.currentUserId,
+                      ),
+                    ],
         ),
       ),
     );
